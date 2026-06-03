@@ -1,18 +1,20 @@
 package krazyminer001.asmrobots.common.entity
 
-import com.lowdragmc.lowdraglib2.gui.factory.BlockUIMenuType
 import com.lowdragmc.lowdraglib2.gui.factory.IContainerUIHolder
-import com.lowdragmc.lowdraglib2.gui.factory.LDMenuTypes
-import com.lowdragmc.lowdraglib2.gui.factory.PlayerUIMenuType
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu
-import com.lowdragmc.lowdraglib2.gui.holder.ModularUIScreen
+import com.lowdragmc.lowdraglib2.gui.sync.rpc.rpcEvent
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
 import com.lowdragmc.lowdraglib2.gui.ui.UI
 import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.button
+import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.codeEditor
+import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
+import net.minecraft.network.syncher.EntityDataAccessor
+import net.minecraft.network.syncher.EntityDataSerializers
+import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.MenuProvider
@@ -24,10 +26,18 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.levelgen.structure.BoundingBox
+import net.minecraft.world.level.storage.ValueInput
+import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 
-class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level) : LivingEntity(type, level), IContainerUIHolder {
+class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level) : LivingEntity(type, level),
+    IContainerUIHolder {
+
+    var code: String
+        get() = entityData.get(CODE_DATA)
+        set(value) = entityData.set(CODE_DATA, value)
+
     override fun getMainArm(): HumanoidArm {
         return HumanoidArm.LEFT
     }
@@ -58,8 +68,21 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     }
 
     override fun createUI(player: Player): ModularUI {
-        val root = element({}) {
-            button({text("Meow")}) {  }
+        val root = element {
+            var clientCode = code.split('\n').toTypedArray()
+            codeEditor({
+                lines(*clientCode)
+                linesResponder = { clientCode = it }
+                layout = { size(300.px, 200.px) }
+            })
+
+            button({
+                val rpcEvent = element.rpcEvent(::code::set)
+                onClick = {
+                    rpcEvent.send(clientCode.joinToString("\n"))
+                }
+                text("Save")
+            })
         }
 
         return ModularUI(UI.of(root), player)
@@ -67,5 +90,25 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun isStillValid(player: Player): Boolean {
         return true
+    }
+
+    override fun defineSynchedData(entityData: SynchedEntityData.Builder) {
+        super.defineSynchedData(entityData)
+        entityData.define(CODE_DATA, "")
+    }
+
+    override fun readAdditionalSaveData(input: ValueInput) {
+        super.readAdditionalSaveData(input)
+        code = input.getStringOr("code", "")
+    }
+
+    override fun addAdditionalSaveData(output: ValueOutput) {
+        super.addAdditionalSaveData(output)
+        output.putString("code", code)
+    }
+
+    companion object {
+        val CODE_DATA: EntityDataAccessor<String> =
+            SynchedEntityData.defineId(RobotEntity::class.java, EntityDataSerializers.STRING)
     }
 }
