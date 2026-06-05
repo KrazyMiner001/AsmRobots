@@ -15,14 +15,20 @@ fun lex (code: String): List<AsmLine> {
                 comment
             )
         }
-        Instruction.tryParse(content)?.let {
+        if (content.isBlank()) {
+            return@map AsmLine(
+                null,
+                comment
+            )
+        }
+        Instruction.tryParse(content).fold({
             return@map AsmLine(
                 Either.left(it),
                 comment
             )
+        }) {
+            throw it
         }
-        TODO("Handle empty lines/lines with only a comment")
-        TODO("Create proper error type to throw")
     }
 }
 

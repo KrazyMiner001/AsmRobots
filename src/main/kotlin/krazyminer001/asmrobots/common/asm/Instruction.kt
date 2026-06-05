@@ -1,7 +1,6 @@
 package krazyminer001.asmrobots.common.asm
 
 import kotlin.reflect.KClass
-import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.primaryConstructor
 
 sealed interface Instruction {
@@ -11,29 +10,28 @@ sealed interface Instruction {
     data class AddRI(val target: Register, val arg1: Register, val arg2: Literal) : Instruction
 
     companion object {
-        fun tryParse(code: String): Instruction? {
+        fun tryParse(code: String): Result<Instruction> {
             val mnemonic = code.substringBefore(" ")
             val components = code.substringAfter(" ").split(", ")
             val instructionConstructor = Instruction::class.sealedSubclasses
                 .find { it.simpleName.equals(mnemonic, true) }
-                ?.primaryConstructor ?: return null
-            val parameters = instructionConstructor.parameters;
-            if (parameters.count() != components.count()) return null
+                ?.primaryConstructor ?: return Result.failure(InstructionNotFoundException(mnemonic))
+            val parameters = instructionConstructor.parameters
+            if (parameters.count() != components.count())
+                return Result.failure(InvalidInstructionParameterCount(mnemonic, components.count(), parameters.count()))
             val args = components.zip(parameters).map { (component, parameter) ->
                 val type = parameter.type
-                val value = ((type.classifier as? KClass<*>)?.companionObjectInstance as? AsmParsable<*>)
-                    ?.parse(component) ?: return null
+                val instructionParameter = (type.classifier as? KClass<*>)
+                    ?.annotations
+                    ?.find { it is InstructionParameter }
+                    .let { it as? InstructionParameter ?: throw InternalInstructionException("Could not find InstructionParameter annotation for parameter $parameter for instruction $mnemonic") }
+                val value = instructionParameter.parser(component)
+                    ?: return Result.failure(InstructionInvalidParameter(
+                            instructionParameter.displayName,
+                            component))
                 return@map Pair(parameter, value)
             }.toMap()
-            return try {
-                instructionConstructor.callBy(args)
-            } catch (_: Exception) {
-                null
-            }
+            return Result.success(instructionConstructor.callBy(args))
         }
     }
-}
-
-interface AsmParsable<T> {
-    fun parse(value: String): T?
 }
