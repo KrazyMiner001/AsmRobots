@@ -9,6 +9,9 @@ import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.button
 import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.codeEditor
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
+import krazyminer001.asmrobots.common.asm.AsmLanguageDefinition
+import krazyminer001.asmrobots.common.asm.AsmStyleManager
+import krazyminer001.asmrobots.common.asm.lex
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
@@ -74,6 +77,8 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 lines(*clientCode)
                 linesResponder = { clientCode = it }
                 layout = { size(300.px, 200.px) }
+                language = AsmLanguageDefinition
+                styleManager = AsmStyleManager
             })
 
             button({
@@ -82,6 +87,15 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                     rpcEvent.send(clientCode.joinToString("\n"))
                 }
                 text("Save")
+            })
+            button({
+                onServerClick = {
+                    try {
+                        player.sendSystemMessage(Component.literal(lex(code).toString()))
+                    } catch(_: Throwable) {
+
+                    }
+                }
             })
         }
 
