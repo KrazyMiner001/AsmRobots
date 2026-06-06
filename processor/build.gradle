@@ -1,0 +1,27 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+group = 'krazyminer001'
+version = 'unspecified'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    implementation 'com.google.devtools.ksp:symbol-processing-api:2.3.6'
+    implementation 'com.squareup:kotlinpoet:2.3.0'
+    implementation 'com.squareup:kotlinpoet-ksp:2.3.0'
+
+    implementation project (':annotations')
+}
+
+kotlin {
+    jvmToolchain(25)
+}
+
+test {
+    useJUnitPlatform()
+}

@@ -13,8 +13,8 @@ object AsmLanguageDefinition
         listOf(
             TokenType("Label").setPattern(".*:"),
             TokenType("Instruction").setPattern("\\b(?:" +
-                Instruction::class.sealedSubclasses.joinToString("|") {
-                    it.simpleName!!.lowercase()
+                InstructionEnum.entries.joinToString("|") {
+                    it.name.lowercase()
                 } + ")\\b"
             ),
             TokenType("Register").setPattern("\\b(?:" +
