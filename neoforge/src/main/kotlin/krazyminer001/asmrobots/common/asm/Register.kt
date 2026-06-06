@@ -1,6 +1,5 @@
 package krazyminer001.asmrobots.common.asm
 
-@InstructionParameter("register", InstructionParser.REGISTER)
 enum class Register {
     A0,
     A1,
@@ -50,4 +49,9 @@ enum class Register {
     S13,
     S14,
     S15;
+
+    companion object : Parsable<Register> {
+        override fun parse(string: String): Register = Register.entries.find { it.name.equals(string, true) }
+            ?: throw InstructionInvalidParameter("register", string)
+    }
 }
