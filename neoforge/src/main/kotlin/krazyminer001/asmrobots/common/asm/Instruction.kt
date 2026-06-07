@@ -26,6 +26,3 @@ sealed interface Instruction {
     }
 }
 
-interface Parsable<T> {
-    fun parse(string: String): T
-}

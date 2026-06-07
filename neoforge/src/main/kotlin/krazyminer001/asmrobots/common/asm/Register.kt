@@ -1,5 +1,7 @@
 package krazyminer001.asmrobots.common.asm
 
+import krazyminer001.asmrobots.annotations.Parsable
+
 enum class Register {
     A0,
     A1,
