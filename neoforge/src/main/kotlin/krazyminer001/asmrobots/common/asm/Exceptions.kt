@@ -12,3 +12,11 @@ class InstructionInvalidParameter(parameterTypeName: String, providedValue: Stri
     : IllegalArgumentException("Could not convert $providedValue to parameter type: $parameterTypeName"), InstructionException
 
 class InternalInstructionException(message: String) : IllegalStateException(message), InstructionException
+
+class ParseError(exception: Throwable, val lineNumber: Int) : Exception("Parse error on line $lineNumber", exception)
+
+class ParseErrors(vararg val parseErrors: ParseError) : Exception("Encountered parse errors") {
+    init {
+        parseErrors.forEach(::addSuppressed)
+    }
+}

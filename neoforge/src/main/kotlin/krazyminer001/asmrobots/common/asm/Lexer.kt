@@ -1,35 +1,56 @@
 package krazyminer001.asmrobots.common.asm
 
-import com.mojang.datafixers.util.Either
+class Program {
+    class Code {
+        private val labels: MutableMap<Label, Int> = mutableMapOf()
+        private val instructions: MutableList<Instruction> = mutableListOf()
 
-fun lex (code: String): List<AsmLine> {
-    val lines = code.split('\n')
-    return lines.map { line ->
-        val trimmed = line.trim()
-        val matches = CommentRegex.matchEntire(trimmed)!!.groups
-        val comment = matches["comment"]?.value?.let(::Comment)
-        val content = matches["content"]!!.value.trim()
-        if (content.endsWith(":")) {
-            return@map AsmLine(
-                Either.right(Label(content.dropLast(1))),
-                comment
-            )
+        internal fun addLabel(label: Label) {
+            labels[label] = instructions.size
         }
-        if (content.isBlank()) {
-            return@map AsmLine(
-                null,
-                comment
-            )
+
+        internal fun addInstruction(instruction: Instruction) {
+            instructions.add(instruction)
         }
-        Instruction.tryParse(content).fold({
-            return@map AsmLine(
-                Either.left(it),
-                comment
-            )
-        }) {
-            throw it
+
+        override fun toString(): String {
+            val stringBuilder = StringBuilder()
+            instructions.forEachIndexed { index, instruction ->
+                labels.filterValues { it == index }.keys.map { it.name + ":\n" }.forEach {
+                    stringBuilder.append(it)
+                }
+                stringBuilder.append(instruction.toString() + "\n")
+            }
+            return stringBuilder.toString()
         }
     }
+}
+
+fun lex (code: String): Result<Program.Code> {
+    val lines = code.split('\n')
+    val code = Program.Code()
+    val parseErrors = mutableListOf<ParseError>()
+    lines.forEachIndexed { index, line ->
+        val trimmed = line.trim()
+        val matches = CommentRegex.matchEntire(trimmed)!!.groups
+        //val comment = matches["comment"]?.value?.let(::Comment)
+        val content = matches["content"]!!.value.trim()
+        if (content.endsWith(":")) {
+            code.addLabel(Label(content.dropLast(1)))
+            return@forEachIndexed
+        }
+        if (content.isBlank()) {
+            return@forEachIndexed
+        }
+        Instruction.tryParse(content).fold({
+            code.addInstruction(it)
+            return@forEachIndexed
+        }) {
+            parseErrors.add(ParseError(it, index))
+        }
+    }
+    if (parseErrors.isNotEmpty()) return Result.failure(ParseErrors(*parseErrors.toTypedArray()))
+    return Result.success(code)
 }
 
 val CommentRegex: Regex = "^(?<content>.*?)(?://(?<comment>.*))?$".toRegex()

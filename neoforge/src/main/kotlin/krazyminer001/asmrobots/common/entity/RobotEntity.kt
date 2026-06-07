@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.codeEditor
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import krazyminer001.asmrobots.common.asm.AsmLanguageDefinition
 import krazyminer001.asmrobots.common.asm.AsmStyleManager
+import krazyminer001.asmrobots.common.asm.ParseErrors
 import krazyminer001.asmrobots.common.asm.lex
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import net.minecraft.network.RegistryFriendlyByteBuf
@@ -90,11 +91,19 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             })
             button({
                 onServerClick = {
-                    try {
-                        player.sendSystemMessage(Component.literal(lex(code).toString()))
-                    } catch(_: Throwable) {
-
-                    }
+                    val text = lex(code).fold(
+                        {
+                            it.toString()
+                        },
+                        { throwable ->
+                            if (throwable is ParseErrors) {
+                                throwable.parseErrors.joinToString { "Error on line ${it.lineNumber}: ${it.cause?.message}" }
+                            } else {
+                                "Unexpected exception: $throwable"
+                            }
+                        }
+                    )
+                    player.sendSystemMessage(Component.literal(text))
                 }
             })
         }
