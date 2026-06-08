@@ -4,11 +4,11 @@ import krazyminer001.asmrobots.common.asm.Register.*
 import krazyminer001.asmrobots.common.asm.Instruction.*
 import kotlin.experimental.or
 
-class Program(val code: Code, memorySize: Int = 8192) {
-    val memory: ByteArray = ByteArray(memorySize) { 0 }
-    val callStack: MutableList<Int> = mutableListOf()
-    val stack: MutableList<Int> = mutableListOf()
-    val reg: RegisterStorage = RegisterStorage()
+class Program(private val code: Code, memorySize: Int = 8192) {
+    private val memory: ByteArray = ByteArray(memorySize) { 0 }
+    private val callStack: MutableList<Int> = mutableListOf()
+    private val stack: MutableList<Int> = mutableListOf()
+    private val reg: RegisterStorage = RegisterStorage()
 
     fun step() {
         with(reg) {
@@ -34,7 +34,7 @@ class Program(val code: Code, memorySize: Int = 8192) {
                     is Srl -> target.value = arg1.value ushr arg2.value
                     is Srli -> target.value = arg1.value ushr arg2.value
                     is Call -> {
-                        callStack.add(PC.value + 1)
+                        callStack.add(PC.value)
                         PC.value = code[address]
                     }
                     is La -> target.value = code[arg1]

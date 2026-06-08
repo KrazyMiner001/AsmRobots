@@ -1,5 +1,6 @@
 package krazyminer001.asmrobots.common.asm
 
+import com.google.common.base.Splitter
 import krazyminer001.asmrobots.annotations.ParsableEnumerated
 import krazyminer001.asmrobots.common.asm.Instruction
 import krazyminer001.asmrobots.common.asm.Immediate as Imm
@@ -46,7 +47,11 @@ sealed interface Instruction {
     companion object {
         fun tryParse(code: String): Result<Instruction> {
             val mnemonic = code.substringBefore(" ")
-            val components = code.substringAfter(" ")
+            val components = Splitter.on(", ")
+                .omitEmptyStrings()
+                .split(code.substringAfter(" ", ""))
+                .toList()
+                .toTypedArray()
             val instruction = InstructionEnum.entries.find { it.name.lowercase() == mnemonic }
 
             if (instruction !is InstructionEnum) return Result.failure(InstructionNotFoundException(mnemonic))

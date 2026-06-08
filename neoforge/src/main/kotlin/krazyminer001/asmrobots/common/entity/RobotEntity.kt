@@ -9,10 +9,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.button
 import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.codeEditor
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
-import krazyminer001.asmrobots.common.asm.AsmLanguageDefinition
-import krazyminer001.asmrobots.common.asm.AsmStyleManager
-import krazyminer001.asmrobots.common.asm.ParseErrors
-import krazyminer001.asmrobots.common.asm.lex
+import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
@@ -34,6 +31,7 @@ import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
+import kotlin.concurrent.thread
 
 class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level) : LivingEntity(type, level),
     IContainerUIHolder {
@@ -104,6 +102,18 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                         }
                     )
                     player.sendSystemMessage(Component.literal(text))
+                }
+            })
+            button({
+                text("Execute")
+                onServerClick = clickHandler@{
+                    val code = lex(code).getOrElse { return@clickHandler }
+                    val program = Program(code)
+                    thread {
+                        while (true) {
+                            program.step()
+                        }
+                    }
                 }
             })
         }

@@ -6,6 +6,7 @@ import com.google.devtools.ksp.symbol.KSVisitorVoid
 import com.google.devtools.ksp.symbol.Variance
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import krazyminer001.asmrobots.annotations.Parsable
@@ -57,15 +58,14 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
                             .addFunction(
                                 FunSpec.builder("invoke")
                                     .addModifiers(KModifier.OPERATOR, KModifier.OVERRIDE)
-                                    .addParameter("string", String::class)
+                                    .addParameter("strings", Array::class.asClassName().parameterizedBy(String::class.asClassName()))
                                     .returns(subclass.toClassName())
-                                    .addStatement("val split = string.split(%S)", ", ")
-                                    .addStatement("require(split.size == %L)", constructorParameters.size)
+                                    .addStatement("require(strings.size == %L)", constructorParameters.size)
                                     .addStatement(
                                         "return %T(%L)",
                                         subclass.toClassName(),
                                         constructorParameters.mapIndexed { index, parameter ->
-                                            CodeBlock.of("%T.parse(split[%L])", parameter.type.resolve().toClassName(), index)
+                                            CodeBlock.of("%T.parse(strings[%L])", parameter.type.resolve().toClassName(), index)
                                         }.joinToCode()
                                     )
                                     .build()
@@ -79,7 +79,7 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
                     FunSpec.builder("invoke")
                         .addModifiers(KModifier.OPERATOR, KModifier.ABSTRACT)
                         .returns(classDeclaration.asStarProjectedType().toClassName())
-                        .addParameter("string", String::class)
+                        .addParameter("strings", Array::class.asClassName().parameterizedBy(String::class.asClassName()))
                         .build()
                 )
 
