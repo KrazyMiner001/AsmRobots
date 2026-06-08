@@ -1,6 +1,7 @@
 package krazyminer001.asmrobots.client
 
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerScreen
+import krazyminer001.asmrobots.client.entity.RobotEntityModel
 import krazyminer001.asmrobots.client.entity.RobotEntityRenderer
 import krazyminer001.asmrobots.common.AsmRobots
 import krazyminer001.asmrobots.common.entity.ModEntities
@@ -23,5 +24,10 @@ object AsmRobotsClient {
     @SubscribeEvent
     fun registerMenuScreens(event: RegisterMenuScreensEvent) {
         event.register(ModMenuTypes.ROBOT_UI, ::ModularUIContainerScreen)
+    }
+
+    @SubscribeEvent
+    fun registerLayerDefinitions(event: EntityRenderersEvent.RegisterLayerDefinitions) {
+        event.registerLayerDefinition(RobotEntityModel.LAYER_LOCATION, RobotEntityModel::createBodyLayer)
     }
 }

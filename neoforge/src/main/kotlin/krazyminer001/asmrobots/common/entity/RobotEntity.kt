@@ -26,10 +26,8 @@ import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.level.Level
-import net.minecraft.world.level.levelgen.structure.BoundingBox
 import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
-import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
 import kotlin.concurrent.thread
 
@@ -42,10 +40,6 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun getMainArm(): HumanoidArm {
         return HumanoidArm.LEFT
-    }
-
-    override fun getHitbox(): AABB {
-        return AABB.of(BoundingBox(-1, 0, -1, 1, 1, 1))
     }
 
     override fun interact(player: Player, hand: InteractionHand, location: Vec3): InteractionResult {
@@ -143,5 +137,9 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     companion object {
         val CODE_DATA: EntityDataAccessor<String> =
             SynchedEntityData.defineId(RobotEntity::class.java, EntityDataSerializers.STRING)
+    }
+
+    override fun shouldShowName(): Boolean {
+        return super.shouldShowName()
     }
 }

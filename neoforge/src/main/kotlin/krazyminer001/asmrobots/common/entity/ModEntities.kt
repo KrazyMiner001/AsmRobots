@@ -1,9 +1,7 @@
 package krazyminer001.asmrobots.common.entity
 
 import krazyminer001.asmrobots.common.AsmRobots
-import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MobCategory
-import net.minecraft.world.level.Level
 import net.neoforged.neoforge.registries.DeferredRegister
 import thedarkcolour.kotlinforforge.neoforge.forge.getValue
 
@@ -13,5 +11,8 @@ object ModEntities {
     val ROBOT_ENTITY by REGISTRY.registerEntityType(
         "robot",
         ::RobotEntity,
-        MobCategory.MISC)
+        MobCategory.MISC) {
+        it
+            .sized(12f/16, 13f/16)
+    }
 }
