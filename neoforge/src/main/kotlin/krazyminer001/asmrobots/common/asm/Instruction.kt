@@ -27,7 +27,21 @@ sealed interface Instruction {
     data class Sra(val target: Reg, val arg1: Reg, val arg2: Reg) : I
     data class Srai(val target: Reg, val arg1: Reg, val arg2: Imm) : I
     data class Li(val target: Reg, val arg1: Imm) : I
-    
+    data class Lw(val target: Reg, val arg1: Pointer) : I
+    data class Lh(val target: Reg, val arg1: Pointer) : I
+    data class Lb(val target: Reg, val arg1: Pointer) : I
+    data class La(val target: Reg, val arg1: Label) : I
+    data class Sw(val target: Pointer, val arg1: Reg) : I
+    data class Sh(val target: Pointer, val arg1: Reg) : I
+    data class Sb(val target: Pointer, val arg1: Reg) : I
+    data class Call(val address: Label) : I
+    class Ret : I
+    class Syscall(val call: krazyminer001.asmrobots.common.asm.Syscall) : I
+    class Mov(val target: Reg, val arg1: Reg) : I
+    class Nop : I
+    class Push(val arg1: Reg) : I
+    class Pushi(val arg1: Imm) : I
+    class Pop(val target: Reg) : I
 
     companion object {
         fun tryParse(code: String): Result<Instruction> {

@@ -2,11 +2,12 @@ package krazyminer001.asmrobots.common.asm
 
 import krazyminer001.asmrobots.common.asm.Register.*
 import krazyminer001.asmrobots.common.asm.Instruction.*
+import kotlin.experimental.or
 
 class Program(val code: Code, memorySize: Int = 8192) {
-    val memory: Array<Byte> = Array(memorySize) { 0 }
-    val callStack: List<Int> = mutableListOf()
-    val stack: List<Byte> = mutableListOf()
+    val memory: ByteArray = ByteArray(memorySize) { 0 }
+    val callStack: MutableList<Int> = mutableListOf()
+    val stack: MutableList<Int> = mutableListOf()
     val reg: RegisterStorage = RegisterStorage()
 
     fun step() {
@@ -32,9 +33,51 @@ class Program(val code: Code, memorySize: Int = 8192) {
                     is Srai -> target.value = arg1.value shr arg2.value
                     is Srl -> target.value = arg1.value ushr arg2.value
                     is Srli -> target.value = arg1.value ushr arg2.value
+                    is Call -> {
+                        callStack.add(PC.value + 1)
+                        PC.value = code[address]
+                    }
+                    is La -> target.value = code[arg1]
+                    is Lb -> target.value = memory[arg1.value].toUByte().toInt()
+                    is Lh -> target.value = memory.getHalf(arg1.value).toUShort().toInt()
+                    is Lw -> target.value = memory.getWord(arg1.value)
+                    is Ret -> PC.value = callStack.removeLast()
+                    is Sb -> memory[target.value] = arg1.value.toUByte().toByte()
+                    is Sh -> memory.setHalf(target.value, arg1.value.toUShort().toShort())
+                    is Sw -> memory.setWord(target.value, arg1.value)
+                    is Mov -> target.value = arg1.value
+                    is Nop -> {}
+                    is Instruction.Syscall -> TODO()
+                    is Pop -> target.value = stack.removeLast()
+                    is Push -> stack.add(arg1.value)
+                    is Pushi -> stack.add(arg1.value)
                 }
             }
         }
+    }
+
+    private fun ByteArray.getWord(address: Int): Int {
+        return this[address].toUByte().toInt() or
+                (this[address + 1].toUByte().toInt() shl 8) or
+                (this[address + 2].toUByte().toInt() shl 16) or
+                (this[address + 3].toUByte().toInt() shl 24)
+    }
+
+    private fun ByteArray.getHalf(address: Int): Short {
+        return this[address].toUByte().toShort() or
+                (this[address + 1].toUByte().toInt() shl 8).toShort()
+    }
+
+    private fun ByteArray.setWord(address: Int, value: Int) {
+        this[address] = value.toByte()
+        this[address + 1] = (value ushr 8).toByte()
+        this[address + 2] = (value ushr 16).toByte()
+        this[address + 3] = (value ushr 24).toByte()
+    }
+
+    private fun ByteArray.setHalf(address: Int, value: Short) {
+        this[address] = value.toByte()
+        this[address + 1] = (value.toUInt() shr 8).toByte()
     }
 
     class Code {
@@ -53,8 +96,8 @@ class Program(val code: Code, memorySize: Int = 8192) {
             return instructions[lineNumber]
         }
 
-        operator fun get(label: Label): Instruction {
-            return instructions[labels[label]!!]
+        operator fun get(label: Label): Int {
+            return labels[label]!!
         }
 
         override fun toString(): String {
