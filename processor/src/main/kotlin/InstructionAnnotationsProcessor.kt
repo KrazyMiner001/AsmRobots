@@ -62,7 +62,7 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
                                     .returns(subclass.toClassName())
                                     .addStatement("require(strings.size == %L)", constructorParameters.size)
                                     .addStatement(
-                                        "return %T(%L)",
+                                        if (constructorParameters.isEmpty()) "return %T%L" else "return %T(%L)",
                                         subclass.toClassName(),
                                         constructorParameters.mapIndexed { index, parameter ->
                                             CodeBlock.of("%T.parse(strings[%L])", parameter.type.resolve().toClassName(), index)
