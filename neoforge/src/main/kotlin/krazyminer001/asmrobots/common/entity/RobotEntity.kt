@@ -12,10 +12,12 @@ import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import net.minecraft.network.RegistryFriendlyByteBuf
+import net.minecraft.network.chat.ChatType
 import net.minecraft.network.chat.Component
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.MenuProvider
@@ -29,14 +31,17 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.Vec3
-import kotlin.concurrent.thread
 
 class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level) : LivingEntity(type, level),
-    IContainerUIHolder {
+    IContainerUIHolder, ProgramCallback {
 
     var code: String
         get() = entityData.get(CODE_DATA)
         set(value) = entityData.set(CODE_DATA, value)
+
+    var program: Program? = null
+
+    var counter = 0
 
     override fun getMainArm(): HumanoidArm {
         return HumanoidArm.LEFT
@@ -102,12 +107,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 text("Execute")
                 onServerClick = clickHandler@{
                     val code = lex(code).getOrElse { return@clickHandler }
-                    val program = Program(code)
-                    thread {
-                        while (true) {
-                            program.step()
-                        }
-                    }
+                    program = Program(code, this@RobotEntity)
                 }
             })
         }
@@ -134,12 +134,39 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
         output.putString("code", code)
     }
 
+    override fun shouldShowName(): Boolean {
+        return super.shouldShowName()
+    }
+
+    override fun halt() {
+        program = null
+    }
+
+    override fun tick() {
+        super.tick()
+        if (counter++ % 10 == 0) {
+            counter = 0
+            program?.step()
+        }
+    }
+
+    override fun get(ioAddress: Int): Int {
+        return 0
+    }
+
+    override fun set(ioAddress: Int, value: Int) {
+        val level = level()
+        if (ioAddress == 0 && level is ServerLevel) {
+            level.server.logChatMessage(
+                Component.literal("You send number: $value"),
+                ChatType.bind(ChatType.CHAT, this),
+                null
+            )
+        }
+    }
+
     companion object {
         val CODE_DATA: EntityDataAccessor<String> =
             SynchedEntityData.defineId(RobotEntity::class.java, EntityDataSerializers.STRING)
-    }
-
-    override fun shouldShowName(): Boolean {
-        return super.shouldShowName()
     }
 }

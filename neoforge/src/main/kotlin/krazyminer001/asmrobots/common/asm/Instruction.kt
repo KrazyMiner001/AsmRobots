@@ -43,6 +43,12 @@ sealed interface Instruction {
     data class Push(val arg1: Reg) : I
     data class Pushi(val arg1: Imm) : I
     data class Pop(val target: Reg) : I
+    data object Halt : I
+    data class In(val target: Reg, val ioAddress: Reg) : I
+    data class Ini(val target: Reg, val ioAddress: Imm) : I
+    data class Out(val targetIOAddress: Reg, val arg1: Reg) : I
+    data class Outi(val targetIOAddress: Imm, val arg1: Reg) : I
+    data class Outii(val targetIOAddress: Imm, val arg1: Imm) : I
 
     companion object {
         fun tryParse(code: String): Result<Instruction> {

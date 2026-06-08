@@ -4,7 +4,7 @@ import krazyminer001.asmrobots.common.asm.Register.*
 import krazyminer001.asmrobots.common.asm.Instruction.*
 import kotlin.experimental.or
 
-class Program(private val code: Code, memorySize: Int = 8192) {
+class Program(private val code: Code, private val callback: ProgramCallback, memorySize: Int = 8192) {
     private val memory: ByteArray = ByteArray(memorySize) { 0 }
     private val callStack: MutableList<Int> = mutableListOf()
     private val stack: MutableList<Int> = mutableListOf()
@@ -57,6 +57,12 @@ class Program(private val code: Code, memorySize: Int = 8192) {
                     is Pop -> target.value = stack.removeLast()
                     is Push -> stack.add(arg1.value)
                     is Pushi -> stack.add(arg1.value)
+                    Halt -> callback.halt()
+                    is In -> target.value = callback[ioAddress.value]
+                    is Ini -> target.value = callback[ioAddress.value]
+                    is Out -> callback[targetIOAddress.value] = arg1.value
+                    is Outi -> callback[targetIOAddress.value] = arg1.value
+                    is Outii -> callback[targetIOAddress.value] = arg1.value
                 }
             }
         }
