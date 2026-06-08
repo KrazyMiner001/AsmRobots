@@ -10,7 +10,7 @@ data class Pointer(val register: Register, val offset: Immediate) {
                     Register.parse(it.groups["register"]!!.value),
                     Immediate.parse(it.groups["offset"]!!.value)
                 )
-            } ?: throw IllegalArgumentException("Could not convert $string into pointer")
+            } ?: throw InstructionInvalidParameter("pointer", string)
         }
     }
 }

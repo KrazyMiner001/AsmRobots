@@ -58,6 +58,8 @@ sealed interface Instruction {
 
             return try {
                 Result.success(instruction(components))
+            } catch (_: IllegalArgumentException) {
+                Result.failure(InvalidInstructionParameterCount(instruction.name, components.size, instruction::invoke.parameters.size))
             } catch (e: Exception) {
                 Result.failure(e)
             }

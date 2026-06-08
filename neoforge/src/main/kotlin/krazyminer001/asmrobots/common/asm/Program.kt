@@ -10,6 +10,12 @@ class Program(private val code: Code, memorySize: Int = 8192) {
     private val stack: MutableList<Int> = mutableListOf()
     private val reg: RegisterStorage = RegisterStorage()
 
+    init {
+        runCatching {
+            reg[PC] = code[Label("_start")]
+        }
+    }
+
     fun step() {
         with(reg) {
             with(code[PC.value++]) {
