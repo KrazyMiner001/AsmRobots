@@ -57,7 +57,7 @@ class Program(private val code: Code, private val callback: ProgramCallback, mem
                     is Pop -> target.value = stack.removeLast()
                     is Push -> stack.add(arg1.value)
                     is Pushi -> stack.add(arg1.value)
-                    Halt -> callback.halt()
+                    is Halt -> callback.halt()
                     is In -> target.value = callback[ioAddress.value]
                     is Ini -> target.value = callback[ioAddress.value]
                     is Out -> callback[targetIOAddress.value] = arg1.value

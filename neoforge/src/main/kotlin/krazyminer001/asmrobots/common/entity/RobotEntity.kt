@@ -12,12 +12,11 @@ import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import net.minecraft.network.RegistryFriendlyByteBuf
-import net.minecraft.network.chat.ChatType
 import net.minecraft.network.chat.Component
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
-import net.minecraft.server.level.ServerLevel
+import net.minecraft.util.Mth
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.MenuProvider
@@ -41,7 +40,19 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     var program: Program? = null
 
-    var counter = 0
+    var velocity: Int = 0
+    var targetRotation: Double = 0.0
+    var rotationSteps: Int = 0
+    fun lerpRotation(targetRotation: Double, steps: Int) {
+        rotationSteps = steps
+        this.targetRotation = targetRotation
+    }
+    fun stepRotation() {
+        if (rotationSteps > 0) {
+            yRot = Mth.rotLerp(1.0 / rotationSteps, yRot.toDouble(), targetRotation).toFloat() % 360
+            rotationSteps--
+        }
+    }
 
     override fun getMainArm(): HumanoidArm {
         return HumanoidArm.LEFT
@@ -144,24 +155,38 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun tick() {
         super.tick()
-        if (counter++ % 10 == 0) {
-            counter = 0
+        stepRotation()
+        try {
             program?.step()
+        } catch (_: Throwable) {
+            program = null
+        }
+        if (onGround()) {
+            addDeltaMovement(
+                Vec3.directionFromRotation(rotationVector)
+                    .normalize()
+                    .scale(
+                        velocity
+                            .toDouble()
+                            .div(256)
+                            .coerceIn(-1.0..1.0) / 20
+                    )
+            )
         }
     }
 
     override fun get(ioAddress: Int): Int {
-        return 0
+        return when(ioAddress) {
+            0 -> yRot.toInt()
+            1 -> velocity
+            else -> 0
+        }
     }
 
     override fun set(ioAddress: Int, value: Int) {
-        val level = level()
-        if (ioAddress == 0 && level is ServerLevel) {
-            level.server.logChatMessage(
-                Component.literal("You send number: $value"),
-                ChatType.bind(ChatType.CHAT, this),
-                null
-            )
+        when (ioAddress) {
+            0 -> lerpRotation(value.toDouble(), 10)
+            1 -> velocity = value
         }
     }
 
