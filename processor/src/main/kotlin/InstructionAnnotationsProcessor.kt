@@ -1,14 +1,15 @@
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.*
-import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSVisitorVoid
-import com.google.devtools.ksp.symbol.Variance
+import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.ksp.toAnnotationSpec
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
+import krazyminer001.asmrobots.annotations.ArgumentAnnotation
+import krazyminer001.asmrobots.annotations.InstructionEnum
 import krazyminer001.asmrobots.annotations.Parsable
 import krazyminer001.asmrobots.annotations.ParsableEnumerated
 
@@ -19,12 +20,17 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
         resolver.getSymbolsWithAnnotation(ParsableEnumerated::class.qualifiedName!!)
             .filter(KSAnnotated::validate)
             .filterIsInstance<KSClassDeclaration>()
-            .forEach { it.accept(Visitor(parsable, resolver), Unit) }
+            .forEach { it.accept(ParsableEnumeratedVisitor(parsable, resolver), Unit) }
+
+        resolver.getSymbolsWithAnnotation(InstructionEnum::class.qualifiedName!!)
+            .filter(KSAnnotated::validate)
+            .filterIsInstance<KSClassDeclaration>()
+            .forEach { it.accept(InstructionEnumVisitor(), Unit) }
 
         return emptyList()
     }
 
-    inner class Visitor(val parsableDeclaration: KSClassDeclaration, val resolver: Resolver) : KSVisitorVoid() {
+    inner class ParsableEnumeratedVisitor(val parsableDeclaration: KSClassDeclaration, val resolver: Resolver) : KSVisitorVoid() {
         override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
             val enumName = ClassName(classDeclaration.qualifiedName!!.getQualifier(), classDeclaration.simpleName.asString() + "Enum")
 
@@ -84,6 +90,79 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
                 )
 
             FileSpec.builder(enumName).addType(enumBuilder.build()).build().writeTo(codeGenerator, Dependencies(false, classDeclaration.containingFile!!))
+        }
+    }
+
+    inner class InstructionEnumVisitor : KSVisitorVoid() {
+        override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
+            val annotation = classDeclaration.annotations.first { it.shortName.asString() == InstructionEnum::class.simpleName }
+            val otherAnnotationType = annotation.arguments[0].value as KSType
+            val argumentTypeAnnotation = otherAnnotationType.declaration.annotations.first { it.shortName.asString() == ArgumentAnnotation::class.simpleName }
+            val argumentType = argumentTypeAnnotation.arguments[0].value as KSType
+
+            val enumBuilder = TypeSpec.enumBuilder(classDeclaration.simpleName.asString() + "Enum")
+                .addProperty(
+                    PropertySpec.builder("types", Array::class.asClassName().parameterizedBy(WildcardTypeName.producerOf(otherAnnotationType.toClassName())))
+                        .initializer("types")
+                        .build()
+                )
+                .primaryConstructor(
+                    FunSpec.constructorBuilder()
+                        .addParameter("types", otherAnnotationType.toClassName(), KModifier.VARARG)
+                        .build()
+                )
+                .addFunction(
+                    FunSpec.builder("create")
+                        .addModifiers(KModifier.ABSTRACT)
+                        .returns(classDeclaration.toClassName())
+                        .addParameter("arguments", argumentType.toClassName(), KModifier.VARARG)
+                        .build()
+                )
+                .addFunction(
+                    FunSpec.builder("isValid")
+                        .returns(Boolean::class)
+                        .addParameter("arguments", argumentType.toClassName(), KModifier.VARARG)
+                        .addStatement("if (types.size != arguments.size) return false")
+                        .addStatement("return arguments.zip(types).all { (argument, type) -> type.validTypes.any { it.isInstance(argument) } }")
+                        .build()
+                )
+
+            classDeclaration.getSealedSubclasses().forEach { subclass ->
+                val constructor = subclass.primaryConstructor!!
+                val parameters = constructor.parameters
+                if (!parameters.all { it.type.resolve() == argumentType }) {
+                    logger.error("Invalid argument type", constructor)
+                }
+
+                val annotations = parameters.map { parameter -> parameter.type.annotations.first { it.annotationType.resolve() == otherAnnotationType } }
+
+                enumBuilder
+                    .addEnumConstant(
+                        subclass.simpleName.asString(),
+                        TypeSpec.anonymousClassBuilder()
+                            .addSuperclassConstructorParameter(
+                                "%L",
+                                annotations.joinToCode {
+                                    CodeBlock.of("%T(%L)", it.annotationType.toTypeName(), it.toAnnotationSpec().members.joinToCode())
+                                }
+                            )
+                            .addFunction(
+                                FunSpec.builder("create")
+                                    .returns(classDeclaration.toClassName())
+                                    .addModifiers(KModifier.OVERRIDE)
+                                    .addParameter("arguments", argumentType.toClassName(), KModifier.VARARG)
+                                    .addStatement("require(this.isValid(*arguments))")
+                                    .addStatement("return %T(%L)", subclass.toClassName(), parameters.indices.toList().joinToCode { CodeBlock.of("arguments[%L]", it) })
+                                    .build()
+                            )
+                            .build()
+                    )
+            }
+
+            FileSpec.builder(classDeclaration.packageName.asString(), classDeclaration.simpleName.asString() + "Enum")
+                .addType(enumBuilder.build())
+                .build()
+                .writeTo(codeGenerator, Dependencies(false, classDeclaration.containingFile!!))
         }
     }
 

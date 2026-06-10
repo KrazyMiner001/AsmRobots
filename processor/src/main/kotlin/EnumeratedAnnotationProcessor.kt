@@ -11,6 +11,7 @@ import com.squareup.kotlinpoet.ksp.toAnnotationSpec
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 import krazyminer001.asmrobots.annotations.Enumerated
+import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 
 class EnumeratedAnnotationProcessor(val codeGenerator: CodeGenerator) : SymbolProcessor {
@@ -32,15 +33,25 @@ class EnumeratedAnnotationProcessor(val codeGenerator: CodeGenerator) : SymbolPr
                 .asClassName()
                 .plusParameter(classDeclaration.asStarProjectedType().toClassName())
 
+            val classType = KClass::class
+                .asClassName()
+                .plusParameter(WildcardTypeName.producerOf(classDeclaration.asStarProjectedType().toClassName()))
+
             var enumBuilder = TypeSpec.enumBuilder(classDeclaration.simpleName.asString() + "Enum")
                 .addProperty(
                     PropertySpec.builder("creator", functionType)
                         .initializer("creator")
                         .build()
                 )
+                .addProperty(
+                    PropertySpec.builder("type", classType)
+                    .initializer("type")
+                    .build()
+                )
 
             val enumConstructorBuilder = FunSpec.constructorBuilder()
                 .addParameter("creator", functionType)
+                .addParameter("type", classType)
 
             val annotationTypes = (classDeclaration
                 .annotations.first { it.annotationType.resolve().declaration.qualifiedName!!.asString() == Enumerated::class.qualifiedName }
@@ -63,6 +74,7 @@ class EnumeratedAnnotationProcessor(val codeGenerator: CodeGenerator) : SymbolPr
             classDeclaration.getSealedSubclasses().forEach { subclass ->
                 val classBuilder = TypeSpec.anonymousClassBuilder()
                     .addSuperclassConstructorParameter("%L", subclass.toClassName().constructorReference())
+                    .addSuperclassConstructorParameter("%T::class", subclass.toClassName())
 
                 annotationTypes.forEach { annotationType ->
                     val annotation = subclass.annotations.first { annotationType.isAssignableFrom(it.annotationType.resolve()) }
