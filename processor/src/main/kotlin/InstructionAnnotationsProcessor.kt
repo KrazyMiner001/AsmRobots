@@ -152,7 +152,7 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
                                     .addModifiers(KModifier.OVERRIDE)
                                     .addParameter("arguments", argumentType.toClassName(), KModifier.VARARG)
                                     .addStatement("require(this.isValid(*arguments))")
-                                    .addStatement("return %T(%L)", subclass.toClassName(), parameters.indices.toList().joinToCode { CodeBlock.of("arguments[%L]", it) })
+                                    .addStatement(if (parameters.isEmpty()) "return %T%L" else "return %T(%L)", subclass.toClassName(), parameters.indices.toList().joinToCode { CodeBlock.of("arguments[%L]", it) })
                                     .build()
                             )
                             .build()
