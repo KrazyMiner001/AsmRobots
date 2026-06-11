@@ -6,7 +6,7 @@ enum class Syscall {
     ;
     companion object : Parsable<Syscall> {
         override fun parse(string: String): Syscall {
-            return runCatching { Syscall.valueOf(string) }.getOrElse { throw InstructionInvalidParameter("syscall", string) }
+            return runCatching { Syscall.valueOf(string) }.getOrElse { throw IllegalArgumentException(string) }
         }
     }
 }

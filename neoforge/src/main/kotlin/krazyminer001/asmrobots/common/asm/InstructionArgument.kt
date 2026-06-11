@@ -27,10 +27,10 @@ sealed interface InstructionArgument {
         override fun toBytes(): ByteArray = value.toBits().toBytes()
     }
     @ArgumentData(5)
-    data class Pointer(val pointer: krazyminer001.asmrobots.common.asm.Pointer) : Argument {
+    data class Pointer(val register: RegisterEnum, val offset: Immediate32) : Argument {
         override fun toBytes(): ByteArray = byteArrayOf(
-            pointer.register.ordinal.toUByte().toByte(),
-            *pointer.offset.value.toBytes()
+            register.ordinal.toUByte().toByte(),
+            *offset.value.toBytes()
         )
     }
     @ArgumentData(1)
@@ -52,7 +52,12 @@ sealed interface InstructionArgument {
                 return ImmediateFloat32(string.toFloat())
             }
             runCatching {
-                return Pointer(krazyminer001.asmrobots.common.asm.Pointer.parse(string))
+                return PointerRegex.matchEntire(string)?.let {
+                    Pointer(
+                        RegisterEnum.parse(it.groups["register"]!!.value),
+                        Immediate32(it.groups["offset"]!!.value.toInt())
+                    )
+                }
             }
             runCatching {
                 return Syscall(SyscallEnum.parse(string))
@@ -62,6 +67,8 @@ sealed interface InstructionArgument {
     }
 }
 
+val PointerRegex: Regex = "(?<offset>-?\\d+?)\\((?<register>\\w+)\\)".toRegex()
+
 fun Argument.Companion.fromBytes(bytes: ByteArray, type: InstructionArgumentEnum): Argument {
     require(bytes.size == type.ArgumentData.numBytes)
     return when (type) {
@@ -70,12 +77,12 @@ fun Argument.Companion.fromBytes(bytes: ByteArray, type: InstructionArgumentEnum
         InstructionArgumentEnum.ImmediateFloat32 -> ImmediateFloat32(
             Float.fromBits(Int.fromBytes(bytes[0], bytes[1], bytes[2], bytes[3]))
         )
-        InstructionArgumentEnum.Pointer -> Pointer(Pointer(
+        InstructionArgumentEnum.Pointer -> Pointer(
             RegisterEnum.entries.find { it.ordinal == bytes[0].toInt() }!!,
-            Immediate(
+            Immediate32(
                 Int.fromBytes(bytes[1], bytes[2], bytes[3], bytes[4])
             )
-        ))
+        )
         InstructionArgumentEnum.Syscall -> Syscall(SyscallEnum.entries.find { it.ordinal == bytes[0].toInt() }!!)
     }
 }

@@ -95,26 +95,27 @@ sealed interface InstructionRewrite {
 
 fun InstructionRewrite.asEnum(): InstructionRewriteEnum = InstructionRewriteEnum.entries.find { it.name == this::class.simpleName }!!
 
-fun InstructionRewrite.Companion.tryParse(string: String): Result<InstructionRewrite> {
+fun InstructionRewrite.Companion.tryParse(string: String): AsmResult<InstructionRewrite, AsmError.ParseError> {
     val mnemonic = string.substringBefore(" ")
     val components = Splitter.on(", ")
         .omitEmptyStrings()
         .split(string.substringAfter(" ", ""))
         .toList()
-        .map { InstructionArgument.parse(it) }
-        .also {
-            val nulls = it.filter { argument -> argument == null }
-            if (nulls.isNotEmpty()) return TODO("proper exception here")
+        .map { Pair(InstructionArgument.parse(it), it) }
+        .also { pairs ->
+            val nulls = pairs.filter { it.first == null }
+            if (nulls.isNotEmpty()) return AsmResult.Failure(AsmError.ParseError.InvalidInstructionArguments(*pairs.map { it.second }.toTypedArray()))
         }
+        .map { it.first }
         .filterIsInstance<InstructionArgument>()
         .toTypedArray()
 
     val instructionType = InstructionRewriteEnum.entries.find { it.name.lowercase() == mnemonic }
-    if (instructionType !is InstructionRewriteEnum) return Result.failure(InstructionNotFoundException(mnemonic))
+    if (instructionType !is InstructionRewriteEnum) return AsmResult.Failure(AsmError.ParseError.InstructionNotFound(mnemonic))
 
-    if (!instructionType.isValid(*components)) return Result.failure(Exception("Invalid instruction arguments"))
+    if (!instructionType.isValid(*components)) return AsmResult.Failure(AsmError.ParseError.InvalidInstructionArgumentsFor(mnemonic, components.joinToString()))
 
-    return Result.success(instructionType.create(*components))
+    return AsmResult.Success(instructionType.create(*components))
 }
 
 fun InstructionRewrite.Companion.identityInstruction(opcode: UByte, typeInformation: UByte): Pair<InstructionRewriteEnum, Array<InstructionArgumentEnum>> {

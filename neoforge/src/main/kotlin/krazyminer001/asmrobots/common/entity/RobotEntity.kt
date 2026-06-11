@@ -103,12 +103,8 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                         {
                             it.component1().contentToString()
                         },
-                        { throwable ->
-                            if (throwable is ParseErrors) {
-                                throwable.parseErrors.joinToString { "Error on line ${it.lineNumber}: ${it.cause?.message}" }
-                            } else {
-                                "Unexpected exception: $throwable"
-                            }
+                        {
+                            it.text
                         }
                     )
                     player.sendSystemMessage(Component.literal(text))

@@ -87,43 +87,43 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
         get() = when (this) {
             is InstructionArgument.Immediate32 -> this.value
             is InstructionArgument.ImmediateFloat32 -> this.value.toBits()
-            is InstructionArgument.Pointer -> memory.getWord(reg[this.pointer.register] + this.pointer.offset.value)
+            is InstructionArgument.Pointer -> memory.getWord(reg[this.register] + this.offset.value)
             is InstructionArgument.Register -> reg[this.register]
             is InstructionArgument.Syscall -> this.syscall.ordinal
         }
         set(value) = when (this) {
             is InstructionArgument.Immediate32 -> throw IllegalArgumentException()
             is InstructionArgument.ImmediateFloat32 -> throw IllegalArgumentException()
-            is InstructionArgument.Pointer -> memory.setWord(reg[this.pointer.register] + this.pointer.offset.value, value)
+            is InstructionArgument.Pointer -> memory.setWord(reg[this.register] + this.offset.value, value)
             is InstructionArgument.Register -> reg[this.register] = value
             is InstructionArgument.Syscall -> throw IllegalArgumentException()
         }
 
     var InstructionArgument.halfValue: Short
         get() = when (this) {
-            is InstructionArgument.Pointer -> memory.getHalf(reg[this.pointer.register] + this.pointer.offset.value)
+            is InstructionArgument.Pointer -> memory.getHalf(reg[this.register] + this.offset.value)
             else -> this.wordValue.toShort()
         }
         set(value) = when (this) {
-            is InstructionArgument.Pointer -> memory.setHalf(reg[this.pointer.register] + this.pointer.offset.value, value)
+            is InstructionArgument.Pointer -> memory.setHalf(reg[this.register] + this.offset.value, value)
             else -> this.wordValue = value.toUShort().toInt()
         }
 
     var InstructionArgument.byteValue: Byte
         get() = when (this) {
-            is InstructionArgument.Pointer -> memory[reg[this.pointer.register] + this.pointer.offset.value]
+            is InstructionArgument.Pointer -> memory[reg[this.register] + this.offset.value]
             else -> this.wordValue.toByte()
         }
         set(value) = when (this) {
-            is InstructionArgument.Pointer -> memory[reg[this.pointer.register] + this.pointer.offset.value] = value
+            is InstructionArgument.Pointer -> memory[reg[this.register] + this.offset.value] = value
             else -> this.wordValue = value.toUByte().toInt()
         }
 
 }
 
-fun lex (code: String): Result<Pair<ByteArray, Map<String, Int>>> {
+fun lex (code: String): AsmResult<Pair<ByteArray, Map<String, Int>>, AsmError.ParseError.ParseErrors> {
     val lines = code.split('\n')
-    val parseErrors = mutableListOf<ParseError>()
+    val parseErrors = mutableListOf<Pair<AsmError.ParseError, Int>>()
 
     val memory = mutableListOf<Byte>()
     val labels = mutableMapOf<String, Int>()
@@ -144,13 +144,13 @@ fun lex (code: String): Result<Pair<ByteArray, Map<String, Int>>> {
                 memory.addAll(it.asEnum().toBytes(it).toTypedArray())
             },
             {
-                parseErrors.add(ParseError(it, index))
+                parseErrors.add(Pair(it, index))
             }
         )
     }
 
-    if (parseErrors.isNotEmpty()) return Result.failure(ParseErrors(*parseErrors.toTypedArray()))
-    return Result.success(Pair(memory.toByteArray(), labels))
+    if (parseErrors.isNotEmpty()) return AsmResult.Failure(AsmError.ParseError.ParseErrors(*parseErrors.toTypedArray()))
+    return AsmResult.Success(Pair(memory.toByteArray(), labels))
 }
 
 val CommentRegex: Regex = "^(?<content>.*?)(?://(?<comment>.*))?$".toRegex()

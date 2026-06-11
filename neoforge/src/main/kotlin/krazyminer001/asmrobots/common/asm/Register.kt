@@ -56,6 +56,6 @@ enum class Register {
 
     companion object : Parsable<Register> {
         override fun parse(string: String): Register = Register.entries.find { it.name.equals(string, true) }
-            ?: throw InstructionInvalidParameter("register", string)
+            ?: throw IllegalArgumentException(string)
     }
 }
