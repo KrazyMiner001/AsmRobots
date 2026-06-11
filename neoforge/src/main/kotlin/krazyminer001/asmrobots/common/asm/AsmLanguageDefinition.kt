@@ -13,7 +13,7 @@ object AsmLanguageDefinition
         listOf(
             TokenType("Label").setPattern(".*:"),
             TokenType("Instruction").setPattern("\\b(?:" +
-                InstructionOLDEnum.entries.joinToString("|") {
+                InstructionRewriteEnum.entries.joinToString("|") {
                     it.name.lowercase()
                 } + ")\\b"
             ),
