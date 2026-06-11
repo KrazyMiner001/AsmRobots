@@ -3,6 +3,7 @@ package krazyminer001.asmrobots.common.asm
 import com.google.common.base.Splitter
 import krazyminer001.asmrobots.annotations.InstructionEnum
 import krazyminer001.asmrobots.common.asm.InstructionArgument.Pointer
+import kotlin.collections.mapIndexed
 import krazyminer001.asmrobots.common.asm.InstructionArgument.Register as Reg
 import krazyminer001.asmrobots.common.asm.InstructionArgument.Immediate32 as Imm
 import krazyminer001.asmrobots.common.asm.InstructionArgument.ImmediateFloat32 as ImmFloat
@@ -88,26 +89,49 @@ sealed interface InstructionRewrite {
     ) : InstructionRewrite
 
     companion object {
-        fun tryParse(string: String): Result<InstructionRewrite> {
-            val mnemonic = string.substringBefore(" ")
-            val components = Splitter.on(", ")
-                .omitEmptyStrings()
-                .split(string.substringAfter(" ", ""))
-                .toList()
-                .map { InstructionArgument.parse(it) }
-                .also {
-                    val nulls = it.filter { argument -> argument == null }
-                    if (nulls.isNotEmpty()) return TODO("proper exception here")
-                }
-                .filterIsInstance<InstructionArgument>()
-                .toTypedArray()
-
-            val instructionType = InstructionRewriteEnum.entries.find { it.name.lowercase() == mnemonic }
-            if (instructionType !is InstructionRewriteEnum) return Result.failure(InstructionNotFoundException(mnemonic))
-
-            if (!instructionType.isValid(*components)) return Result.failure(Exception("Invalid instruction arguments"))
-
-            return Result.success(instructionType.create(*components))
-        }
+        fun Array<InstructionArgumentEnum>.byteLength(): Int = this.sumOf { it.ArgumentData.numBytes }
     }
+}
+
+fun InstructionRewrite.asEnum(): InstructionRewriteEnum = InstructionRewriteEnum.entries.find { it.name == this::class.simpleName }!!
+
+fun InstructionRewrite.Companion.tryParse(string: String): Result<InstructionRewrite> {
+    val mnemonic = string.substringBefore(" ")
+    val components = Splitter.on(", ")
+        .omitEmptyStrings()
+        .split(string.substringAfter(" ", ""))
+        .toList()
+        .map { InstructionArgument.parse(it) }
+        .also {
+            val nulls = it.filter { argument -> argument == null }
+            if (nulls.isNotEmpty()) return TODO("proper exception here")
+        }
+        .filterIsInstance<InstructionArgument>()
+        .toTypedArray()
+
+    val instructionType = InstructionRewriteEnum.entries.find { it.name.lowercase() == mnemonic }
+    if (instructionType !is InstructionRewriteEnum) return Result.failure(InstructionNotFoundException(mnemonic))
+
+    if (!instructionType.isValid(*components)) return Result.failure(Exception("Invalid instruction arguments"))
+
+    return Result.success(instructionType.create(*components))
+}
+
+fun InstructionRewrite.Companion.identityInstruction(opcode: UByte, typeInformation: UByte): Pair<InstructionRewriteEnum, Array<InstructionArgumentEnum>> {
+    val instructionEnum = InstructionRewriteEnum.entries.find { it.ordinal == opcode.toInt() }
+    if (instructionEnum == null) throw IllegalArgumentException("Opcode $opcode does not correspond to and instruction")
+
+    val types = instructionEnum.types
+
+    // Checks to make sure current data parsing system works. It most likely will work for all future instructions so these should not ever be reached
+    if (types.size > 4) throw NotImplementedError("Instructions with more than 4 parameters are not yet implemented")
+    if (types.any { it.validTypes.size > 4 }) throw NotImplementedError("Instructions parameters with more than 4 possible types are not yet implemented")
+
+    val argumentTypes = types.mapIndexed { index, type ->
+        type.validTypes[(typeInformation.toInt() ushr (2 * index)) and 0b11]
+    }.map { type ->
+        InstructionArgumentEnum.entries.find { it.type == type }!!
+    }
+
+    return Pair(instructionEnum, argumentTypes.toTypedArray())
 }

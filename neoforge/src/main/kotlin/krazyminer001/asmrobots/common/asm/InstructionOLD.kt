@@ -2,13 +2,13 @@ package krazyminer001.asmrobots.common.asm
 
 import com.google.common.base.Splitter
 import krazyminer001.asmrobots.annotations.ParsableEnumerated
-import krazyminer001.asmrobots.common.asm.Instruction
+import krazyminer001.asmrobots.common.asm.InstructionOLD
 import krazyminer001.asmrobots.common.asm.Immediate as Imm
-import krazyminer001.asmrobots.common.asm.Instruction as I
+import krazyminer001.asmrobots.common.asm.InstructionOLD as I
 import krazyminer001.asmrobots.common.asm.Register as Reg
 
 @ParsableEnumerated
-sealed interface Instruction {
+sealed interface InstructionOLD {
     data class Add(val target: Reg, val arg1: Reg, val arg2: Reg) : I
     data class Addi(val target: Reg, val arg1: Reg, val arg2: Imm) : I
     data class Neg(val target: Reg, val arg1: Reg) : I
@@ -51,16 +51,16 @@ sealed interface Instruction {
     data class Outii(val targetIOAddress: Imm, val arg1: Imm) : I
 
     companion object {
-        fun tryParse(code: String): Result<Instruction> {
+        fun tryParse(code: String): Result<InstructionOLD> {
             val mnemonic = code.substringBefore(" ")
             val components = Splitter.on(", ")
                 .omitEmptyStrings()
                 .split(code.substringAfter(" ", ""))
                 .toList()
                 .toTypedArray()
-            val instruction = InstructionEnum.entries.find { it.name.lowercase() == mnemonic }
+            val instruction = InstructionOLDEnum.entries.find { it.name.lowercase() == mnemonic }
 
-            if (instruction !is InstructionEnum) return Result.failure(InstructionNotFoundException(mnemonic))
+            if (instruction !is InstructionOLDEnum) return Result.failure(InstructionNotFoundException(mnemonic))
 
             return try {
                 Result.success(instruction(components))

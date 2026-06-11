@@ -101,7 +101,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 onServerClick = {
                     val text = lex(code).fold(
                         {
-                            it.toString()
+                            it.component1().contentToString()
                         },
                         { throwable ->
                             if (throwable is ParseErrors) {
@@ -117,8 +117,9 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             button({
                 text("Execute")
                 onServerClick = clickHandler@{
-                    val code = lex(code).getOrElse { return@clickHandler }
-                    program = Program(code, this@RobotEntity)
+                    val (code, labels) = lex(code).getOrElse { return@clickHandler }
+                    program = Program(this@RobotEntity)
+                    program?.initMemoryAndLabels(code, labels)
                 }
             })
         }

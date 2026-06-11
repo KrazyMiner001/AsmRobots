@@ -119,6 +119,13 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
                         .build()
                 )
                 .addFunction(
+                    FunSpec.builder("toBytes")
+                        .returns(ByteArray::class)
+                        .addModifiers(KModifier.ABSTRACT)
+                        .addParameter("value", classDeclaration.toClassName())
+                        .build()
+                )
+                .addFunction(
                     FunSpec.builder("isValid")
                         .returns(Boolean::class)
                         .addParameter("arguments", argumentType.toClassName(), KModifier.VARARG)
@@ -155,6 +162,33 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
                                     .addStatement(if (parameters.isEmpty()) "return %T%L" else "return %T(%L)", subclass.toClassName(), parameters.indices.toList().joinToCode { CodeBlock.of("arguments[%L]", it) })
                                     .build()
                             )
+                            .addFunction(
+                            FunSpec.builder("toBytes")
+                                .returns(ByteArray::class)
+                                .addModifiers(KModifier.OVERRIDE)
+                                .addParameter("value", classDeclaration.toClassName())
+                                .addStatement("require(value is %L)", subclass.toClassName())
+                                .apply {
+                                    if (!parameters.isEmpty()) {
+                                        addStatement("val (%L) = value", parameters.joinToCode { CodeBlock.of("%L", it.name!!.asString()) })
+                                        addStatement(
+                                            "val num = %L",
+                                            parameters.mapIndexed { index, parameter ->
+                                                CodeBlock.of("this.types[%L].validTypes.indexOf(%L::class).shl(%L)", index, parameter.name!!.asString(), 2 * index)
+                                            }.joinToCode(separator = " or ")
+                                        )
+                                    } else {
+                                        addStatement(
+                                            "val num = 0"
+                                        )
+                                    }
+                                }
+                                .addStatement(
+                                    "return byteArrayOf(this.ordinal.toUByte().toByte(), num.toUByte().toByte()%L)",
+                                    parameters.joinToCode(separator = "") { CodeBlock.of(", *%L.toBytes()", it.name!!.asString()) }
+                                )
+                                .build()
+                        )
                             .build()
                     )
             }

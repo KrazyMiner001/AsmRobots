@@ -15,15 +15,30 @@ import krazyminer001.asmrobots.common.asm.Syscall as SyscallEnum
 @Enumerated(ArgumentData::class)
 sealed interface InstructionArgument {
     @ArgumentData(1)
-    data class Register(val register: RegisterEnum) : Argument
+    data class Register(val register: RegisterEnum) : Argument {
+        override fun toBytes(): ByteArray = byteArrayOf(register.ordinal.toUByte().toByte())
+    }
     @ArgumentData(4)
-    data class Immediate32(val value: Int) : Argument
+    data class Immediate32(val value: Int) : Argument {
+        override fun toBytes(): ByteArray = value.toBytes()
+    }
     @ArgumentData(4)
-    data class ImmediateFloat32(val value: Float) : Argument
+    data class ImmediateFloat32(val value: Float) : Argument {
+        override fun toBytes(): ByteArray = value.toBits().toBytes()
+    }
     @ArgumentData(5)
-    data class Pointer(val pointer: krazyminer001.asmrobots.common.asm.Pointer) : Argument
+    data class Pointer(val pointer: krazyminer001.asmrobots.common.asm.Pointer) : Argument {
+        override fun toBytes(): ByteArray = byteArrayOf(
+            pointer.register.ordinal.toUByte().toByte(),
+            *pointer.offset.value.toBytes()
+        )
+    }
     @ArgumentData(1)
-    data class Syscall(val syscall: SyscallEnum) : Argument
+    data class Syscall(val syscall: SyscallEnum) : Argument  {
+        override fun toBytes(): ByteArray = byteArrayOf(syscall.ordinal.toUByte().toByte())
+    }
+
+    fun toBytes(): ByteArray
 
     companion object {
         fun parse(string: String): Argument? {

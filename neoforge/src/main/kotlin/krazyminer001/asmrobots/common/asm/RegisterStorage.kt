@@ -12,11 +12,4 @@ class RegisterStorage {
         if (register == Register.RZ) return
         array[register.ordinal] = value
     }
-
-    var Register.value: Int
-        get() = get(this)
-        set(value) = set(this, value)
-
-    val Pointer.value: Int
-        get() = this.register.value + this.offset.value
 }
