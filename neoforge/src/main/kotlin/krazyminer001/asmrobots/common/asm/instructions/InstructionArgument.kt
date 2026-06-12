@@ -30,7 +30,7 @@ sealed interface InstructionArgument {
         )
     }
     @ArgumentData(4)
-    data class Label(val value: Int) : InstructionArgument {
+    data class Label(val value: Int, val name: String? = null) : InstructionArgument {
         override fun toBytes(): ByteArray = value.toBytes()
     }
 
@@ -56,8 +56,7 @@ sealed interface InstructionArgument {
                 }
             }
             runCatching {
-                if (labelResolver == null) return@runCatching
-                return Label(labelResolver[string]!!)
+                return Label(labelResolver?.get(string) ?: -1, string)
             }
             return null
         }
@@ -65,6 +64,8 @@ sealed interface InstructionArgument {
 }
 
 val PointerRegex: Regex = "(?<offset>-?\\d+?)\\((?<register>\\w+)\\)".toRegex()
+
+fun InstructionArgument.asEnum() = InstructionArgumentEnum.valueOf(this::class.simpleName!!)
 
 fun InstructionArgument.Companion.fromBytes(bytes: ByteArray, type: InstructionArgumentEnum): InstructionArgument {
     require(bytes.size == type.ArgumentData.numBytes)

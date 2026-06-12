@@ -1,9 +1,6 @@
 package krazyminer001.asmrobots.common.asm.instructions
 
-import com.google.common.base.Splitter
 import krazyminer001.asmrobots.annotations.InstructionEnum
-import krazyminer001.asmrobots.common.asm.AsmError
-import krazyminer001.asmrobots.common.asm.AsmResult
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Immediate32
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.ImmediateFloat32
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Label
@@ -90,38 +87,16 @@ sealed interface InstructionRewrite {
         val address: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument
     ) : InstructionRewrite
 
+    fun toBytes(): ByteArray {
+        return this.asEnum().toBytes(this)
+    }
+
     companion object {
-        fun Array<InstructionArgumentEnum>.byteLength(): Int = this.sumOf { it.ArgumentData.numBytes }
+        fun Iterable<InstructionArgumentEnum>.byteLength(): Int = this.sumOf { it.ArgumentData.numBytes }
     }
 }
 
 fun InstructionRewrite.asEnum(): InstructionRewriteEnum = InstructionRewriteEnum.entries.find { it.name == this::class.simpleName }!!
-
-fun InstructionRewrite.Companion.tryParse(string: String, labelResolver: Map<String, Int>? = null): AsmResult<InstructionRewrite, AsmError.ParseError> {
-    val mnemonic = string.substringBefore(" ")
-    val components = Splitter.on(", ")
-        .omitEmptyStrings()
-        .split(string.substringAfter(" ", ""))
-        .toList()
-        .map { Pair(InstructionArgument.parse(it, labelResolver), it) }
-        .also { pairs ->
-            val nulls = pairs.filter { it.first == null }
-            if (nulls.isNotEmpty())
-                return AsmResult.Failure(AsmError.ParseError.InvalidInstructionArguments(*pairs.map { it.second }.toTypedArray()))
-        }
-        .map { it.first }
-        .filterIsInstance<InstructionArgument>()
-        .toTypedArray()
-
-    val instructionType = InstructionRewriteEnum.entries.find { it.name.lowercase() == mnemonic }
-    if (instructionType !is InstructionRewriteEnum)
-        return AsmResult.Failure(AsmError.ParseError.InstructionNotFound(mnemonic))
-
-    if (!instructionType.isValid(*components))
-        return AsmResult.Failure(AsmError.ParseError.InvalidInstructionArgumentsFor(mnemonic, components.joinToString()))
-
-    return AsmResult.Success(instructionType.create(*components))
-}
 
 fun InstructionRewrite.Companion.identityInstruction(opcode: UByte, typeInformation: UByte): Pair<InstructionRewriteEnum, Array<InstructionArgumentEnum>> {
     val instructionEnum = InstructionRewriteEnum.entries.find { it.ordinal == opcode.toInt() }

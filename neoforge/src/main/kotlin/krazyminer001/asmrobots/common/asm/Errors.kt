@@ -1,5 +1,7 @@
 package krazyminer001.asmrobots.common.asm
 
+import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
+import krazyminer001.asmrobots.common.asm.instructions.InstructionRewriteEnum
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.ExperimentalExtendedContracts
 import kotlin.contracts.contract
@@ -10,8 +12,8 @@ sealed interface AsmError {
             override val text = "Invalid instruction $instructionName"
         }
 
-        data class InvalidInstructionArgumentsFor(val instructionName: String, val providedArguments: String) : ParseError {
-            override val text = "Invalid arguments ($providedArguments) for instruction $instructionName"
+        data class InvalidInstructionArgumentsFor(val instruction: InstructionRewriteEnum, val providedArguments: List<InstructionArgument>) : ParseError {
+            override val text = "Invalid arguments ($providedArguments) for instruction $instruction"
         }
 
         class InvalidInstructionArguments(vararg val arguments: String) : ParseError {
@@ -107,6 +109,8 @@ sealed class AsmResult<out T : Any, out E : AsmError> {
         throw IllegalStateException()
     }
 }
+
+fun <T : Any> T.asSuccess(): AsmResult.Success<T> = AsmResult.Success(this)
 
 inline fun <T : Any, E : AsmError> AsmResult<T, E>.getOrElse(orElse: (E) -> T): T {
     if (isSuccess) return successValue!!
