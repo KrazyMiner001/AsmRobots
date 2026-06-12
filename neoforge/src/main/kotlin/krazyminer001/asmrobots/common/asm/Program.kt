@@ -1,6 +1,10 @@
 package krazyminer001.asmrobots.common.asm
 
-import krazyminer001.asmrobots.common.asm.Register.*
+import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
+import krazyminer001.asmrobots.common.asm.instructions.InstructionRewrite
+import krazyminer001.asmrobots.common.asm.instructions.Register.*
+import krazyminer001.asmrobots.common.asm.instructions.fromBytes
+import krazyminer001.asmrobots.common.asm.instructions.identityInstruction
 import kotlin.experimental.or
 
 class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
@@ -120,37 +124,3 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
         }
 
 }
-
-fun lex (code: String): AsmResult<Pair<ByteArray, Map<String, Int>>, AsmError.ParseError.ParseErrors> {
-    val lines = code.split('\n')
-    val parseErrors = mutableListOf<Pair<AsmError.ParseError, Int>>()
-
-    val memory = mutableListOf<Byte>()
-    val labels = mutableMapOf<String, Int>()
-    lines.forEachIndexed { index, line ->
-        val trimmed = line.trim()
-        val matches = CommentRegex.matchEntire(trimmed)!!.groups
-        //val comment = matches["comment"]?.value?.let(::Comment)
-        val content = matches["content"]!!.value.trim()
-        if (content.endsWith(":")) {
-            labels[content.dropLast(1)] = memory.size
-            return@forEachIndexed
-        }
-        if (content.isBlank()) {
-            return@forEachIndexed
-        }
-        InstructionRewrite.tryParse(trimmed).fold(
-            {
-                memory.addAll(it.asEnum().toBytes(it).toTypedArray())
-            },
-            {
-                parseErrors.add(Pair(it, index))
-            }
-        )
-    }
-
-    if (parseErrors.isNotEmpty()) return AsmResult.Failure(AsmError.ParseError.ParseErrors(*parseErrors.toTypedArray()))
-    return AsmResult.Success(Pair(memory.toByteArray(), labels))
-}
-
-val CommentRegex: Regex = "^(?<content>.*?)(?://(?<comment>.*))?$".toRegex()

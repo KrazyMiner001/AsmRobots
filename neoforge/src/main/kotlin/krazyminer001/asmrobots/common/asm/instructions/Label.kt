@@ -1,4 +1,4 @@
-package krazyminer001.asmrobots.common.asm
+package krazyminer001.asmrobots.common.asm.instructions
 
 import krazyminer001.asmrobots.annotations.Parsable
 

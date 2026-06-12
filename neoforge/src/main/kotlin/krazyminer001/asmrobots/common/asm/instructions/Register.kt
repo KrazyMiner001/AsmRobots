@@ -1,4 +1,4 @@
-package krazyminer001.asmrobots.common.asm
+package krazyminer001.asmrobots.common.asm.instructions
 
 import krazyminer001.asmrobots.annotations.Parsable
 
@@ -55,7 +55,7 @@ enum class Register {
     S15;
 
     companion object : Parsable<Register> {
-        override fun parse(string: String): Register = Register.entries.find { it.name.equals(string, true) }
+        override fun parse(string: String): Register = entries.find { it.name.equals(string, true) }
             ?: throw IllegalArgumentException(string)
     }
 }

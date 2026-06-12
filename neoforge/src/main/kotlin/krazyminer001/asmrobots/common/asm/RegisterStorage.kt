@@ -1,5 +1,7 @@
 package krazyminer001.asmrobots.common.asm
 
+import krazyminer001.asmrobots.common.asm.instructions.Register
+
 class RegisterStorage {
     private val array = Array(Register.entries.size) { 0 }
 

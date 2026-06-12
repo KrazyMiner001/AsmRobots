@@ -99,21 +99,14 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             })
             button({
                 onServerClick = {
-                    val text = lex(code).fold(
-                        {
-                            it.component1().contentToString()
-                        },
-                        {
-                            it.text
-                        }
-                    )
+                    val text = lex(code).joinToString("\n")
                     player.sendSystemMessage(Component.literal(text))
                 }
             })
             button({
                 text("Execute")
                 onServerClick = clickHandler@{
-                    val (code, labels) = lex(code).getOrElse { return@clickHandler }
+                    val (code, labels) = assemble(lex(code)).getOrElse { return@clickHandler }
                     program = Program(this@RobotEntity)
                     program?.initMemoryAndLabels(code, labels)
                 }
