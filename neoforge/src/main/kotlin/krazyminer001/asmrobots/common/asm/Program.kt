@@ -57,7 +57,7 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                 is InstructionRewrite.Sra -> target.wordValue = arg1.wordValue shr arg2.wordValue
                 is InstructionRewrite.Srl -> target.wordValue = arg1.wordValue ushr arg2.wordValue
                 is InstructionRewrite.Sub -> target.wordValue = arg1.wordValue - arg2.wordValue
-                is InstructionRewrite.Syscall -> TODO()
+                is InstructionRewrite.Jump -> reg[PC] = address.wordValue
             }
         }
 
@@ -93,14 +93,14 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
             is InstructionArgument.ImmediateFloat32 -> this.value.toBits()
             is InstructionArgument.Pointer -> memory.getWord(reg[this.register] + this.offset.value)
             is InstructionArgument.Register -> reg[this.register]
-            is InstructionArgument.Syscall -> this.syscall.ordinal
+            is InstructionArgument.Label -> this.value
         }
         set(value) = when (this) {
             is InstructionArgument.Immediate32 -> throw IllegalArgumentException()
             is InstructionArgument.ImmediateFloat32 -> throw IllegalArgumentException()
             is InstructionArgument.Pointer -> memory.setWord(reg[this.register] + this.offset.value, value)
             is InstructionArgument.Register -> reg[this.register] = value
-            is InstructionArgument.Syscall -> throw IllegalArgumentException()
+            is InstructionArgument.Label -> throw IllegalArgumentException()
         }
 
     var InstructionArgument.halfValue: Short

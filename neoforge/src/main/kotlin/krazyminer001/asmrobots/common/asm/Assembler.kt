@@ -3,7 +3,6 @@ package krazyminer001.asmrobots.common.asm
 import krazyminer001.asmrobots.common.asm.instructions.InstructionRewrite
 import krazyminer001.asmrobots.common.asm.instructions.asEnum
 import krazyminer001.asmrobots.common.asm.instructions.tryParse
-import kotlin.collections.filterValues
 
 fun lex(code: String): List<LexedLine> {
     val lines = code.split('\n')
@@ -24,14 +23,14 @@ fun lex(code: String): List<LexedLine> {
 }
 
 fun assemble(lines: List<LexedLine>): AsmResult<Pair<ByteArray, Map<String, Int>>, AsmError.ParseError.ParseErrors> {
-    val labels = mutableMapOf<LexedLine.Content.Label, Int>()
+    val labels = mutableMapOf<String, Int>()
     val pendingLabels = mutableListOf<LexedLine.Content.Label>()
     val instructions = mutableListOf<LexedLine.Content.Instruction>()
     lines.forEach { line ->
         when (line.content) {
             is LexedLine.Content.Label -> pendingLabels.add(line.content)
             is LexedLine.Content.Instruction -> {
-                labels.putAll(pendingLabels.map { Pair(it, instructions.size) })
+                labels.putAll(pendingLabels.map { Pair(it.name, instructions.size) })
                 pendingLabels.clear()
                 instructions.add(line.content)
             }
@@ -41,15 +40,30 @@ fun assemble(lines: List<LexedLine>): AsmResult<Pair<ByteArray, Map<String, Int>
 
     val parseErrors = mutableListOf<Pair<AsmError.ParseError, Int>>()
 
+    val lineNumbersToRam = mutableMapOf<Int, Int>()
+
+    val parsedInstructions = mutableListOf<InstructionRewrite>()
+    var memorySize = 0
+    instructions.forEachIndexed { index, instruction ->
+        InstructionRewrite.tryParse(instruction.content, labels).fold(
+            { parsedInstruction ->
+                parsedInstructions.add(parsedInstruction)
+                lineNumbersToRam[index] = memorySize
+                memorySize += parsedInstruction.asEnum().toBytes(parsedInstruction).size
+            },
+            {
+                parseErrors.add(Pair(it, index))
+            }
+        )
+    }
+
     val memory = mutableListOf<Byte>()
-    val labelsToRam = mutableMapOf<String, Int>()
+    val labelsToRam = labels.mapValues { lineNumbersToRam[it.value]!! }
 
     instructions.forEachIndexed { index, instruction ->
-        InstructionRewrite.tryParse(instruction.content).fold(
+        InstructionRewrite.tryParse(instruction.content, labelsToRam).fold(
             { parsedInstruction ->
-                labelsToRam.putAll(
-                    labels.filterValues { it == index }.keys.map { Pair(it.name, memory.size) }
-                )
+                lineNumbersToRam[index] = memory.size
                 memory.addAll(parsedInstruction.asEnum().toBytes(parsedInstruction).toTypedArray())
             },
             {

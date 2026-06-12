@@ -29,15 +29,15 @@ sealed interface InstructionArgument {
             *offset.value.toBytes()
         )
     }
-    @ArgumentData(1)
-    data class Syscall(val syscall: krazyminer001.asmrobots.common.asm.instructions.Syscall) : InstructionArgument {
-        override fun toBytes(): ByteArray = byteArrayOf(syscall.ordinal.toUByte().toByte())
+    @ArgumentData(4)
+    data class Label(val value: Int) : InstructionArgument {
+        override fun toBytes(): ByteArray = value.toBytes()
     }
 
     fun toBytes(): ByteArray
 
     companion object {
-        fun parse(string: String): InstructionArgument? {
+        fun parse(string: String, labelResolver: Map<String, Int>? = null): InstructionArgument? {
             runCatching {
                 return Register(RegisterEnum.parse(string))
             }
@@ -48,7 +48,7 @@ sealed interface InstructionArgument {
                 return ImmediateFloat32(string.toFloat())
             }
             runCatching {
-                return PointerRegex.matchEntire(string)?.let {
+                return PointerRegex.matchEntire(string)!!.let {
                     Pointer(
                         RegisterEnum.parse(it.groups["register"]!!.value),
                         Immediate32(it.groups["offset"]!!.value.toInt())
@@ -56,7 +56,8 @@ sealed interface InstructionArgument {
                 }
             }
             runCatching {
-                return Syscall(krazyminer001.asmrobots.common.asm.instructions.Syscall.parse(string))
+                if (labelResolver == null) return@runCatching
+                return Label(labelResolver[string]!!)
             }
             return null
         }
@@ -86,7 +87,14 @@ fun InstructionArgument.Companion.fromBytes(bytes: ByteArray, type: InstructionA
                 Int.fromBytes(bytes[1], bytes[2], bytes[3], bytes[4])
             )
         )
-        InstructionArgumentEnum.Syscall -> InstructionArgument.Syscall(Syscall.entries.find { it.ordinal == bytes[0].toInt() }!!)
+        InstructionArgumentEnum.Label -> InstructionArgument.Label(
+            Int.fromBytes(
+                bytes[0],
+                bytes[1],
+                bytes[2],
+                bytes[3]
+            )
+        )
     }
 }
 
