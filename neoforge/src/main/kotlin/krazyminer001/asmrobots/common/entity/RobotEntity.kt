@@ -11,6 +11,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.codeEditor
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
+import krazyminer001.asmrobots.common.ui.elements.AssemblyEditor
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -121,6 +122,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 }
             })
         }
+        root.addChild(AssemblyEditor("Mrowwww\nmroooow\nmrump"))
 
         return ModularUI(UI.of(root), player)
     }
