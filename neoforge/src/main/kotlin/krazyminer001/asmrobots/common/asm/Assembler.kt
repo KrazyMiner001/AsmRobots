@@ -70,7 +70,7 @@ fun assemble(lines: List<LexedLine>): AsmResult<Pair<ByteArray, Map<String, Int>
     var memorySize = 0
     instructions.forEachIndexed { index, (instruction, _) ->
         instructionIndexToRam[index] = memorySize
-        memorySize += instruction.arguments.map { it.asEnum() }.byteLength()
+        memorySize += instruction.arguments.map { it.asEnum() }.byteLength() + 2
     }
 
     val memory = mutableListOf<Byte>()
