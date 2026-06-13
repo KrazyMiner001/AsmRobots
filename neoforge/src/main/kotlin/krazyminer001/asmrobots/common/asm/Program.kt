@@ -11,9 +11,12 @@ import kotlin.experimental.or
 class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
     private val memory: ByteArray = ByteArray(memorySize) { 0 }
     private val callStack: MutableList<Int> = mutableListOf()
-    private val stack: MutableList<Int> = mutableListOf()
     private val reg: RegisterStorage = RegisterStorage()
     private val labels: MutableMap<String, Int> = mutableMapOf()
+
+    init {
+        reg[SP] = memorySize - 1
+    }
 
     fun initMemoryAndLabels(initialMemory: ByteArray = byteArrayOf(), labels: Map<String, Int> = mapOf()) {
         initialMemory.copyInto(memory)
@@ -52,8 +55,12 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
 
                 InstructionRewrite.Nop -> {}
                 is InstructionRewrite.Out -> callback[ioPortAddress.wordValue] = value.wordValue
-                is InstructionRewrite.Pop -> target.wordValue = stack.removeLast()
-                is InstructionRewrite.Push -> stack.add(value.wordValue)
+                is InstructionRewrite.Pop -> target.wordValue = pop()
+                is InstructionRewrite.Push -> push(value.wordValue)
+                is InstructionRewrite.Poph -> target.wordValue = popHalf().toUShort().toInt()
+                is InstructionRewrite.Pushh -> pushHalf(value.wordValue.toShort())
+                is InstructionRewrite.Popb -> target.wordValue = popByte().toUByte().toInt()
+                is InstructionRewrite.Pushb -> pushByte(value.wordValue.toByte())
                 is InstructionRewrite.Rem -> target.wordValue = arg1.wordValue % arg2.wordValue
                 InstructionRewrite.Ret -> reg[PC] = callStack.removeLast()
                 is InstructionRewrite.Sll -> target.wordValue = arg1.wordValue shl arg2.wordValue
@@ -81,6 +88,39 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
             }
         }
 
+    }
+
+    private fun pop(): Int {
+        val num = memory.getWord(reg[SP])
+        reg[SP] += 4
+        return num
+    }
+
+    private fun popHalf(): Short {
+        val num = memory.getHalf(reg[SP])
+        reg[SP] += 2
+        return num
+    }
+
+    private fun popByte(): Byte {
+        val num = memory[reg[SP]]
+        reg[SP] += 1
+        return num
+    }
+
+    private fun push(num: Int) {
+        reg[SP] -= 4
+        memory.setWord(reg[SP], num)
+    }
+
+    private fun pushHalf(num: Short) {
+        reg[SP] -= 2
+        memory.setHalf(reg[SP], num)
+    }
+
+    private fun pushByte(num: Byte) {
+        reg[SP] -= 1
+        memory[reg[SP]] = num
     }
 
     private fun ByteArray.getWord(address: Int): Int {

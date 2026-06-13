@@ -75,6 +75,18 @@ sealed interface InstructionRewrite {
     data class Pop(
         val target: @ArgumentType(Register::class) InstructionArgument
     ) : InstructionRewrite
+    data class Pushh(
+        val value: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument
+    ) : InstructionRewrite
+    data class Poph(
+        val target: @ArgumentType(Register::class) InstructionArgument
+    ) : InstructionRewrite
+    data class Pushb(
+        val value: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument
+    ) : InstructionRewrite
+    data class Popb(
+        val target: @ArgumentType(Register::class) InstructionArgument
+    ) : InstructionRewrite
     data object Halt : InstructionRewrite
     data class In(
         val target: @ArgumentType(Register::class) InstructionArgument,

@@ -5,6 +5,7 @@ import krazyminer001.asmrobots.annotations.Parsable
 enum class Register {
     PC,
     RZ,
+    SP,
     A0,
     A1,
     A2,

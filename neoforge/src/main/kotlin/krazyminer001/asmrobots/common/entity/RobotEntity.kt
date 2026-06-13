@@ -13,9 +13,11 @@ import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.util.Mth
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
@@ -39,6 +41,9 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
         set(value) = entityData.set(CODE_DATA, value)
 
     var program: Program? = null
+
+    val messagePrefix: MutableComponent
+        get() = Component.literal("[").append(this.displayName).append("] ")
 
     var velocity: Int = 0
     var targetRotation: Double = 0.0
@@ -181,6 +186,20 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
         when (ioAddress) {
             0 -> lerpRotation(value.toDouble(), 10)
             1 -> velocity = value
+            2 -> {
+                val level = level()
+                if (level is ServerLevel) {
+                    level.server.playerList
+                        .broadcastSystemMessage(messagePrefix.append(value.toString()), false)
+                }
+            }
+            3 -> {
+                val level = level()
+                if (level is ServerLevel) {
+                    level.server.playerList
+                        .broadcastSystemMessage(messagePrefix.append(Float.fromBits(value).toString()), false)
+                }
+            }
         }
     }
 
