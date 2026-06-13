@@ -1,6 +1,7 @@
 package krazyminer001.asmrobots.common.asm.instructions
 
 import krazyminer001.asmrobots.annotations.InstructionEnum
+import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Condition
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Immediate32
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.ImmediateFloat32
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Label
@@ -85,6 +86,31 @@ sealed interface InstructionRewrite {
     ) : InstructionRewrite
     data class Jump(
         val address: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument
+    ) : InstructionRewrite
+    data class And(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
+    ) : InstructionRewrite
+    data class Or(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
+    ) : InstructionRewrite
+    data class Xor(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
+    ) : InstructionRewrite
+    data class Not(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
+    ) : InstructionRewrite
+    data class JCond(
+        val address: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument,
+        val condition: @ArgumentType(Condition::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
     ) : InstructionRewrite
 
     fun toBytes(): ByteArray {

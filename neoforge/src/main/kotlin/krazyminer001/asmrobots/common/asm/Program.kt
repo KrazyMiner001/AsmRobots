@@ -1,5 +1,6 @@
 package krazyminer001.asmrobots.common.asm
 
+import krazyminer001.asmrobots.common.asm.instructions.Condition
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
 import krazyminer001.asmrobots.common.asm.instructions.InstructionRewrite
 import krazyminer001.asmrobots.common.asm.instructions.Register.*
@@ -46,7 +47,9 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                 is InstructionRewrite.Movb -> target.byteValue = arg1.byteValue
                 is InstructionRewrite.Movh -> target.halfValue = arg1.halfValue
                 is InstructionRewrite.Mul -> target.wordValue = arg1.wordValue * arg2.wordValue
-                is InstructionRewrite.Mulh -> target.wordValue = (arg1.wordValue.toLong() * arg2.wordValue.toLong()).ushr(32).toInt()
+                is InstructionRewrite.Mulh -> target.wordValue =
+                    (arg1.wordValue.toLong() * arg2.wordValue.toLong()).ushr(32).toInt()
+
                 InstructionRewrite.Nop -> {}
                 is InstructionRewrite.Out -> callback[ioPortAddress.wordValue] = value.wordValue
                 is InstructionRewrite.Pop -> target.wordValue = stack.removeLast()
@@ -58,6 +61,23 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                 is InstructionRewrite.Srl -> target.wordValue = arg1.wordValue ushr arg2.wordValue
                 is InstructionRewrite.Sub -> target.wordValue = arg1.wordValue - arg2.wordValue
                 is InstructionRewrite.Jump -> reg[PC] = address.wordValue
+                is InstructionRewrite.And -> target.wordValue = arg1.wordValue and arg2.wordValue
+                is InstructionRewrite.JCond -> {
+                    if (when ((condition as InstructionArgument.Condition).condition) {
+                            Condition.EQ -> arg1.wordValue == arg2.wordValue
+                            Condition.LT -> arg1.wordValue < arg2.wordValue
+                            Condition.LE -> arg1.wordValue <= arg2.wordValue
+                            Condition.GT -> arg1.wordValue > arg2.wordValue
+                            Condition.GE -> arg1.wordValue >= arg2.wordValue
+                        }
+                    ) {
+                        reg[PC] = address.wordValue
+                    }
+                }
+
+                is InstructionRewrite.Not -> target.wordValue = arg1.wordValue.inv()
+                is InstructionRewrite.Or -> target.wordValue = arg1.wordValue or arg2.wordValue
+                is InstructionRewrite.Xor -> target.wordValue = arg1.wordValue xor arg2.wordValue
             }
         }
 
@@ -94,6 +114,7 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
             is InstructionArgument.Pointer -> memory.getWord(reg[this.register] + this.offset.value)
             is InstructionArgument.Register -> reg[this.register]
             is InstructionArgument.Label -> this.value
+            else -> throw IllegalArgumentException()
         }
         set(value) = when (this) {
             is InstructionArgument.Immediate32 -> throw IllegalArgumentException()
@@ -101,6 +122,7 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
             is InstructionArgument.Pointer -> memory.setWord(reg[this.register] + this.offset.value, value)
             is InstructionArgument.Register -> reg[this.register] = value
             is InstructionArgument.Label -> throw IllegalArgumentException()
+            else -> throw IllegalArgumentException()
         }
 
     var InstructionArgument.halfValue: Short

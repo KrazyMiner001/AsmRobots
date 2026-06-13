@@ -6,6 +6,7 @@ import krazyminer001.asmrobots.common.asm.fromBytes
 import krazyminer001.asmrobots.common.asm.toBytes
 import kotlin.reflect.KClass
 import kotlin.text.get
+import krazyminer001.asmrobots.common.asm.instructions.Condition as ConditionEnum
 import krazyminer001.asmrobots.common.asm.instructions.Register as RegisterEnum
 
 @Enumerated(ArgumentData::class)
@@ -29,6 +30,10 @@ sealed interface InstructionArgument {
             *offset.value.toBytes()
         )
     }
+    @ArgumentData(1)
+    data class Condition(val condition: ConditionEnum) : InstructionArgument {
+        override fun toBytes(): ByteArray = byteArrayOf(this.condition.ordinal.toUByte().toByte())
+    }
     @ArgumentData(4)
     data class Label(val value: Int, val name: String? = null) : InstructionArgument {
         override fun toBytes(): ByteArray = value.toBytes()
@@ -40,6 +45,9 @@ sealed interface InstructionArgument {
         fun parse(string: String, labelResolver: Map<String, Int>? = null): InstructionArgument? {
             runCatching {
                 return Register(RegisterEnum.parse(string))
+            }
+            runCatching {
+                return Condition(ConditionEnum.entries.find { it.name.lowercase() == string }!!)
             }
             runCatching {
                 return Immediate32(string.toInt())
@@ -95,6 +103,9 @@ fun InstructionArgument.Companion.fromBytes(bytes: ByteArray, type: InstructionA
                 bytes[2],
                 bytes[3]
             )
+        )
+        InstructionArgumentEnum.Condition -> InstructionArgument.Condition(
+            ConditionEnum.entries.find { it.ordinal == bytes[0].toInt() }!!
         )
     }
 }
