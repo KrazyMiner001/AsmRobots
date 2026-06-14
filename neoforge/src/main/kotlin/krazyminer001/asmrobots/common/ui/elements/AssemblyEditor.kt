@@ -1,95 +1,101 @@
 package krazyminer001.asmrobots.common.ui.elements
 
-import com.lowdragmc.lowdraglib2.gui.ui.elements.BindableUIElement
-import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent
-import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
-import com.lowdragmc.lowdraglib2.gui.ui.rendering.DelegatingUIElementRenderer
+import com.lowdragmc.lowdraglib2.gui.ui.elements.TextArea
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext
-import com.lowdragmc.lowdraglib2.gui.ui.rendering.IGUIContext
-import com.lowdragmc.lowdraglib2.gui.util.DrawerHelperClient
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister
-import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegisterClient
-import net.minecraft.client.Minecraft
+import krazyminer001.asmrobots.common.asm.LexedLine
+import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
+import krazyminer001.asmrobots.common.asm.lex
+import net.minecraft.client.gui.Font
+import net.minecraft.locale.Language
+import net.minecraft.network.chat.FormattedText
+import net.minecraft.network.chat.Style
 import java.awt.Color
 
 @LDLRegister(
     name = "assembly-editor",
     registry = "ldlib2:ui-element",
 )
-class AssemblyEditor(var text: String = "") : BindableUIElement<String>() {
+class AssemblyEditor : TextArea() {
+    private var needsReparsing: Boolean = true
+    private val styledLines: MutableList<FormattedText> = mutableListOf()
 
-    init {
-        layout.height(14f)
-        layout.paddingAll(2f)
-
-        isFocusable = true
-
-        addEventListener(UIEvents.CHAR_TYPED, ::charTyped)
-    }
-
-    var cursorPosX = 0
-    var cursorPosY = 0
-
-    private fun appendChar(char: Char) {
-        val currentContent = text.split("\n").toMutableList()
-        val line = currentContent[cursorPosY]
-        currentContent[cursorPosY] = line
-            .toCharArray()
-            .toMutableList()
-            .also { it.add(cursorPosX++, char) }
-            .toCharArray()
-            .concatToString()
-
-        text = currentContent.joinToString("\n")
-    }
-
-    override fun getValue(): String {
-        return text
-    }
-
-    override fun setValue(
-        value: String?,
-        notify: Boolean
-    ): AssemblyEditor {
-        text = value ?: ""
-        if (notify) notifyListeners()
-        return this
-    }
-
-    private fun charTyped(uiEvent: UIEvent) {
-        appendChar(uiEvent.codePoint)
-        notifyListeners()
-    }
-
-    @LDLRegisterClient(name = "assembly_editor", registry = "ldlib2:ui_element_renderer")
-    class AssemblyEditorRenderer : DelegatingUIElementRenderer<AssemblyEditor, AssemblyEditorRenderer>() {
-        override fun type(): Class<AssemblyEditor> = AssemblyEditor::class.java
-
-        override fun drawBackgroundAdditional(element: AssemblyEditor, context: IGUIContext) {
-            if (context !is GUIContext) {
-                drawParentBackgroundAdditional(element, context)
-                return
+    private fun reparseAndStyle() {
+        styledLines.clear()
+        val lexedText = lex(lines.joinToString("\n")).successValue ?: return
+        lexedText.zip(lines).mapTo(styledLines) { (lexedLine, rawLine) ->
+            val textComponents = mutableListOf<FormattedText>()
+            if (lexedLine.content != null) {
+                when (lexedLine.content) {
+                    is LexedLine.Content.Label ->
+                        textComponents
+                            .add(FormattedText.of(
+                                lexedLine.content.name + ":",
+                                Style.EMPTY.withColor(Color.RED.rgb)
+                            ))
+                    is LexedLine.Content.Instruction -> {
+                        textComponents.add(FormattedText.of(
+                            lexedLine.content.instruction.name,
+                            Style.EMPTY.withColor(Color.BLUE.rgb)
+                        ))
+                        lexedLine.content.arguments.mapTo(textComponents) {
+                            when (it) {
+                                is InstructionArgument.Condition -> FormattedText.of(it.condition.name, Style.EMPTY.withColor(Color.GREEN.rgb))
+                                is InstructionArgument.Immediate32 -> FormattedText.of(it.value.toString(), Style.EMPTY.withColor(Color.ORANGE.rgb))
+                                is InstructionArgument.ImmediateFloat32 -> FormattedText.of(it.value.toString(), Style.EMPTY.withColor(Color.YELLOW.rgb))
+                                is InstructionArgument.Label -> FormattedText.of(it.name!!, Style.EMPTY.withColor(Color.RED.rgb))
+                                is InstructionArgument.Pointer -> TODO()
+                                is InstructionArgument.Register -> FormattedText.of(it.register.name, Style.EMPTY.withColor(Color.PINK.rgb))
+                            }
+                        }
+                    }
+                }
+            }
+            if (lexedLine.comment != null) {
+                textComponents.add(FormattedText.of("//${lexedLine.comment}", Style.EMPTY.withColor(Color.GRAY.rgb)))
             }
 
-            DrawerHelperClient.drawSolidRect(context,
-                element.positionX,
-                element.positionY,
-                element.sizeWidth,
-                element.sizeHeight,
-                Color.BLACK.rgb
-            )
+            if (textComponents.isEmpty()) textComponents.add(FormattedText.of(rawLine, Style.EMPTY.withColor(Color.CYAN.rgb)))
 
-            val font = Minecraft.getInstance().font
+            FormattedText.composite(textComponents)
+        }
+        needsReparsing = false
+    }
 
-            element.text.split("\n").forEachIndexed { index, line ->
-                val lineY = element.contentY + index * (font.lineHeight + 1)
-                val lineX = element.contentX
+    override fun onRawLinesUpdated() {
+        super.onRawLinesUpdated()
+        needsReparsing = true
+    }
+
+    override fun drawContentLines(
+        context: GUIContext,
+        font: Font,
+        scale: Float,
+        x: Float,
+        y: Float,
+        firstVisibleLine: Int,
+        lastVisibleLine: Int
+    ) {
+        if (needsReparsing) reparseAndStyle()
+        styledLines
+            .withIndex()
+            .filter { it.index in (firstVisibleLine..lastVisibleLine) }
+            .forEach { (index, line) ->
+                val lineY = y + index * lineHeight() - scrollY
+                val drawX = x - scrollX
+                val charSequence = Language.getInstance().getVisualOrder(line)
 
                 context.pose.pushPose()
-                context.pose.translate(lineX, lineY)
-                context.graphics.text(Minecraft.getInstance().font, line, 0, 0, Color.RED.rgb)
+                context.pose.translate(drawX, lineY)
+                context.graphics.text(
+                    font,
+                    charSequence,
+                    0,
+                    0,
+                    -1,
+                    textAreaStyle.textShadow()
+                )
                 context.pose.popPose()
             }
-        }
     }
 }

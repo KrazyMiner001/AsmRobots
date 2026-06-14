@@ -122,7 +122,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 }
             })
         }
-        root.addChild(AssemblyEditor("Mrowwww\nmroooow\nmrump"))
+        root.addChild(AssemblyEditor())
 
         return ModularUI(UI.of(root), player)
     }
