@@ -1,15 +1,19 @@
 package krazyminer001.asmrobots.common.ui.elements
 
+import com.lowdragmc.lowdraglib2.gui.LDLibFonts
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextArea
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext
+import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister
 import krazyminer001.asmrobots.common.asm.Lexeme
 import krazyminer001.asmrobots.common.asm.lex
 import net.minecraft.client.gui.Font
-import net.minecraft.locale.Language
-import net.minecraft.network.chat.FormattedText
-import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.FontDescription
+import org.lwjgl.glfw.GLFW
 import java.awt.Color
+import kotlin.math.max
 
 @LDLRegister(
     name = "assembly-editor",
@@ -17,34 +21,116 @@ import java.awt.Color
 )
 class AssemblyEditor : TextArea() {
     private var needsReparsing: Boolean = true
-    private val styledLines: MutableList<FormattedText> = mutableListOf()
+    private val styledLines: MutableList<Component> = mutableListOf()
+
+    var indentSize: Int = 2
 
     private fun reparseAndStyle() {
         styledLines.clear()
         val lexedText = lex(lines.joinToString("\n"))
         lexedText.mapTo(styledLines) { line ->
-            FormattedText.composite(line.map {
-                FormattedText.of(
-                    it.toString(),
-                    when (it) {
-                        Lexeme.Colon -> Style.EMPTY
-                        Lexeme.Comma -> Style.EMPTY
-                        is Lexeme.Comment -> Style.EMPTY.withColor(Color.gray.rgb)
-                        is Lexeme.Condition -> Style.EMPTY.withColor(Color.yellow.rgb)
-                        is Lexeme.Error -> Style.EMPTY.withColor(Color.red.rgb).withUnderlined(true)
-                        is Lexeme.FloatNum -> Style.EMPTY.withColor(Color.cyan.rgb)
-                        is Lexeme.Identifier -> Style.EMPTY.withColor(0x8314D9)
-                        is Lexeme.Integer -> Style.EMPTY.withColor(Color.cyan.rgb)
-                        Lexeme.LeftBracket -> Style.EMPTY
-                        is Lexeme.Mnemonic -> Style.EMPTY.withColor(Color.green.rgb)
-                        is Lexeme.Register -> Style.EMPTY.withColor(Color.pink.rgb)
-                        Lexeme.RightBracket -> Style.EMPTY
-                        Lexeme.Whitespace -> Style.EMPTY
+            val component = Component.empty()
+            line.forEach { line ->
+                component.append(
+                    Component.literal(
+                        line.toString()
+                    ).withStyle {
+                        when (line) {
+                            Lexeme.Colon -> it
+                            Lexeme.Comma -> it
+                            is Lexeme.Comment -> it.withColor(Color.gray.rgb)
+                            is Lexeme.Condition -> it.withColor(Color.yellow.rgb)
+                            is Lexeme.Error -> it.withColor(Color.red.rgb).withUnderlined(true)
+                            is Lexeme.FloatNum -> it.withColor(Color.cyan.rgb)
+                            is Lexeme.Identifier -> it.withColor(0xCB94F5)
+                            is Lexeme.Integer -> it.withColor(Color.cyan.rgb)
+                            Lexeme.LeftBracket -> it
+                            is Lexeme.Mnemonic -> it.withColor(Color.green.rgb)
+                            is Lexeme.Register -> it.withColor(Color.pink.rgb)
+                            Lexeme.RightBracket -> it
+                            Lexeme.Whitespace -> it
+                        }
                     }
                 )
-            })
+            }
+            component
         }
         needsReparsing = false
+    }
+
+    init {
+        textAreaStyle.setDefault(PropertyRegistry.FONT, LDLibFonts.JETBRAINS_MONO_BOLD)
+        internalSetup()
+    }
+
+    override fun insertNewLine() {
+        val cursorLine = cursorLine
+        super.insertNewLine()
+        val lastLine = lines[cursorLine]
+        insertText(lastLine.takeWhile { it.isWhitespace() })
+    }
+
+    override fun onKeyDown(event: UIEvent) {
+        if (isEditable) {
+            when (event.keyCode) {
+                GLFW.GLFW_KEY_TAB -> insertText(" ".repeat(indentSize))
+                GLFW.GLFW_KEY_SLASH -> {
+                    if (isCtrlOrCmdDown()) {
+                        pushHistory()
+                        if (!hasSelection()) {
+                            val delta: Int
+                            val lineNum = cursorLine
+                            val line = lines[lineNum]
+
+                            if (line.startsWith("//")) {
+                                lines[lineNum] = line.drop(2)
+                                delta = -2
+                            } else {
+                                lines[lineNum] = "//$line"
+                                delta = 2
+                            }
+                            setCursor(cursorLine, max(0, cursorCol + delta))
+                        } else {
+                            var start = selStartLine
+                            var end = selEndLine
+                            if (start > end) {
+                                start = end.also { end = start }
+                            }
+                            val selectedLines = lines
+                                .withIndex()
+                                .filter { (index, _) -> index in start..end }
+                                .toMutableList()
+                            val delta: Int
+                            if (selectedLines.all { (_, line) -> line.startsWith("//") }) {
+                                selectedLines.forEach { (index, line) ->
+                                    lines[index] = line.drop(2)
+                                }
+                                delta = -2
+                            } else {
+                                selectedLines.forEach { (index, line) ->
+                                    lines[index] = "//$line"
+                                }
+                                delta = 2
+                            }
+
+                            if (cursorLine in start..end) {
+                                setCursor(cursorLine, max(0, cursorCol + delta))
+                            }
+                        }
+                        onRawLinesUpdated()
+                    }
+                }
+                else -> super.onKeyDown(event)
+            }
+        } else {
+            super.onKeyDown(event)
+        }
+    }
+
+    override fun setValue(value: Array<out String?>?): TextArea {
+        super.setValue(value)
+        needsReparsing = true
+        return this
     }
 
     override fun onRawLinesUpdated() {
@@ -68,13 +154,11 @@ class AssemblyEditor : TextArea() {
             .forEach { (index, line) ->
                 val lineY = y + index * lineHeight() - scrollY
                 val drawX = x - scrollX
-                val charSequence = Language.getInstance().getVisualOrder(line)
-
                 context.pose.pushPose()
                 context.pose.translate(drawX, lineY)
                 context.graphics.text(
                     font,
-                    charSequence,
+                    line.copy().withStyle { it.withFont(FontDescription.Resource(textAreaStyle.font())) },
                     0,
                     0,
                     -1,

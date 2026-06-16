@@ -7,11 +7,10 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
 import com.lowdragmc.lowdraglib2.gui.ui.UI
 import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.button
-import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.codeEditor
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
-import krazyminer001.asmrobots.common.ui.elements.AssemblyEditor
+import krazyminer001.asmrobots.common.ui.elements.assemblyEditor
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -88,12 +87,10 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     override fun createUI(player: Player): ModularUI {
         val root = element {
             var clientCode = code.split('\n').toTypedArray()
-            codeEditor({
+            assemblyEditor({
                 lines(*clientCode)
                 linesResponder = { clientCode = it }
                 layout = { size(300.px, 200.px) }
-                language = AsmLanguageDefinition
-                styleManager = AsmStyleManager
             })
 
             button({
@@ -136,7 +133,6 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 }
             })
         }
-        root.addChild(AssemblyEditor())
 
         return ModularUI(UI.of(root), player)
     }
