@@ -16,25 +16,16 @@ sealed interface AsmError {
             override val text = "Invalid arguments ($providedArguments) for instruction $instruction"
         }
 
-        class InvalidInstructionArguments(vararg val arguments: String) : ParseError {
-            override fun equals(other: Any?): Boolean {
-                if (this === other) return true
-                if (other !is InvalidInstructionArguments) return false
-
-                if (!arguments.contentEquals(other.arguments)) return false
-
-                return true
-            }
-
-            override fun hashCode(): Int {
-                return arguments.contentHashCode()
-            }
-
+        data class InvalidInstructionArguments(val arguments: List<String>) : ParseError {
             override val text = "Could not parse instruction arguments: ${arguments.joinToString()}"
         }
 
-        class ParseErrors(vararg errors: Pair<out ParseError, Int>) : ParseError {
-            override val text: String = errors.joinToString("\n") { "Encountered error on line ${it.second}: ${it.first.text}" }
+        data class ParseErrors(val errors: List<Pair<ParseError, Int>>) : ParseError {
+            override val text = errors.joinToString("\n") { "Encountered error on line ${it.second}: ${it.first.text}" }
+        }
+
+        data class UnparsableLine(val line: String) : ParseError {
+            override val text = line
         }
     }
 

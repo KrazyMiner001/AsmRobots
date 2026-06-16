@@ -105,7 +105,19 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             })
             button({
                 onServerClick = {
-                    val text = lex(code).fold({
+                    val text = lex(code).map { parse(it) }.let { lines ->
+                        if (lines.any { it.isFailure })
+                            AsmResult.Failure(AsmError
+                                .ParseError
+                                .ParseErrors(
+                                    lines
+                                        .mapIndexed { index, result -> Pair(result, index) }
+                                        .filter { it.first.isFailure }
+                                        .map { (result, index) -> Pair(result.errorValue!!, index) }
+                                ))
+                        else
+                            lines.map { it.successValue!! }.asSuccess()
+                    }.fold({
                         it.joinToString()
                     }, {
                         it.text
@@ -116,7 +128,9 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             button({
                 text("Execute")
                 onServerClick = clickHandler@{
-                    val (code, labels) = assemble(lex(code).getOrElse { return@clickHandler }).getOrElse { return@clickHandler }
+                    val (code, labels) = assemble(
+                        lex(code).map { parse(it).getOrElse { return@clickHandler } }
+                    ).getOrElse { return@clickHandler }
                     program = Program(this@RobotEntity)
                     program?.initMemoryAndLabels(code, labels)
                 }

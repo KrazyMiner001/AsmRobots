@@ -3,8 +3,7 @@ package krazyminer001.asmrobots.common.ui.elements
 import com.lowdragmc.lowdraglib2.gui.ui.elements.TextArea
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister
-import krazyminer001.asmrobots.common.asm.LexedLine
-import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
+import krazyminer001.asmrobots.common.asm.Lexeme
 import krazyminer001.asmrobots.common.asm.lex
 import net.minecraft.client.gui.Font
 import net.minecraft.locale.Language
@@ -22,42 +21,28 @@ class AssemblyEditor : TextArea() {
 
     private fun reparseAndStyle() {
         styledLines.clear()
-        val lexedText = lex(lines.joinToString("\n")).successValue ?: return
-        lexedText.zip(lines).mapTo(styledLines) { (lexedLine, rawLine) ->
-            val textComponents = mutableListOf<FormattedText>()
-            if (lexedLine.content != null) {
-                when (lexedLine.content) {
-                    is LexedLine.Content.Label ->
-                        textComponents
-                            .add(FormattedText.of(
-                                lexedLine.content.name + ":",
-                                Style.EMPTY.withColor(Color.RED.rgb)
-                            ))
-                    is LexedLine.Content.Instruction -> {
-                        textComponents.add(FormattedText.of(
-                            lexedLine.content.instruction.name,
-                            Style.EMPTY.withColor(Color.BLUE.rgb)
-                        ))
-                        lexedLine.content.arguments.mapTo(textComponents) {
-                            when (it) {
-                                is InstructionArgument.Condition -> FormattedText.of(it.condition.name, Style.EMPTY.withColor(Color.GREEN.rgb))
-                                is InstructionArgument.Immediate32 -> FormattedText.of(it.value.toString(), Style.EMPTY.withColor(Color.ORANGE.rgb))
-                                is InstructionArgument.ImmediateFloat32 -> FormattedText.of(it.value.toString(), Style.EMPTY.withColor(Color.YELLOW.rgb))
-                                is InstructionArgument.Label -> FormattedText.of(it.name!!, Style.EMPTY.withColor(Color.RED.rgb))
-                                is InstructionArgument.Pointer -> TODO()
-                                is InstructionArgument.Register -> FormattedText.of(it.register.name, Style.EMPTY.withColor(Color.PINK.rgb))
-                            }
-                        }
+        val lexedText = lex(lines.joinToString("\n"))
+        lexedText.mapTo(styledLines) { line ->
+            FormattedText.composite(line.map {
+                FormattedText.of(
+                    it.toString(),
+                    when (it) {
+                        Lexeme.Colon -> Style.EMPTY
+                        Lexeme.Comma -> Style.EMPTY
+                        is Lexeme.Comment -> Style.EMPTY.withColor(Color.GRAY.rgb)
+                        is Lexeme.Condition -> Style.EMPTY.withColor(Color.YELLOW.rgb)
+                        is Lexeme.Error -> Style.EMPTY.withColor(Color.RED.rgb).withUnderlined(true)
+                        is Lexeme.FloatNum -> Style.EMPTY.withColor(Color.CYAN.rgb)
+                        is Lexeme.Identifier -> Style.EMPTY.withColor(Color.RED.rgb)
+                        is Lexeme.Integer -> Style.EMPTY.withColor(Color.CYAN.rgb)
+                        Lexeme.LeftBracket -> Style.EMPTY
+                        is Lexeme.Mnemonic -> Style.EMPTY.withColor(0xE06822)
+                        is Lexeme.Register -> Style.EMPTY.withColor(Color.PINK.rgb)
+                        Lexeme.RightBracket -> Style.EMPTY
+                        Lexeme.Whitespace -> Style.EMPTY
                     }
-                }
-            }
-            if (lexedLine.comment != null) {
-                textComponents.add(FormattedText.of("//${lexedLine.comment}", Style.EMPTY.withColor(Color.GRAY.rgb)))
-            }
-
-            if (textComponents.isEmpty()) textComponents.add(FormattedText.of(rawLine, Style.EMPTY.withColor(Color.CYAN.rgb)))
-
-            FormattedText.composite(textComponents)
+                )
+            })
         }
         needsReparsing = false
     }

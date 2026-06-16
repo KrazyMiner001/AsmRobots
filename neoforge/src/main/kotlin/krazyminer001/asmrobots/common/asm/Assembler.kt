@@ -1,50 +1,149 @@
 package krazyminer001.asmrobots.common.asm
 
-import com.google.common.base.Splitter
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
 import krazyminer001.asmrobots.common.asm.instructions.InstructionRewrite.Companion.byteLength
 import krazyminer001.asmrobots.common.asm.instructions.InstructionRewriteEnum
 import krazyminer001.asmrobots.common.asm.instructions.asEnum
+import krazyminer001.asmrobots.common.asm.instructions.Condition as ConditionEnum
+import krazyminer001.asmrobots.common.asm.instructions.Register as RegisterEnum
 
-fun lex(code: String): AsmResult<List<LexedLine>, AsmError.ParseError> {
+fun lex(code: String): List<List<Lexeme>> {
     val lines = code.split('\n')
 
+    fun parseArgument(
+        string: String,
+    ): Lexeme {
+        val int = string.toIntOrNull()
+        val float = string.toFloatOrNull()
+        val condition = ConditionEnum.entries.find { it.name.lowercase() == string }
+        val register = RegisterEnum.entries.find { it.name.lowercase() == string }
+        return when {
+            null != int -> Lexeme.Integer(int)
+            null != float -> Lexeme.FloatNum(float, string)
+            null != condition -> Lexeme.Condition(condition)
+            null != register -> Lexeme.Register(register)
+            else -> Lexeme.Identifier(string)
+        }
+    }
+
     return lines.map { line ->
-        val trimmed = line.trim()
-        val matches = CommentRegex.matchEntire(trimmed)!!.groups
-        val comment = matches["comment"]?.value
-        val content = matches["content"]!!.value.trim()
-        if (content.endsWith(":")) {
-            return@map LexedLine(LexedLine.Content.Label(content.dropLast(1)), comment)
-        }
-        if (content.isBlank()) {
-            return@map LexedLine(null, comment)
-        }
+        val lexemes = mutableListOf<Lexeme>()
+        var partialString = ""
+        line.forEach { char ->
+            partialString += char
 
-        val mnemonic = trimmed.substringBefore(" ")
-        val components = Splitter.on(", ")
-            .omitEmptyStrings()
-            .split(trimmed.substringAfter(" ", ""))
-            .toList()
-            .map { Pair(InstructionArgument.parse(it), it) }
-            .also { pairs ->
-                val nulls = pairs.filter { it.first == null }
-                if (nulls.isNotEmpty())
-                    AsmResult.Failure(
-                        AsmError
-                            .ParseError
-                            .InvalidInstructionArguments(*pairs.map { it.second }.toTypedArray())
-                    )
+            when {
+                partialString.startsWith("//") -> {
+                    val lastLexemeIndex = lexemes.lastIndex
+                    if (lexemes.getOrNull(lastLexemeIndex) !is Lexeme.Comment) {
+                        lexemes += Lexeme.Comment(partialString.drop(2))
+                    } else {
+                        lexemes[lastLexemeIndex] = Lexeme.Comment(partialString.drop(2))
+                    }
+                }
+                partialString.startsWith("/") && partialString.length != 1 -> {
+                    lexemes += Lexeme.Error(partialString)
+                    partialString = ""
+                }
+                partialString.endsWith(":") -> {
+                    val mainPart = partialString.dropLast(1)
+                    if (mainPart.isNotEmpty()) {
+                        lexemes += Lexeme.Identifier(mainPart)
+                    }
+                    lexemes += Lexeme.Colon
+                    partialString = ""
+                }
+                partialString.endsWith(",") -> {
+                    val mainPart = partialString.dropLast(1)
+                    if (mainPart.isNotEmpty()) {
+                        lexemes += parseArgument(mainPart)
+                    }
+                    lexemes += Lexeme.Comma
+                    partialString = ""
+                }
+                partialString.endsWith(" ") -> {
+                    val mainPart = partialString.dropLast(1)
+                    if (mainPart.isNotEmpty()) {
+                        val mnemonic = InstructionRewriteEnum.entries.find { it.name.lowercase() == mainPart }
+                        lexemes += mnemonic?.let { Lexeme.Mnemonic(it) } ?: parseArgument(mainPart)
+                    }
+                    lexemes += Lexeme.Whitespace
+                    partialString = ""
+                }
+                partialString.endsWith("(") -> {
+                    val mainPart = partialString.dropLast(1)
+                    val int = mainPart.toIntOrNull()
+                    lexemes += if (int == null) Lexeme.Error(mainPart) else Lexeme.Integer(int)
+                    lexemes += Lexeme.LeftBracket
+                    partialString = ""
+                }
+                partialString.endsWith(")") -> {
+                    val mainPart = partialString.dropLast(1)
+                    val register = RegisterEnum.entries.find { it.name.lowercase() == mainPart }
+                    lexemes += if (register == null) Lexeme.Error(mainPart) else Lexeme.Register(register)
+                    lexemes += Lexeme.RightBracket
+                    partialString = ""
+                }
             }
-            .map { it.first }
-            .filterIsInstance<InstructionArgument>()
+        }
+        if (partialString.isNotEmpty() && lexemes.lastOrNull() !is Lexeme.Comment) {
+            val mnemonic = InstructionRewriteEnum.entries.find { it.name.lowercase() == partialString }
+            lexemes += mnemonic?.let { Lexeme.Mnemonic(it) } ?: parseArgument(partialString)
+        }
+        lexemes.toList()
+    }
+}
 
-        val instructionType = InstructionRewriteEnum.entries.find { it.name.lowercase() == mnemonic }
-        if (instructionType == null)
-            return AsmResult.Failure(AsmError.ParseError.InstructionNotFound(mnemonic))
+fun parse(line: List<Lexeme>): AsmResult<LexedLine, AsmError.ParseError> {
+    if (line.any { it is Lexeme.Error }) TODO()
+    val parts = line.filter { it !is Lexeme.Whitespace }
 
-        return@map LexedLine(LexedLine.Content.Instruction(instructionType, components), comment)
-    }.asSuccess()
+    if (parts.isEmpty()) return LexedLine(null, null).asSuccess()
+
+    val comment = parts.lastOrNull().let { it as? Lexeme.Comment }?.text
+    val firstPart = parts.firstOrNull()
+
+    if (firstPart is Lexeme.Identifier && parts.getOrNull(1) is Lexeme.Colon) {
+        return LexedLine(LexedLine.Content.Label(firstPart.text), comment).asSuccess()
+    }
+
+    if (firstPart is Lexeme.Mnemonic) {
+        val arguments = mutableListOf<InstructionArgument>()
+        val invalidArguments = mutableListOf<String>()
+        var argumentLexemes = parts.drop(1).let { if (comment != null) it.dropLast(1) else it }
+        while (argumentLexemes.isNotEmpty()) {
+            val argument = argumentLexemes.takeWhile { it !is Lexeme.Comma }
+            argumentLexemes = argumentLexemes.drop(argument.size + 1)
+
+            if (argument.size == 1) {
+                val (lexeme) = argument
+                when (lexeme) {
+                    is Lexeme.Register -> arguments += InstructionArgument.Register(lexeme.register)
+                    is Lexeme.Identifier -> arguments += InstructionArgument.Label(-1, lexeme.text)
+                    is Lexeme.Condition -> arguments += InstructionArgument.Condition(lexeme.condition)
+                    is Lexeme.Integer -> arguments += InstructionArgument.Immediate32(lexeme.value)
+                    is Lexeme.FloatNum -> arguments += InstructionArgument.ImmediateFloat32(lexeme.value)
+                    else -> invalidArguments += lexeme.toString()
+                }
+            } else if (argument.size == 4) {
+                val (offset, openBracket, register, closeBracket) = argument
+                if (offset is Lexeme.Integer && openBracket is Lexeme.LeftBracket && register is Lexeme.Register && closeBracket is Lexeme.RightBracket) {
+                    arguments += InstructionArgument.Pointer(register.register, InstructionArgument.Immediate32(offset.value))
+                } else {
+                    invalidArguments += argument.joinToString("")
+                }
+            } else {
+                invalidArguments += argument.joinToString("")
+            }
+        }
+        if (invalidArguments.isNotEmpty())
+            return AsmResult.Failure(AsmError.ParseError.InvalidInstructionArguments(invalidArguments))
+        return LexedLine(LexedLine.Content.Instruction(firstPart.mnemonic, arguments), comment).asSuccess()
+    }
+
+    if (parts.size == 1) return LexedLine(null, comment).asSuccess()
+
+    return AsmResult.Failure(AsmError.ParseError.UnparsableLine(line.joinToString("")))
 }
 
 fun assemble(lines: List<LexedLine>): AsmResult<Pair<ByteArray, Map<String, Int>>, AsmError.ParseError.ParseErrors> {
@@ -102,11 +201,9 @@ fun assemble(lines: List<LexedLine>): AsmResult<Pair<ByteArray, Map<String, Int>
         memory.addAll(instructionInstance.toBytes().toList())
     }
 
-    if (parseErrors.isNotEmpty()) return AsmResult.Failure(AsmError.ParseError.ParseErrors(*parseErrors.toTypedArray()))
+    if (parseErrors.isNotEmpty()) return AsmResult.Failure(AsmError.ParseError.ParseErrors(parseErrors))
     return AsmResult.Success(Pair(memory.toByteArray(), labelsToRam.toMap()))
 }
-
-val CommentRegex: Regex = "^(?<content>.*?)(?://(?<comment>.*))?$".toRegex()
 
 data class LexedLine(val content: Content?, val comment: String?) {
     sealed interface Content {
@@ -114,5 +211,47 @@ data class LexedLine(val content: Content?, val comment: String?) {
 
         data class Label(val name: String) : Content
         //+ directive related content for when directives are added
+    }
+}
+
+sealed interface Lexeme {
+    data class Identifier(val text: String) : Lexeme {
+        override fun toString() = text
+    }
+    data class Comment(val text: String) : Lexeme {
+        override fun toString() = "//$text"
+    }
+    data class Register(val register: RegisterEnum) : Lexeme {
+        override fun toString() = register.name.lowercase()
+    }
+    data class Integer(val value: Int) : Lexeme {
+        override fun toString() = value.toString()
+    }
+    data class FloatNum(val value: Float, val originalText: String? = null) : Lexeme {
+        override fun toString() = originalText ?: value.toString()
+    }
+    data class Condition(val condition: ConditionEnum) : Lexeme {
+        override fun toString() = condition.name.lowercase()
+    }
+    data class Mnemonic(val mnemonic: InstructionRewriteEnum) : Lexeme {
+        override fun toString() = mnemonic.name.lowercase()
+    }
+    data class Error(val text: String): Lexeme {
+        override fun toString() = text
+    }
+    data object Comma : Lexeme {
+        override fun toString() = ","
+    }
+    data object Colon : Lexeme {
+        override fun toString() = ":"
+    }
+    data object Whitespace : Lexeme {
+        override fun toString() = " "
+    }
+    data object LeftBracket : Lexeme {
+        override fun toString() = "("
+    }
+    data object RightBracket : Lexeme {
+        override fun toString() = ")"
     }
 }
