@@ -11,6 +11,8 @@ import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.common.ui.elements.assemblyEditor
+import net.minecraft.core.BlockPos
+import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
@@ -28,10 +30,15 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
+import net.minecraft.world.phys.BlockHitResult
+import net.minecraft.world.phys.EntityHitResult
 import net.minecraft.world.phys.Vec3
+import thedarkcolour.kotlinforforge.neoforge.forge.vectorutil.v3d.*
+import kotlin.math.ceil
 
 class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level) : LivingEntity(type, level),
     IContainerUIHolder, ProgramCallback {
@@ -42,16 +49,22 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     var program: Program? = null
 
+    var isBreaking = false
+
     val messagePrefix: MutableComponent
         get() = Component.literal("[").append(this.displayName).append("] ")
 
     var velocity: Int = 0
     var targetRotation: Double = 0.0
     var rotationSteps: Int = 0
+
+    var blockBreakProgress: Pair<BlockPos, Int>? = null
+
     fun lerpRotation(targetRotation: Double, steps: Int) {
         rotationSteps = steps
         this.targetRotation = targetRotation
     }
+
     fun stepRotation() {
         if (rotationSteps > 0) {
             yRot = Mth.rotLerp(1.0 / rotationSteps, yRot.toDouble(), targetRotation).toFloat() % 360
@@ -104,7 +117,8 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 onServerClick = {
                     val text = lex(code).map { parse(it) }.let { lines ->
                         if (lines.any { it.isFailure })
-                            AsmResult.Failure(AsmError
+                            AsmResult.Failure(
+                                AsmError
                                 .ParseError
                                 .ParseErrors(
                                     lines
@@ -184,34 +198,80 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                     )
             )
         }
+
+        if (isBreaking) {
+            val hitResult = this
+                .getAttackRangeWith(ItemStack.EMPTY)
+                .getClosesetHit(this, 0f) { true }
+
+            when (hitResult) {
+                is BlockHitResult -> {
+                    var blockBreakProgress = blockBreakProgress
+                    blockBreakProgress =
+                        if (blockBreakProgress == null || blockBreakProgress.first != hitResult.blockPos) {
+                            Pair(hitResult.blockPos, 1)
+                        } else {
+                            blockBreakProgress.copy(second = blockBreakProgress.second + 1)
+                        }
+
+                    val block = level().getBlockState(hitResult.blockPos)
+                    val harvestMultiplier = if (block.requiresCorrectToolForDrops()) 100 else 30
+                    val totalTicks = ceil(harvestMultiplier * block.block.defaultDestroyTime()).toInt()
+
+                    level().destroyBlockProgress(this.id, hitResult.blockPos,
+                        (10 * blockBreakProgress.second.toFloat() / totalTicks).toInt()
+                    )
+                    if (blockBreakProgress.second >= totalTicks) {
+                        level().destroyBlock(hitResult.blockPos, true, this)
+                        this.blockBreakProgress = null
+                    } else {
+                        this.blockBreakProgress = blockBreakProgress
+                    }
+                }
+                is EntityHitResult -> {
+                    val level = level()
+                    if (level is ServerLevel) {
+                        hitResult.entity.hurtServer(
+                            level,
+                            this.damageSources().mobAttack(this),
+                            1f
+                        )
+                    }
+                }
+            }
+        }
     }
 
     override fun get(ioAddress: Int): Int {
-        return when(ioAddress) {
-            0 -> yRot.toInt()
-            1 -> velocity
+        return when (ioAddress) {
+            IOPorts.ROTATION -> yRot.toInt()
+            IOPorts.VELOCITY -> velocity
+            IOPorts.FEET_BLOCK -> BuiltInRegistries.BLOCK
+                .getId(level().getBlockState(blockPosition().offset(0, -1, 0)).block)
+            IOPorts.ATTACK -> if (isBreaking) 1 else 0
             else -> 0
         }
     }
 
     override fun set(ioAddress: Int, value: Int) {
         when (ioAddress) {
-            0 -> lerpRotation(value.toDouble(), 10)
-            1 -> velocity = value
-            2 -> {
+            IOPorts.ROTATION -> lerpRotation(value.toDouble(), 10)
+            IOPorts.VELOCITY -> velocity = value
+            IOPorts.PRINT_INT -> {
                 val level = level()
                 if (level is ServerLevel) {
                     level.server.playerList
                         .broadcastSystemMessage(messagePrefix.append(value.toString()), false)
                 }
             }
-            3 -> {
+            IOPorts.PRINT_FLOAT -> {
                 val level = level()
                 if (level is ServerLevel) {
                     level.server.playerList
                         .broadcastSystemMessage(messagePrefix.append(Float.fromBits(value).toString()), false)
                 }
             }
+            IOPorts.ATTACK -> isBreaking = value > 0
         }
     }
 
@@ -219,4 +279,14 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
         val CODE_DATA: EntityDataAccessor<String> =
             SynchedEntityData.defineId(RobotEntity::class.java, EntityDataSerializers.STRING)
     }
+
+    object IOPorts {
+        const val ROTATION = 0
+        const val VELOCITY = 1
+        const val PRINT_INT = 2
+        const val PRINT_FLOAT = 3
+        const val FEET_BLOCK = 4
+        const val ATTACK = 5
+    }
 }
+
