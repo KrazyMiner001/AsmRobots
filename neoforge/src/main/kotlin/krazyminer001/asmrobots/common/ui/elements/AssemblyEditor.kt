@@ -29,15 +29,15 @@ class AssemblyEditor : TextArea() {
                     when (it) {
                         Lexeme.Colon -> Style.EMPTY
                         Lexeme.Comma -> Style.EMPTY
-                        is Lexeme.Comment -> Style.EMPTY.withColor(Color.GRAY.rgb)
-                        is Lexeme.Condition -> Style.EMPTY.withColor(Color.YELLOW.rgb)
-                        is Lexeme.Error -> Style.EMPTY.withColor(Color.RED.rgb).withUnderlined(true)
-                        is Lexeme.FloatNum -> Style.EMPTY.withColor(Color.CYAN.rgb)
-                        is Lexeme.Identifier -> Style.EMPTY.withColor(Color.RED.rgb)
-                        is Lexeme.Integer -> Style.EMPTY.withColor(Color.CYAN.rgb)
+                        is Lexeme.Comment -> Style.EMPTY.withColor(Color.gray.rgb)
+                        is Lexeme.Condition -> Style.EMPTY.withColor(Color.yellow.rgb)
+                        is Lexeme.Error -> Style.EMPTY.withColor(Color.red.rgb).withUnderlined(true)
+                        is Lexeme.FloatNum -> Style.EMPTY.withColor(Color.cyan.rgb)
+                        is Lexeme.Identifier -> Style.EMPTY.withColor(0x8314D9)
+                        is Lexeme.Integer -> Style.EMPTY.withColor(Color.cyan.rgb)
                         Lexeme.LeftBracket -> Style.EMPTY
-                        is Lexeme.Mnemonic -> Style.EMPTY.withColor(0xE06822)
-                        is Lexeme.Register -> Style.EMPTY.withColor(Color.PINK.rgb)
+                        is Lexeme.Mnemonic -> Style.EMPTY.withColor(Color.green.rgb)
+                        is Lexeme.Register -> Style.EMPTY.withColor(Color.pink.rgb)
                         Lexeme.RightBracket -> Style.EMPTY
                         Lexeme.Whitespace -> Style.EMPTY
                     }
