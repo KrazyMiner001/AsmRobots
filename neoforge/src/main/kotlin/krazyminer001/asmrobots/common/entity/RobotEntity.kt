@@ -55,7 +55,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     val messagePrefix: MutableComponent
         get() = Component.literal("[").append(this.displayName).append("] ")
 
-    var velocity: Int = 0
+    var velocity: Float = 0f
     var targetRotation: Double = 0.0
     var rotationSteps: Int = 0
 
@@ -193,9 +193,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                     .normalize()
                     .scale(
                         velocity
-                            .toDouble()
-                            .div(256)
-                            .coerceIn(-1.0..1.0) / 20
+                            .coerceIn(-1f..1f).toDouble() / 20
                     )
             )
 
@@ -250,7 +248,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     override fun get(ioAddress: Int): Int {
         return when (ioAddress) {
             IOPorts.ROTATION -> yRot.toInt()
-            IOPorts.VELOCITY -> velocity
+            IOPorts.VELOCITY -> velocity.toBits()
             IOPorts.FEET_BLOCK -> BuiltInRegistries.BLOCK
                 .getId(level().getBlockState(blockPosition().offset(0, -1, 0)).block)
             IOPorts.ATTACK -> if (isBreaking) 1 else 0
@@ -262,7 +260,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     override fun set(ioAddress: Int, value: Int) {
         when (ioAddress) {
             IOPorts.ROTATION -> lerpRotation(value.toDouble(), 10)
-            IOPorts.VELOCITY -> velocity = value
+            IOPorts.VELOCITY -> velocity = Float.fromBits(value)
             IOPorts.PRINT_INT -> {
                 val level = level()
                 if (level is ServerLevel) {
