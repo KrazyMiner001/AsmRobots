@@ -1,11 +1,8 @@
 package krazyminer001.asmrobots.common.asm
 
-import krazyminer001.asmrobots.common.asm.instructions.Condition
-import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
-import krazyminer001.asmrobots.common.asm.instructions.InstructionRewrite
-import krazyminer001.asmrobots.common.asm.instructions.Register.*
-import krazyminer001.asmrobots.common.asm.instructions.fromBytes
-import krazyminer001.asmrobots.common.asm.instructions.identityInstruction
+import krazyminer001.asmrobots.common.asm.instructions.*
+import krazyminer001.asmrobots.common.asm.instructions.Register.PC
+import krazyminer001.asmrobots.common.asm.instructions.Register.SP
 import kotlin.experimental.or
 
 class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
@@ -13,6 +10,8 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
     private val callStack: MutableList<Int> = mutableListOf()
     private val reg: RegisterStorage = RegisterStorage()
     private val labels: MutableMap<String, Int> = mutableMapOf()
+    private var interruptsEnabled = false
+    private val pendingInterrupts: MutableList<Int> = mutableListOf()
 
     init {
         reg[SP] = memorySize - 1
@@ -21,9 +20,22 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
     fun initMemoryAndLabels(initialMemory: ByteArray = byteArrayOf(), labels: Map<String, Int> = mapOf()) {
         initialMemory.copyInto(memory)
         this.labels.putAll(labels)
+        reg[PC] = this.labels.getOrElse("_start") { 0 }
+    }
+
+    fun interrupt(id: Int) {
+        pendingInterrupts.add(id)
     }
 
     fun step() {
+        if (interruptsEnabled && pendingInterrupts.isNotEmpty()) {
+            val interrupt = pendingInterrupts.removeLast()
+            callStack.add(reg[PC])
+            push(interrupt)
+            reg[PC] = labels.getOrElse("_int") { 0 }
+            interruptsEnabled = false
+        }
+
         val (instruction, argumentTypes) = InstructionRewrite.identityInstruction(
             memory[reg[PC]].toUByte(),
             memory[reg[PC] + 1].toUByte()
@@ -81,13 +93,14 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                         reg[PC] = address.wordValue
                     }
                 }
-
                 is InstructionRewrite.Not -> target.wordValue = arg1.wordValue.inv()
                 is InstructionRewrite.Or -> target.wordValue = arg1.wordValue or arg2.wordValue
                 is InstructionRewrite.Xor -> target.wordValue = arg1.wordValue xor arg2.wordValue
+                InstructionRewrite.DI -> interruptsEnabled = false
+                InstructionRewrite.EI -> interruptsEnabled  = true
+                InstructionRewrite.CI -> pendingInterrupts.clear()
             }
         }
-
     }
 
     private fun pop(): Int {

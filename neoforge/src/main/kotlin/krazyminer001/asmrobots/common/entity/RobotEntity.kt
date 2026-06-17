@@ -50,6 +50,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     var program: Program? = null
 
     var isBreaking = false
+    var shouldNotifyBump = false
 
     val messagePrefix: MutableComponent
         get() = Component.literal("[").append(this.displayName).append("] ")
@@ -197,6 +198,10 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                             .coerceIn(-1.0..1.0) / 20
                     )
             )
+
+            if (horizontalCollision && shouldNotifyBump) {
+                program?.interrupt(Interrupts.BUMP)
+            }
         }
 
         if (isBreaking) {
@@ -249,6 +254,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             IOPorts.FEET_BLOCK -> BuiltInRegistries.BLOCK
                 .getId(level().getBlockState(blockPosition().offset(0, -1, 0)).block)
             IOPorts.ATTACK -> if (isBreaking) 1 else 0
+            IOPorts.NOTIFY_BUMP -> if (shouldNotifyBump) 1 else 0
             else -> 0
         }
     }
@@ -271,7 +277,8 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                         .broadcastSystemMessage(messagePrefix.append(Float.fromBits(value).toString()), false)
                 }
             }
-            IOPorts.ATTACK -> isBreaking = value > 0
+            IOPorts.ATTACK -> isBreaking = value != 0
+            IOPorts.NOTIFY_BUMP -> shouldNotifyBump = value != 0
         }
     }
 
@@ -287,6 +294,11 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
         const val PRINT_FLOAT = 3
         const val FEET_BLOCK = 4
         const val ATTACK = 5
+        const val NOTIFY_BUMP = 6
+    }
+
+    object Interrupts {
+        const val BUMP = 0
     }
 }
 

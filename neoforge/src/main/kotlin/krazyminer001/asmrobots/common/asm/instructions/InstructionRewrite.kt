@@ -1,12 +1,10 @@
 package krazyminer001.asmrobots.common.asm.instructions
 
 import krazyminer001.asmrobots.annotations.InstructionEnum
+import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.*
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Condition
-import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Immediate32
-import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.ImmediateFloat32
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Label
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Register
-import kotlin.collections.mapIndexed
 
 @InstructionEnum(ArgumentType::class)
 sealed interface InstructionRewrite {
@@ -56,16 +54,16 @@ sealed interface InstructionRewrite {
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
     ) : InstructionRewrite
     data class Mov(
-        val target: @ArgumentType(Register::class, InstructionArgument.Pointer::class) InstructionArgument,
-        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, InstructionArgument.Pointer::class) InstructionArgument,
+        val target: @ArgumentType(Register::class, Pointer::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class) InstructionArgument,
     ) : InstructionRewrite
     data class Movh(
-        val target: @ArgumentType(Register::class, InstructionArgument.Pointer::class) InstructionArgument,
-        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, InstructionArgument.Pointer::class) InstructionArgument,
+        val target: @ArgumentType(Register::class, Pointer::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class) InstructionArgument,
     ) : InstructionRewrite
     data class Movb(
-        val target: @ArgumentType(Register::class, InstructionArgument.Pointer::class) InstructionArgument,
-        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, InstructionArgument.Pointer::class) InstructionArgument,
+        val target: @ArgumentType(Register::class, Pointer::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class) InstructionArgument,
     ) : InstructionRewrite
     data object Ret : InstructionRewrite
     data object Nop : InstructionRewrite
@@ -124,6 +122,9 @@ sealed interface InstructionRewrite {
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
     ) : InstructionRewrite
+    data object EI : InstructionRewrite
+    data object DI : InstructionRewrite
+    data object CI : InstructionRewrite
 
     fun toBytes(): ByteArray {
         return this.asEnum().toBytes(this)
