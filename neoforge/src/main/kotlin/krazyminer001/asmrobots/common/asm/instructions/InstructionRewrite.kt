@@ -143,21 +143,20 @@ sealed interface InstructionRewrite {
 
 fun InstructionRewrite.asEnum(): InstructionRewriteEnum = InstructionRewriteEnum.entries.find { it.name == this::class.simpleName }!!
 
-fun InstructionRewrite.Companion.identityInstruction(opcode: UByte, typeInformation: UByte): Pair<InstructionRewriteEnum, Array<InstructionArgumentEnum>> {
+fun InstructionRewrite.Companion.identifyInstruction(opcode: UByte, typeInformation: UByte): Pair<InstructionRewriteEnum, Array<InstructionArgumentEnum>> {
     val instructionEnum = InstructionRewriteEnum.entries.find { it.ordinal == opcode.toInt() }
     if (instructionEnum == null) throw IllegalArgumentException("Opcode $opcode does not correspond to an instruction")
 
     val types = instructionEnum.types
 
-    // Checks to make sure current data parsing system works. It most likely will work for all future instructions so these should not ever be reached
-    if (types.size > 4) throw NotImplementedError("Instructions with more than 4 parameters are not yet implemented")
-    if (types.any { it.validTypes.size > 4 }) throw NotImplementedError("Instructions parameters with more than 4 possible types are not yet implemented")
+    var typeInformation = typeInformation.toInt()
+    val argumentTypes = types.reversed().map { type ->
+        val count = typeInformation % type.validTypes.size
+        typeInformation -= count
+        typeInformation /= type.validTypes.size
 
-    val argumentTypes = types.mapIndexed { index, type ->
-        type.validTypes[(typeInformation.toInt() ushr (2 * index)) and 0b11]
-    }.map { type ->
-        InstructionArgumentEnum.entries.find { it.type == type }!!
-    }
+        InstructionArgumentEnum.entries.find { it.type == type.validTypes[count] }!!
+    }.reversed()
 
     return Pair(instructionEnum, argumentTypes.toTypedArray())
 }

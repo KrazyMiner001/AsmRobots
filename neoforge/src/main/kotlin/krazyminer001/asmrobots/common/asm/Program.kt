@@ -36,7 +36,7 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
             interruptsEnabled = false
         }
 
-        val (instruction, argumentTypes) = InstructionRewrite.identityInstruction(
+        val (instruction, argumentTypes) = InstructionRewrite.identifyInstruction(
             memory[reg[PC]].toUByte(),
             memory[reg[PC] + 1].toUByte()
         )

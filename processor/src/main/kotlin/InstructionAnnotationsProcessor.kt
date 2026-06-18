@@ -172,11 +172,18 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
                                     if (!parameters.isEmpty()) {
                                         addStatement("val (%L) = value", parameters.joinToCode { CodeBlock.of("%L", it.name!!.asString()) })
                                         addStatement(
-                                            "val num = %L",
-                                            parameters.mapIndexed { index, parameter ->
-                                                CodeBlock.of("this.types[%L].validTypes.indexOf(%L::class).shl(%L)", index, parameter.name!!.asString(), 2 * index)
-                                            }.joinToCode(separator = " or ")
+                                            "var num = 0",
                                         )
+                                        parameters.forEachIndexed { index, parameter ->
+                                            addStatement(
+                                                "num += this.types[%L].validTypes.indexOf(%L::class)", index, parameter.name!!.asString()
+                                            )
+                                            if (index != parameters.size - 1) {
+                                                addStatement(
+                                                    "num *= this.types[%L].validTypes.size", index
+                                                )
+                                            }
+                                        }
                                     } else {
                                         addStatement(
                                             "val num = 0"
