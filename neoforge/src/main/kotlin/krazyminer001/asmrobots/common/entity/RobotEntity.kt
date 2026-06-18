@@ -116,7 +116,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             })
             button({
                 onServerClick = {
-                    val text = lex(code).map { parse(it) }.let { lines ->
+                    val text = Assembler.lex(code).map { Assembler.parse(it) }.let { lines ->
                         if (lines.any { it.isFailure })
                             AsmResult.Failure(
                                 AsmError
@@ -140,8 +140,8 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             button({
                 text("Execute")
                 onServerClick = clickHandler@{
-                    val (code, labels) = assemble(
-                        lex(code).map { parse(it).getOrElse { return@clickHandler } }
+                    val (code, labels) = Assembler.assemble(
+                        Assembler.lex(code).map { Assembler.parse(it).getOrElse { return@clickHandler } }
                     ).getOrElse { return@clickHandler }
                     program = Program(this@RobotEntity)
                     program?.initMemoryAndLabels(code, labels)

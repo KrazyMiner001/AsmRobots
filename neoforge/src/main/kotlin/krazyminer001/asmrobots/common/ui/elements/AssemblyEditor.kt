@@ -6,8 +6,8 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister
+import krazyminer001.asmrobots.common.asm.Assembler
 import krazyminer001.asmrobots.common.asm.Lexeme
-import krazyminer001.asmrobots.common.asm.lex
 import net.minecraft.client.gui.Font
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.FontDescription
@@ -27,7 +27,7 @@ class AssemblyEditor : TextArea() {
 
     private fun reparseAndStyle() {
         styledLines.clear()
-        val lexedText = lex(lines.joinToString("\n"))
+        val lexedText = Assembler.lex(lines.joinToString("\n"))
         lexedText.mapTo(styledLines) { line ->
             val component = Component.empty()
             line.forEach { line ->
