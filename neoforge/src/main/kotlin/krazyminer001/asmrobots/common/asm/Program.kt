@@ -197,5 +197,4 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
             is InstructionArgument.Pointer -> memory[reg[this.register] + this.offset.value] = value
             else -> this.wordValue = value.toUByte().toInt()
         }
-
 }

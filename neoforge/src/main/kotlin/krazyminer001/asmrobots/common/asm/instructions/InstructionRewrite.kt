@@ -55,15 +55,21 @@ sealed interface InstructionRewrite {
     ) : InstructionRewrite
     data class Mov(
         val target: @ArgumentType(Register::class, Pointer::class) InstructionArgument,
-        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class,
+            Label::class
+        ) InstructionArgument,
     ) : InstructionRewrite
     data class Movh(
         val target: @ArgumentType(Register::class, Pointer::class) InstructionArgument,
-        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class,
+            Label::class
+        ) InstructionArgument,
     ) : InstructionRewrite
     data class Movb(
         val target: @ArgumentType(Register::class, Pointer::class) InstructionArgument,
-        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class,
+            Label::class
+        ) InstructionArgument,
     ) : InstructionRewrite
     data object Ret : InstructionRewrite
     data object Nop : InstructionRewrite
@@ -139,7 +145,7 @@ fun InstructionRewrite.asEnum(): InstructionRewriteEnum = InstructionRewriteEnum
 
 fun InstructionRewrite.Companion.identityInstruction(opcode: UByte, typeInformation: UByte): Pair<InstructionRewriteEnum, Array<InstructionArgumentEnum>> {
     val instructionEnum = InstructionRewriteEnum.entries.find { it.ordinal == opcode.toInt() }
-    if (instructionEnum == null) throw IllegalArgumentException("Opcode $opcode does not correspond to and instruction")
+    if (instructionEnum == null) throw IllegalArgumentException("Opcode $opcode does not correspond to an instruction")
 
     val types = instructionEnum.types
 
