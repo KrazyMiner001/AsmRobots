@@ -25,7 +25,15 @@ sealed interface AsmError {
         }
 
         data class UnparsableLine(val line: String) : ParseError {
-            override val text = line
+            override val text = "Invalid line $line"
+        }
+
+        data class InvalidDelimiter(val delimiter: String) : ParseError {
+            override val text = "Invalid delimiter \"$delimiter\""
+        }
+
+        data class InvalidByte(val byte: String) : ParseError {
+            override val text = "Invalid byte \"$byte\""
         }
     }
 

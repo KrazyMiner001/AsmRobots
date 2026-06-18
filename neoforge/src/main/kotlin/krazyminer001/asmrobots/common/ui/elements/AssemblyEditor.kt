@@ -49,6 +49,8 @@ class AssemblyEditor : TextArea() {
                             is Lexeme.Register -> it.withColor(Color.pink.rgb)
                             Lexeme.RightBracket -> it
                             Lexeme.Whitespace -> it
+                            is Lexeme.Byte -> it.withColor(Color.cyan.rgb)
+                            Lexeme.EmbedDirective -> it.withColor(Color.yellow.rgb)
                         }
                     }
                 )

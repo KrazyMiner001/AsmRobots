@@ -18,11 +18,13 @@ object Assembler {
             val float = string.toFloatOrNull()
             val condition = ConditionEnum.entries.find { it.name.lowercase() == string }
             val register = RegisterEnum.entries.find { it.name.lowercase() == string }
+            val byte = if (string.length == 4 && string[0] == '0' && string[1] == 'x') string.drop(2).toUByteOrNull(16) else null
             return when {
                 null != int -> Lexeme.Integer(int)
                 null != float -> Lexeme.FloatNum(float, string)
                 null != condition -> Lexeme.Condition(condition)
                 null != register -> Lexeme.Register(register)
+                null != byte -> Lexeme.Byte(byte, string)
                 else -> Lexeme.Identifier(string)
             }
         }
@@ -70,7 +72,11 @@ object Assembler {
                         val mainPart = partialString.dropLast(1)
                         if (mainPart.isNotEmpty()) {
                             val mnemonic = InstructionRewriteEnum.entries.find { it.name.lowercase() == mainPart }
-                            lexemes += mnemonic?.let { Lexeme.Mnemonic(it) } ?: parseArgument(mainPart)
+                            lexemes +=
+                                if (mainPart == "emb")
+                                    Lexeme.EmbedDirective
+                                else
+                                    mnemonic?.let { Lexeme.Mnemonic(it) } ?: parseArgument(mainPart)
                         }
                         lexemes += Lexeme.Whitespace
                         partialString = ""
@@ -151,6 +157,27 @@ object Assembler {
             return LexedLine(LexedLine.Content.Instruction(firstPart.mnemonic, arguments), comment).asSuccess()
         }
 
+        if (firstPart is Lexeme.EmbedDirective) {
+            val bytes = parts
+                .drop(1).let { if (comment != null) it.dropLast(1) else it }
+                .chunked(2)
+                .map {
+                    val byte = it.getOrNull(0)
+                    val comma = it.getOrNull(1)
+
+                    if (comma != null && comma !is Lexeme.Comma) {
+                        return AsmResult.Failure(AsmError.ParseError.InvalidDelimiter(comma.toString()))
+                    }
+                    if (byte !is Lexeme.Byte) {
+                        return AsmResult.Failure(AsmError.ParseError.InvalidByte(byte.toString()))
+                    }
+
+                    byte.value
+                }
+
+            return LexedLine(LexedLine.Content.EmbedDirective(bytes), comment).asSuccess()
+        }
+
         if (parts.size == 1) return LexedLine(null, comment).asSuccess()
 
         return AsmResult.Failure(AsmError.ParseError.UnparsableLine(line.joinToString("")))
@@ -159,14 +186,14 @@ object Assembler {
     fun assemble(lines: List<LexedLine>): AsmResult<Pair<ByteArray, Map<String, Int>>, AsmError.ParseError.ParseErrors> {
         val labels = mutableMapOf<String, Int>()
         val pendingLabels = mutableListOf<LexedLine.Content.Label>()
-        val instructions = mutableListOf<Pair<LexedLine.Content.Instruction, Int>>()
+        val content = mutableListOf<Pair<LexedLine.Content, Int>>()
         lines.forEachIndexed { index, line ->
             when (line.content) {
                 is LexedLine.Content.Label -> pendingLabels.add(line.content)
-                is LexedLine.Content.Instruction -> {
-                    labels.putAll(pendingLabels.map { Pair(it.name, instructions.size) })
+                is LexedLine.Content.Instruction, is LexedLine.Content.EmbedDirective -> {
+                    labels.putAll(pendingLabels.map { Pair(it.name, content.size) })
                     pendingLabels.clear()
-                    instructions.add(Pair(line.content, index))
+                    content.add(Pair(line.content, index))
                 }
 
                 else -> {}
@@ -178,38 +205,63 @@ object Assembler {
         val instructionIndexToRam = mutableMapOf<Int, Int>()
 
         var memorySize = 0
-        instructions.forEachIndexed { index, (instruction, _) ->
+        content.forEachIndexed { index, (content, _) ->
             instructionIndexToRam[index] = memorySize
-            memorySize += instruction.arguments.map { it.asEnum() }.byteLength() + 2
+            memorySize += when (content) {
+                is LexedLine.Content.Instruction -> {
+                    content.arguments.map { it.asEnum() }.byteLength() + 2
+                }
+                is LexedLine.Content.EmbedDirective -> {
+                    content.values.size
+                }
+                else -> {
+                    throw IllegalStateException("Content list has invalid object in it")
+                }
+            }
         }
 
         val memory = mutableListOf<Byte>()
         val labelsToRam = labels.mapValues { instructionIndexToRam[it.value]!! }
 
-        instructions.map { (instruction, lineNum) ->
-            Pair(
-                instruction.copy(arguments = instruction.arguments.map {
-                    if (it !is InstructionArgument.Label) return@map it
-                    if (it.name == null) return@map it
-                    return@map it.copy(value = labelsToRam[it.name] ?: -1)
-                }),
-                lineNum
-            )
-        }.forEach { (instruction, lineNum) ->
-            val (instructionEnum, arguments) = instruction
-            if (!instructionEnum.isValid(*arguments.toTypedArray())) {
-                parseErrors.add(
-                    Pair(
-                        AsmError.ParseError.InvalidInstructionArgumentsFor(
-                            instructionEnum,
-                            arguments
-                        ), lineNum
-                    )
+        content.map { (content, lineNum) ->
+            if (content is LexedLine.Content.Instruction) {
+                Pair(
+                    content.copy(arguments = content.arguments.map {
+                        if (it !is InstructionArgument.Label) return@map it
+                        if (it.name == null) return@map it
+                        return@map it.copy(value = labelsToRam[it.name] ?: -1)
+                    }),
+                    lineNum
                 )
-                return@forEach
+            } else {
+                Pair(
+                    content,
+                    lineNum
+                )
             }
-            val instructionInstance = instructionEnum.create(*arguments.toTypedArray())
-            memory.addAll(instructionInstance.toBytes().toList())
+        }.forEach { (content, lineNum) ->
+            when (content) {
+                is LexedLine.Content.EmbedDirective -> {
+                    memory.addAll(content.values.map { it.toByte() })
+                }
+                is LexedLine.Content.Instruction -> {
+                    val (instructionEnum, arguments) = content
+                    if (!instructionEnum.isValid(*arguments.toTypedArray())) {
+                        parseErrors.add(
+                            Pair(
+                                AsmError.ParseError.InvalidInstructionArgumentsFor(
+                                    instructionEnum,
+                                    arguments
+                                ), lineNum
+                            )
+                        )
+                        return@forEach
+                    }
+                    val instructionInstance = instructionEnum.create(*arguments.toTypedArray())
+                    memory.addAll(instructionInstance.toBytes().toList())
+                }
+                else -> throw IllegalStateException()
+            }
         }
 
         if (parseErrors.isNotEmpty()) return AsmResult.Failure(AsmError.ParseError.ParseErrors(parseErrors))
@@ -223,7 +275,8 @@ data class LexedLine(val content: Content?, val comment: String?) {
             Content
 
         data class Label(val name: String) : Content
-        //+ directive related content for when directives are added
+
+        data class EmbedDirective(val values: List<UByte>) : Content
     }
 }
 
@@ -246,6 +299,10 @@ sealed interface Lexeme {
 
     data class FloatNum(val value: Float, val originalText: String? = null) : Lexeme {
         override fun toString() = originalText ?: value.toString()
+    }
+
+    data class Byte(val value: UByte, val originalText: String? = null) : Lexeme {
+        override fun toString() = originalText ?: "0x${value.toString(16)}"
     }
 
     data class Condition(val condition: ConditionEnum) : Lexeme {
@@ -278,5 +335,9 @@ sealed interface Lexeme {
 
     data object RightBracket : Lexeme {
         override fun toString() = ")"
+    }
+
+    data object EmbedDirective : Lexeme {
+        override fun toString() = "emb"
     }
 }
