@@ -20,13 +20,13 @@ import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.level.ServerLevel
-import net.minecraft.util.Mth
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.MenuProvider
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.HumanoidArm
-import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.ai.control.LookControl
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
@@ -37,11 +37,25 @@ import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.EntityHitResult
 import net.minecraft.world.phys.Vec3
-import thedarkcolour.kotlinforforge.neoforge.forge.vectorutil.v3d.*
 import kotlin.math.ceil
 
-class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level) : LivingEntity(type, level),
+class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level) : Mob(type, level),
     IContainerUIHolder, ProgramCallback {
+
+    init {
+        this.lookControl = object : LookControl(this) {
+            override fun resetXRotOnTick() = false
+
+            override fun tick() {
+                this.mob.yHeadRot = this.rotateTowards(this.mob.yHeadRot, (this.mob as RobotEntity).targetYaw, 10f)
+                this.mob.yBodyRot = this.mob.yHeadRot
+                this.mob.yRot = this.mob.yHeadRot
+                this.mob.xRot = this.rotateTowards(this.mob.xRot, (this.mob as RobotEntity).targetPitch, 10f)
+
+                this.clampHeadRotationToBody()
+            }
+        }
+    }
 
     var code: String
         get() = entityData.get(CODE_DATA)
@@ -56,22 +70,10 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
         get() = Component.literal("[").append(this.displayName).append("] ")
 
     var velocity: Float = 0f
-    var targetRotation: Double = 0.0
-    var rotationSteps: Int = 0
+    var targetYaw: Float = 0f
+    var targetPitch: Float = 0f
 
     var blockBreakProgress: Pair<BlockPos, Int>? = null
-
-    fun lerpRotation(targetRotation: Double, steps: Int) {
-        rotationSteps = steps
-        this.targetRotation = targetRotation
-    }
-
-    fun stepRotation() {
-        if (rotationSteps > 0) {
-            yRot = Mth.rotLerp(1.0 / rotationSteps, yRot.toDouble(), targetRotation).toFloat() % 360
-            rotationSteps--
-        }
-    }
 
     override fun getMainArm(): HumanoidArm {
         return HumanoidArm.LEFT
@@ -181,21 +183,13 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun tick() {
         super.tick()
-        stepRotation()
         try {
             program?.step()
         } catch (_: Throwable) {
             program = null
         }
         if (onGround()) {
-            addDeltaMovement(
-                Vec3.directionFromRotation(rotationVector)
-                    .normalize()
-                    .scale(
-                        velocity
-                            .coerceIn(-1f..1f).toDouble() / 20
-                    )
-            )
+            deltaMovement = deltaMovement.add(getInputVector(Vec3(0.0, 0.0, 1.0), velocity, yHeadRot))
 
             if (horizontalCollision && shouldNotifyBump) {
                 program?.interrupt(Interrupts.BUMP)
@@ -247,20 +241,20 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun get(ioAddress: Int): Int {
         return when (ioAddress) {
-            IOPorts.ROTATION -> yRot.toInt()
             IOPorts.VELOCITY -> velocity.toBits()
             IOPorts.FEET_BLOCK -> BuiltInRegistries.BLOCK
                 .getId(level().getBlockState(blockPosition().offset(0, -1, 0)).block)
             IOPorts.ATTACK -> if (isBreaking) 1 else 0
             IOPorts.NOTIFY_BUMP -> if (shouldNotifyBump) 1 else 0
+            IOPorts.YAW -> yHeadRot.toInt()
+            IOPorts.PITCH -> xRot.toInt()
             else -> 0
         }
     }
 
     override fun set(ioAddress: Int, value: Int) {
         when (ioAddress) {
-            IOPorts.ROTATION -> lerpRotation(value.toDouble(), 10)
-            IOPorts.VELOCITY -> velocity = Float.fromBits(value)
+            IOPorts.VELOCITY -> velocity = Float.fromBits(value).coerceIn(-1f..1f) / 20
             IOPorts.PRINT_INT -> {
                 val level = level()
                 if (level is ServerLevel) {
@@ -277,6 +271,8 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             }
             IOPorts.ATTACK -> isBreaking = value != 0
             IOPorts.NOTIFY_BUMP -> shouldNotifyBump = value != 0
+            IOPorts.YAW -> targetYaw = value.toFloat() % 360
+            IOPorts.PITCH -> targetPitch = value.toFloat() % 360
         }
     }
 
@@ -286,13 +282,14 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     }
 
     object IOPorts {
-        const val ROTATION = 0
         const val VELOCITY = 1
         const val PRINT_INT = 2
         const val PRINT_FLOAT = 3
         const val FEET_BLOCK = 4
         const val ATTACK = 5
         const val NOTIFY_BUMP = 6
+        const val YAW = 7
+        const val PITCH = 8
     }
 
     object Interrupts {

@@ -8,9 +8,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.fml.common.Mod
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent
-import net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
@@ -38,23 +35,12 @@ object AsmRobots {
     }
 
     @SubscribeEvent
-    private fun onClientSetup(event: FMLClientSetupEvent) {
-    }
-
-    @SubscribeEvent
-    private fun onServerSetup(event: FMLDedicatedServerSetupEvent) {
-    }
-
-    @SubscribeEvent
-    fun onCommonSetup(event: FMLCommonSetupEvent) {
-    }
-
-    @SubscribeEvent
     fun createDefaultAttributes(event: EntityAttributeCreationEvent) {
         event.put(
             ModEntities.ROBOT_ENTITY,
             LivingEntity.createLivingAttributes()
                 .add(Attributes.MAX_HEALTH, 50.0)
+                .add(Attributes.FOLLOW_RANGE)
                 .build()
         )
     }
