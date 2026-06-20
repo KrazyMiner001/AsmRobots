@@ -41,6 +41,7 @@ object AsmRobots {
             LivingEntity.createLivingAttributes()
                 .add(Attributes.MAX_HEALTH, 50.0)
                 .add(Attributes.FOLLOW_RANGE)
+                .add(Attributes.ATTACK_DAMAGE)
                 .build()
         )
     }

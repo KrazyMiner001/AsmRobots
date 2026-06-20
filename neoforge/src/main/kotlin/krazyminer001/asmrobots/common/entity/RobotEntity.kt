@@ -7,11 +7,15 @@ import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
 import com.lowdragmc.lowdraglib2.gui.ui.UI
 import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.button
+import com.lowdragmc.lowdraglib2.gui.ui.elements.itemSlot
+import com.lowdragmc.lowdraglib2.gui.ui.inventorySlots
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
+import dev.vfyjxf.taffy.style.TaffyDisplay
 import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.common.ui.elements.assemblyEditor
 import net.minecraft.core.BlockPos
+import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.RegistryFriendlyByteBuf
 import net.minecraft.network.chat.Component
@@ -20,16 +24,18 @@ import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.server.level.ServerLevel
-import net.minecraft.world.InteractionHand
-import net.minecraft.world.InteractionResult
-import net.minecraft.world.MenuProvider
+import net.minecraft.world.*
 import net.minecraft.world.entity.EntityType
+import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.HumanoidArm
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.ai.control.LookControl
+import net.minecraft.world.entity.npc.InventoryCarrier
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.storage.ValueInput
@@ -37,10 +43,12 @@ import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.EntityHitResult
 import net.minecraft.world.phys.Vec3
+import net.neoforged.neoforge.transfer.item.ItemStackResourceHandler
 import kotlin.math.ceil
 
-class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level) : Mob(type, level),
-    IContainerUIHolder, ProgramCallback {
+class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level
+                  ) : Mob(type, level),
+    IContainerUIHolder, ProgramCallback, InventoryCarrier {
 
     init {
         this.lookControl = object : LookControl(this) {
@@ -55,6 +63,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 this.clampHeadRotationToBody()
             }
         }
+        this.setCanPickUpLoot(true)
     }
 
     var code: String
@@ -75,6 +84,34 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     var blockBreakProgress: Pair<BlockPos, Int>? = null
 
+    @get:JvmName("getInventoryContainer")
+    val inventory: SimpleContainer = SimpleContainer(4)
+
+    override fun canHoldItem(itemStack: ItemStack): Boolean {
+        val isTool = itemStack.has(DataComponents.TOOL)
+        val isWeapon = itemStack.has(DataComponents.WEAPON)
+        val hasTool = hasItemInSlot(EquipmentSlot.OFFHAND)
+        val hasWeapon = hasItemInSlot(EquipmentSlot.MAINHAND)
+
+        return (!hasWeapon && isWeapon) || (!hasTool && isTool)
+    }
+
+    override fun equipItemIfPossible(level: ServerLevel, itemStack: ItemStack): ItemStack {
+        val isTool = itemStack.has(DataComponents.TOOL)
+        val isWeapon = itemStack.has(DataComponents.WEAPON)
+        val hasTool = hasItemInSlot(EquipmentSlot.OFFHAND)
+        val hasWeapon = hasItemInSlot(EquipmentSlot.MAINHAND)
+
+        if (isWeapon && !hasWeapon) {
+            setItemSlotAndDropWhenKilled(EquipmentSlot.MAINHAND, itemStack)
+            return itemStack
+        } else if (isTool && !hasTool) {
+            setItemSlotAndDropWhenKilled(EquipmentSlot.OFFHAND, itemStack)
+            return itemStack
+        } else {
+            return ItemStack.EMPTY
+        }
+    }
     override fun getMainArm(): HumanoidArm {
         return HumanoidArm.LEFT
     }
@@ -106,7 +143,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             assemblyEditor({
                 lines(*clientCode)
                 linesResponder = { clientCode = it }
-                layout = { size(300.px, 200.px) }
+                layout = { size(300.px, 100.px) }
             })
 
             button({
@@ -149,6 +186,32 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                     program?.initMemoryAndLabels(code, labels)
                 }
             })
+
+            inventorySlots()
+            element({
+                layout = {
+                    display(TaffyDisplay.GRID)
+                    grid {
+                        templateColumns("repeat(2, min-content)")
+                        templateRows("repeat(2, min-content)")
+                    }
+                    gap {
+                        all(0)
+                    }
+                }
+            }) {
+                repeat(4) {
+                    itemSlot({
+                        slot = Slot(inventory, it, 0, 0)
+                    })
+                }
+            }
+            itemSlot({
+                bind(EquipmentSlotResourceHandler(EquipmentSlot.MAINHAND), 0)
+            })
+            itemSlot({
+                bind(EquipmentSlotResourceHandler(EquipmentSlot.OFFHAND), 0)
+            })
         }
 
         return ModularUI(UI.of(root), player)
@@ -165,11 +228,14 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun readAdditionalSaveData(input: ValueInput) {
         super.readAdditionalSaveData(input)
+        this.setCanPickUpLoot(input.getBooleanOr("CanPickUpLoot", true))
+        ContainerHelper.loadAllItems(input, inventory.items)
         code = input.getStringOr("code", "")
     }
 
     override fun addAdditionalSaveData(output: ValueOutput) {
         super.addAdditionalSaveData(output)
+        ContainerHelper.saveAllItems(output, inventory.items)
         output.putString("code", code)
     }
 
@@ -212,10 +278,22 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                         }
 
                     val block = level().getBlockState(hitResult.blockPos)
-                    val harvestMultiplier = if (block.requiresCorrectToolForDrops()) 100 else 30
-                    val totalTicks = ceil(harvestMultiplier * block.block.defaultDestroyTime()).toInt()
 
-                    level().destroyBlockProgress(this.id, hitResult.blockPos,
+                    val tool = getItemBySlot(EquipmentSlot.OFFHAND)
+
+                    var toolSpeed = tool.getDestroySpeed(block).toDouble()
+                    if (toolSpeed > 1)
+                        toolSpeed += tool.attributeModifiers.compute(Attributes.MINING_EFFICIENCY, 0.0, EquipmentSlot.MAINHAND)
+
+                    val harvestMultiplier =
+                        if (block.requiresCorrectToolForDrops()
+                            && tool.isCorrectToolForDrops(block)
+                        ) 100 else 30
+
+                    val totalTicks = ceil(harvestMultiplier * block.block.defaultDestroyTime() / toolSpeed).toInt()
+
+                    level().destroyBlockProgress(
+                        this.id, hitResult.blockPos,
                         (10 * blockBreakProgress.second.toFloat() / totalTicks).toInt()
                     )
                     if (blockBreakProgress.second >= totalTicks) {
@@ -228,11 +306,9 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 is EntityHitResult -> {
                     val level = level()
                     if (level is ServerLevel) {
-                        hitResult.entity.hurtServer(
-                            level,
-                            this.damageSources().mobAttack(this),
-                            1f
-                        )
+                        if (hitResult.entity.isAttackable) {
+                            this.doHurtTarget(level, hitResult.entity)
+                        }
                     }
                 }
             }
@@ -276,6 +352,8 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
         }
     }
 
+    override fun getInventory() = inventory
+
     companion object {
         val CODE_DATA: EntityDataAccessor<String> =
             SynchedEntityData.defineId(RobotEntity::class.java, EntityDataSerializers.STRING)
@@ -294,6 +372,16 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     object Interrupts {
         const val BUMP = 0
+    }
+
+    inner class EquipmentSlotResourceHandler(val slot: EquipmentSlot) : ItemStackResourceHandler() {
+        override fun getStack(): ItemStack = getItemBySlot(slot)
+
+        override fun setStack(stack: ItemStack) = setItemSlot(slot, stack)
+
+        override fun onRootCommit(originalState: ItemStack) {
+            onEquipItem(slot, originalState, stack)
+        }
     }
 }
 
