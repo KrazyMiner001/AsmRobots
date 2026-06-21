@@ -4,12 +4,14 @@ import com.lowdragmc.lowdraglib2.gui.factory.IContainerUIHolder
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu
 import com.lowdragmc.lowdraglib2.gui.sync.rpc.rpcEvent
 import com.lowdragmc.lowdraglib2.gui.sync.rpc.rpcEventR
+import com.lowdragmc.lowdraglib2.gui.texture.SpriteTexture
 import com.lowdragmc.lowdraglib2.gui.ui.*
 import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog
 import com.lowdragmc.lowdraglib2.gui.ui.elements.button
 import com.lowdragmc.lowdraglib2.gui.ui.elements.itemSlot
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
 import com.lowdragmc.lowdraglib2.gui.ui.layout.pct
+import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import dev.vfyjxf.taffy.style.AlignContent
 import dev.vfyjxf.taffy.style.AlignItems
 import dev.vfyjxf.taffy.style.FlexDirection
@@ -27,6 +29,7 @@ import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.resources.Identifier
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.*
 import net.minecraft.world.entity.EntityType
@@ -39,7 +42,6 @@ import net.minecraft.world.entity.npc.InventoryCarrier
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
-import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
 import net.minecraft.world.level.storage.ValueInput
@@ -48,6 +50,7 @@ import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.EntityHitResult
 import net.minecraft.world.phys.Vec3
 import net.neoforged.neoforge.transfer.item.ItemStackResourceHandler
+import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper
 import org.lwjgl.glfw.GLFW
 import kotlin.math.ceil
 
@@ -180,21 +183,17 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                     layout = {
                         size(80.pct, 100.pct)
                         alignSelf(AlignItems.CENTER)
-                        margin {
-
-                        }
                     }
                 })
-
                 element({
                     layout = {
                         width(10.pct)
-                        margin {
-
-                        }
                         flexDirection(FlexDirection.COLUMN)
                         flexGrow(1)
                         flexBasis(0)
+                        gap {
+                            all(10.px)
+                        }
                     }
                 }) {
                     button({
@@ -204,29 +203,6 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                         text("Save")
                     })
                     button({
-                        onServerClick = {
-                            val text = Assembler.lex(code).map { Assembler.parse(it) }.let { lines ->
-                                if (lines.any { it.isFailure })
-                                    AsmResult.Failure(
-                                        AsmError
-                                            .ParseError
-                                            .ParseErrors(
-                                                lines
-                                                    .mapIndexed { index, result -> Pair(result, index) }
-                                                    .filter { it.first.isFailure }
-                                                    .map { (result, index) -> Pair(result.errorValue!!, index) }
-                                            ))
-                                else
-                                    lines.map { it.successValue!! }.asSuccess()
-                            }.fold({
-                                it.joinToString()
-                            }, {
-                                it.text
-                            })
-                            player.sendSystemMessage(Component.literal(text))
-                        }
-                    })
-                    button({
                         text("Execute")
                         onServerClick = clickHandler@{
                             val (code, labels) = Assembler.assemble(
@@ -234,6 +210,12 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                             ).getOrElse { return@clickHandler }
                             program = Program(this@RobotEntity)
                             program?.initMemoryAndLabels(code, labels)
+                        }
+                    })
+                    button({
+                        text("Stop")
+                        onServerClick = {
+                            program = null
                         }
                     })
 
@@ -251,16 +233,38 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                     }) {
                         repeat(4) {
                             itemSlot({
-                                slot = Slot(inventory, it, 0, 0)
+                                bind(VanillaContainerWrapper.of(inventory), it)
                             })
                         }
                     }
-                    itemSlot({
-                        bind(EquipmentSlotResourceHandler(EquipmentSlot.MAINHAND), 0)
-                    })
-                    itemSlot({
-                        bind(EquipmentSlotResourceHandler(EquipmentSlot.OFFHAND), 0)
-                    })
+                    element({
+                        layout = {
+                            flexDirection(FlexDirection.ROW)
+                        }
+                    }) {
+                        itemSlot({
+                            bind(EquipmentSlotResourceHandler(EquipmentSlot.MAINHAND), 0)
+                            slotStyle = {
+                                slotOverlay(
+                                    SpriteTexture.of(
+                                        Identifier
+                                            .parse("textures/gui/sprites/container/slot/sword.png")
+                                    )
+                                )
+                            }
+                        })
+                        itemSlot({
+                            bind(EquipmentSlotResourceHandler(EquipmentSlot.OFFHAND), 0)
+                            slotStyle = {
+                                slotOverlay(
+                                    SpriteTexture.of(
+                                        Identifier
+                                            .parse("textures/gui/sprites/container/slot/pickaxe.png")
+                                    )
+                                )
+                            }
+                        })
+                    }
                 }
             }
 
