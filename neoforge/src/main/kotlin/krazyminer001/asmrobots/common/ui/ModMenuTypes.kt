@@ -10,9 +10,9 @@ import net.neoforged.neoforge.registries.DeferredRegister
 import thedarkcolour.kotlinforforge.neoforge.forge.getValue
 
 object ModMenuTypes {
-    val REGISTER = DeferredRegister.create(Registries.MENU, AsmRobots.ID)
+    val REGISTRY = DeferredRegister.create(Registries.MENU, AsmRobots.ID)
 
-    val ROBOT_UI: MenuType<ModularUIContainerMenu> by REGISTER.register("robot_ui") { ->
+    val ROBOT_UI: MenuType<ModularUIContainerMenu> by REGISTRY.register("robot_ui") { ->
         IMenuTypeExtension.create { containerId, inventory, buf ->
             val uuid = buf.readUUID()
             ModularUIContainerMenu(

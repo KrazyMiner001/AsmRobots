@@ -12,6 +12,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.inventorySlots
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import dev.vfyjxf.taffy.style.TaffyDisplay
 import krazyminer001.asmrobots.common.asm.*
+import krazyminer001.asmrobots.common.item.ModuleItem
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.common.ui.elements.assemblyEditor
 import net.minecraft.core.BlockPos
@@ -85,7 +86,11 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     var blockBreakProgress: Pair<BlockPos, Int>? = null
 
     @get:JvmName("getInventoryContainer")
-    val inventory: SimpleContainer = SimpleContainer(4)
+    val inventory: SimpleContainer = object : SimpleContainer(4) {
+        override fun canPlaceItem(slot: Int, itemStack: ItemStack): Boolean {
+            return super.canPlaceItem(slot, itemStack) && itemStack.item is ModuleItem
+        }
+    }
 
     override fun canHoldItem(itemStack: ItemStack): Boolean {
         val isTool = itemStack.has(DataComponents.TOOL)
@@ -317,6 +322,22 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun get(ioAddress: Int): Int {
         return when (ioAddress) {
+            in 1000..1999 -> {
+                val stack = inventory.getItem(0)
+                (stack.item as? ModuleItem)?.getIOPort(ioAddress - 1000, stack, this) ?: 0
+            }
+            in 2000..2999 -> {
+                val stack = inventory.getItem(1)
+                (stack.item as? ModuleItem)?.getIOPort(ioAddress - 2000, stack, this) ?: 0
+            }
+            in 3000..3999 -> {
+                val stack = inventory.getItem(2)
+                (stack.item as? ModuleItem)?.getIOPort(ioAddress - 3000, stack, this) ?: 0
+            }
+            in 4000..4999 -> {
+                val stack = inventory.getItem(3)
+                (stack.item as? ModuleItem)?.getIOPort(ioAddress - 4000, stack, this) ?: 0
+            }
             IOPorts.VELOCITY -> velocity.toBits()
             IOPorts.FEET_BLOCK -> BuiltInRegistries.BLOCK
                 .getId(level().getBlockState(blockPosition().offset(0, -1, 0)).block)
@@ -330,6 +351,22 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun set(ioAddress: Int, value: Int) {
         when (ioAddress) {
+            in 1000..1999 -> {
+                val stack = inventory.getItem(0)
+                (stack.item as? ModuleItem)?.setIOPort(ioAddress - 1000, stack, this, value)
+            }
+            in 2000..2999 -> {
+                val stack = inventory.getItem(1)
+                (stack.item as? ModuleItem)?.setIOPort(ioAddress - 2000, stack, this, value)
+            }
+            in 3000..3999 -> {
+                val stack = inventory.getItem(2)
+                (stack.item as? ModuleItem)?.setIOPort(ioAddress - 3000, stack, this, value)
+            }
+            in 4000..4999 -> {
+                val stack = inventory.getItem(3)
+                (stack.item as? ModuleItem)?.setIOPort(ioAddress - 4000, stack, this, value) ?: 0
+            }
             IOPorts.VELOCITY -> velocity = Float.fromBits(value).coerceIn(-1f..1f) / 20
             IOPorts.PRINT_INT -> {
                 val level = level()
