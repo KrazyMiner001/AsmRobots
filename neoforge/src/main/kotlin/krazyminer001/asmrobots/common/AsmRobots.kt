@@ -2,6 +2,7 @@ package krazyminer001.asmrobots.common
 
 import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.item.ModItems
+import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.Attributes
@@ -32,6 +33,7 @@ object AsmRobots {
         ModEntities.REGISTRY.register(MOD_BUS)
         ModMenuTypes.REGISTRY.register(MOD_BUS)
         ModItems.REGISTRY.register(MOD_BUS)
+        ModComponents.REGISTRY.register(MOD_BUS)
     }
 
     @SubscribeEvent

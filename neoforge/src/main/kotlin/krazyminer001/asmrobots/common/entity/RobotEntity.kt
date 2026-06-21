@@ -3,12 +3,12 @@ package krazyminer001.asmrobots.common.entity
 import com.lowdragmc.lowdraglib2.gui.factory.IContainerUIHolder
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu
 import com.lowdragmc.lowdraglib2.gui.sync.rpc.rpcEvent
-import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
-import com.lowdragmc.lowdraglib2.gui.ui.UI
-import com.lowdragmc.lowdraglib2.gui.ui.element
+import com.lowdragmc.lowdraglib2.gui.sync.rpc.rpcEventR
+import com.lowdragmc.lowdraglib2.gui.ui.*
+import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog
 import com.lowdragmc.lowdraglib2.gui.ui.elements.button
 import com.lowdragmc.lowdraglib2.gui.ui.elements.itemSlot
-import com.lowdragmc.lowdraglib2.gui.ui.inventorySlots
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
 import com.lowdragmc.lowdraglib2.gui.ui.layout.px
 import dev.vfyjxf.taffy.style.TaffyDisplay
 import krazyminer001.asmrobots.common.asm.*
@@ -45,6 +45,7 @@ import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.EntityHitResult
 import net.minecraft.world.phys.Vec3
 import net.neoforged.neoforge.transfer.item.ItemStackResourceHandler
+import org.lwjgl.glfw.GLFW
 import kotlin.math.ceil
 
 class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level
@@ -143,8 +144,15 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     }
 
     override fun createUI(player: Player): ModularUI {
-        val root = element {
+        val root = element({
+            focusable = true
+        }) {
             var clientCode = code.split('\n').toTypedArray()
+            val saveCodeEvent = element.rpcEvent(::code::set)
+            val queryServerCode = element.rpcEventR<Array<String>> {
+                return@rpcEventR this@RobotEntity.code.split('\n').toTypedArray()
+            }
+
             assemblyEditor({
                 lines(*clientCode)
                 linesResponder = { clientCode = it }
@@ -152,9 +160,8 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             })
 
             button({
-                val rpcEvent = element.rpcEvent(::code::set)
                 onClick = {
-                    rpcEvent.send(clientCode.joinToString("\n"))
+                    saveCodeEvent.send(clientCode.joinToString("\n"))
                 }
                 text("Save")
             })
@@ -217,9 +224,36 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
             itemSlot({
                 bind(EquipmentSlotResourceHandler(EquipmentSlot.OFFHAND), 0)
             })
+
+            events(capture = true) {
+                UIEvents.KEY_DOWN += { event ->
+                    if (event.keyCode == GLFW.GLFW_KEY_ESCAPE) {
+                        queryServerCode.send<Array<String>>({ serverCode ->
+                            if (!serverCode.contentEquals(clientCode)) {
+                                Dialog.showCancelableCheck(
+                                    "Save?", "You have unsaved changes, would you like to save them?",
+                                    {
+                                        if (it) {
+                                            saveCodeEvent.send(clientCode.joinToString("\n"))
+                                        }
+                                        ModularUIClientAccess.getScreen(this@element.element.modularUI)?.onClose()
+                                    }, {
+
+                                    }).show(this@element.element)
+                            } else {
+                                ModularUIClientAccess.getScreen(this@element.element.modularUI)?.onClose()
+                            }
+                        })
+                    }
+
+                    if (event.keyCode == GLFW.GLFW_KEY_S && event.isCtrlDown) {
+                        saveCodeEvent.send(clientCode.joinToString("\n"))
+                    }
+                }
+            }
         }
 
-        return ModularUI(UI.of(root), player)
+        return ModularUI(UI.of(root), player).shouldCloseOnEsc(false).shouldCloseOnKeyInventory(false)
     }
 
     override fun isStillValid(player: Player): Boolean {

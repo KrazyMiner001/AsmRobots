@@ -8,9 +8,9 @@ import net.neoforged.neoforge.registries.DeferredRegister
 import thedarkcolour.kotlinforforge.neoforge.forge.getValue
 
 object ModComponents {
-    val REGISTRAR = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, AsmRobots.ID)
+    val REGISTRY = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, AsmRobots.ID)
 
-    val HARD_DRIVE: DataComponentType<List<Byte>> by REGISTRAR.registerComponentType("hard_drive") { builder ->
+    val HARD_DRIVE: DataComponentType<List<Byte>> by REGISTRY.registerComponentType("hard_drive") { builder ->
         builder.persistent(Codec.BYTE.listOf(256, 256))
     }
 }
