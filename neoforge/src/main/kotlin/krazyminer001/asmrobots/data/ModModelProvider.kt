@@ -1,0 +1,15 @@
+package krazyminer001.asmrobots.data
+
+import krazyminer001.asmrobots.common.AsmRobots
+import krazyminer001.asmrobots.common.item.ModItems
+import net.minecraft.client.data.models.BlockModelGenerators
+import net.minecraft.client.data.models.ItemModelGenerators
+import net.minecraft.client.data.models.ModelProvider
+import net.minecraft.client.data.models.model.ModelTemplates
+import net.minecraft.data.PackOutput
+
+class ModModelProvider(output: PackOutput) : ModelProvider(output, AsmRobots.ID) {
+    override fun registerModels(blockModels: BlockModelGenerators, itemModels: ItemModelGenerators) {
+        itemModels.generateFlatItem(ModItems.GPS_MODULE, ModelTemplates.FLAT_ITEM)
+    }
+}

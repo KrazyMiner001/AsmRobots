@@ -1,6 +1,5 @@
 package krazyminer001.asmrobots.common
 
-import krazyminer001.asmrobots.common.block.ModBlocks
 import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
@@ -30,7 +29,6 @@ object AsmRobots {
     init {
         LOGGER.log(Level.INFO, "Hello world!")
 
-        ModBlocks.REGISTRY.register(MOD_BUS)
         ModEntities.REGISTRY.register(MOD_BUS)
         ModMenuTypes.REGISTRY.register(MOD_BUS)
         ModItems.REGISTRY.register(MOD_BUS)
