@@ -9,7 +9,10 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.Dialog
 import com.lowdragmc.lowdraglib2.gui.ui.elements.button
 import com.lowdragmc.lowdraglib2.gui.ui.elements.itemSlot
 import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
-import com.lowdragmc.lowdraglib2.gui.ui.layout.px
+import com.lowdragmc.lowdraglib2.gui.ui.layout.pct
+import dev.vfyjxf.taffy.style.AlignContent
+import dev.vfyjxf.taffy.style.AlignItems
+import dev.vfyjxf.taffy.style.FlexDirection
 import dev.vfyjxf.taffy.style.TaffyDisplay
 import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.item.ModuleItem
@@ -146,6 +149,10 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     override fun createUI(player: Player): ModularUI {
         val root = element({
             focusable = true
+            layout = {
+                flexDirection(FlexDirection.COLUMN)
+                size(90.pct)
+            }
         }) {
             var clientCode = code.split('\n').toTypedArray()
             val saveCodeEvent = element.rpcEvent(::code::set)
@@ -153,76 +160,114 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                 return@rpcEventR this@RobotEntity.code.split('\n').toTypedArray()
             }
 
-            assemblyEditor({
-                lines(*clientCode)
-                linesResponder = { clientCode = it }
-                layout = { size(300.px, 100.px) }
-            })
-
-            button({
-                onClick = {
-                    saveCodeEvent.send(clientCode.joinToString("\n"))
-                }
-                text("Save")
-            })
-            button({
-                onServerClick = {
-                    val text = Assembler.lex(code).map { Assembler.parse(it) }.let { lines ->
-                        if (lines.any { it.isFailure })
-                            AsmResult.Failure(
-                                AsmError
-                                .ParseError
-                                .ParseErrors(
-                                    lines
-                                        .mapIndexed { index, result -> Pair(result, index) }
-                                        .filter { it.first.isFailure }
-                                        .map { (result, index) -> Pair(result.errorValue!!, index) }
-                                ))
-                        else
-                            lines.map { it.successValue!! }.asSuccess()
-                    }.fold({
-                        it.joinToString()
-                    }, {
-                        it.text
-                    })
-                    player.sendSystemMessage(Component.literal(text))
-                }
-            })
-            button({
-                text("Execute")
-                onServerClick = clickHandler@{
-                    val (code, labels) = Assembler.assemble(
-                        Assembler.lex(code).map { Assembler.parse(it).getOrElse { return@clickHandler } }
-                    ).getOrElse { return@clickHandler }
-                    program = Program(this@RobotEntity)
-                    program?.initMemoryAndLabels(code, labels)
-                }
-            })
-
-            inventorySlots()
             element({
                 layout = {
-                    display(TaffyDisplay.GRID)
-                    grid {
-                        templateColumns("repeat(2, min-content)")
-                        templateRows("repeat(2, min-content)")
-                    }
-                    gap {
-                        all(0)
-                    }
+                    flexDirection(FlexDirection.ROW)
+                    width(100.pct)
+                    justifyContent(AlignContent.SPACE_BETWEEN)
+                    flex(1)
                 }
             }) {
-                repeat(4) {
+                element({
+                    layout = {
+                        flexGrow(1)
+                        flexBasis(0)
+                    }
+                })
+                assemblyEditor({
+                    lines(*clientCode)
+                    linesResponder = { clientCode = it }
+                    layout = {
+                        size(80.pct, 100.pct)
+                        alignSelf(AlignItems.CENTER)
+                        margin {
+
+                        }
+                    }
+                })
+
+                element({
+                    layout = {
+                        width(10.pct)
+                        margin {
+
+                        }
+                        flexDirection(FlexDirection.COLUMN)
+                        flexGrow(1)
+                        flexBasis(0)
+                    }
+                }) {
+                    button({
+                        onClick = {
+                            saveCodeEvent.send(clientCode.joinToString("\n"))
+                        }
+                        text("Save")
+                    })
+                    button({
+                        onServerClick = {
+                            val text = Assembler.lex(code).map { Assembler.parse(it) }.let { lines ->
+                                if (lines.any { it.isFailure })
+                                    AsmResult.Failure(
+                                        AsmError
+                                            .ParseError
+                                            .ParseErrors(
+                                                lines
+                                                    .mapIndexed { index, result -> Pair(result, index) }
+                                                    .filter { it.first.isFailure }
+                                                    .map { (result, index) -> Pair(result.errorValue!!, index) }
+                                            ))
+                                else
+                                    lines.map { it.successValue!! }.asSuccess()
+                            }.fold({
+                                it.joinToString()
+                            }, {
+                                it.text
+                            })
+                            player.sendSystemMessage(Component.literal(text))
+                        }
+                    })
+                    button({
+                        text("Execute")
+                        onServerClick = clickHandler@{
+                            val (code, labels) = Assembler.assemble(
+                                Assembler.lex(code).map { Assembler.parse(it).getOrElse { return@clickHandler } }
+                            ).getOrElse { return@clickHandler }
+                            program = Program(this@RobotEntity)
+                            program?.initMemoryAndLabels(code, labels)
+                        }
+                    })
+
+                    element({
+                        layout = {
+                            display(TaffyDisplay.GRID)
+                            grid {
+                                templateColumns("repeat(2, min-content)")
+                                templateRows("repeat(2, min-content)")
+                            }
+                            gap {
+                                all(0)
+                            }
+                        }
+                    }) {
+                        repeat(4) {
+                            itemSlot({
+                                slot = Slot(inventory, it, 0, 0)
+                            })
+                        }
+                    }
                     itemSlot({
-                        slot = Slot(inventory, it, 0, 0)
+                        bind(EquipmentSlotResourceHandler(EquipmentSlot.MAINHAND), 0)
+                    })
+                    itemSlot({
+                        bind(EquipmentSlotResourceHandler(EquipmentSlot.OFFHAND), 0)
                     })
                 }
             }
-            itemSlot({
-                bind(EquipmentSlotResourceHandler(EquipmentSlot.MAINHAND), 0)
-            })
-            itemSlot({
-                bind(EquipmentSlotResourceHandler(EquipmentSlot.OFFHAND), 0)
+
+            inventorySlots({
+                layout = {
+                    alignSelf(AlignItems.CENTER)
+                }
             })
 
             events(capture = true) {
