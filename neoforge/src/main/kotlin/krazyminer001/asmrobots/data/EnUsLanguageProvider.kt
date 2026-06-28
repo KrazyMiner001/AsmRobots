@@ -10,6 +10,10 @@ class EnUsLanguageProvider(output: PackOutput) : LanguageProvider(output, AsmRob
 
     override fun addTranslations() {
         this.add(ModEntities.ROBOT_ENTITY, "Robot")
+
         this.add(ModItems.GPS_MODULE, "GPS Module")
+        this.add(ModItems.CHEST_MODULE, "Chest Module")
+        this.add(ModItems.HARD_DRIVE_MODULE, "Hard Drive Module")
+        this.add(ModItems.STORAGE_CONTROLLER_MODULE, "Storage Controller Module")
     }
 }

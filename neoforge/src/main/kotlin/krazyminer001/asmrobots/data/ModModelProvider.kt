@@ -11,5 +11,8 @@ import net.minecraft.data.PackOutput
 class ModModelProvider(output: PackOutput) : ModelProvider(output, AsmRobots.ID) {
     override fun registerModels(blockModels: BlockModelGenerators, itemModels: ItemModelGenerators) {
         itemModels.generateFlatItem(ModItems.GPS_MODULE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.CHEST_MODULE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.STORAGE_CONTROLLER_MODULE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.HARD_DRIVE_MODULE, ModelTemplates.FLAT_ITEM)
     }
 }

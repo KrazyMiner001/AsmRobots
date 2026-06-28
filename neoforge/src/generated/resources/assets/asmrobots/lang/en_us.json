@@ -1,4 +1,7 @@
 {
   "entity.asmrobots.robot": "Robot",
-  "item.asmrobots.gps_module": "GPS Module"
+  "item.asmrobots.chest_module": "Chest Module",
+  "item.asmrobots.gps_module": "GPS Module",
+  "item.asmrobots.hard_drive_module": "Hard Drive Module",
+  "item.asmrobots.storage_controller_module": "Storage Controller Module"
 }

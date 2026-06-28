@@ -1,3 +1,9 @@
-// 26.1.2	2026-06-21T14:13:35.4320333	Model Definitions - asmrobots
+// 26.1.2	2026-06-28T15:07:42.0404269	Model Definitions - asmrobots
+b4285fd0a3b3a3fc533421c681e9dd128a0d820a assets/asmrobots/items/chest_module.json
 156ee8dac1c426b9459d7bf9fea6df8896d39374 assets/asmrobots/items/gps_module.json
+871145f1dfccb6b680e342eb86fe646af0d67341 assets/asmrobots/items/hard_drive_module.json
+d879335d2e4d34f432a809dbb80dd39e866d7e29 assets/asmrobots/items/storage_controller_module.json
+4252b70431c364d07e426a775ca50a50e97969fd assets/asmrobots/models/item/chest_module.json
 c26213ec9fda605f35cbd9e3f5b697085567f9f3 assets/asmrobots/models/item/gps_module.json
+34fce7d4b6e33f71772d1104b292ce0d6b37e5fb assets/asmrobots/models/item/hard_drive_module.json
+1a2ddf2530a51667633532260593850e13575580 assets/asmrobots/models/item/storage_controller_module.json
