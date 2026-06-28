@@ -13,4 +13,9 @@ object ModComponents {
     val HARD_DRIVE: DataComponentType<List<Byte>> by REGISTRY.registerComponentType("hard_drive") { builder ->
         builder.persistent(Codec.BYTE.listOf(256, 256))
     }
+
+    val STORAGE_COMPONENT: DataComponentType<StorageModuleComponent> by REGISTRY.registerComponentType("storage_component") { builder ->
+        builder.persistent(StorageModuleComponent.CODEC)
+            .networkSynchronized(StorageModuleComponent.STREAM_CODEC)
+    }
 }

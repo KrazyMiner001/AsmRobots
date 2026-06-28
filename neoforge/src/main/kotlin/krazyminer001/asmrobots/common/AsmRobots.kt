@@ -3,13 +3,17 @@ package krazyminer001.asmrobots.common
 import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.item.component.ModComponents
+import krazyminer001.asmrobots.common.item.container.StorageModuleContainer
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.fml.common.Mod
+import net.neoforged.neoforge.capabilities.Capabilities
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent
+import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import org.apache.logging.log4j.Logger
@@ -45,6 +49,15 @@ object AsmRobots {
                 .add(Attributes.FOLLOW_RANGE)
                 .add(Attributes.ATTACK_DAMAGE)
                 .build()
+        )
+    }
+
+    @SubscribeEvent
+    fun registerCapabilities(event: RegisterCapabilitiesEvent) {
+        event.registerItem(
+            Capabilities.Item.ITEM,
+            { stack, _ -> VanillaContainerWrapper.of(StorageModuleContainer(stack)) },
+            ModItems.CHEST_MODULE
         )
     }
 }
