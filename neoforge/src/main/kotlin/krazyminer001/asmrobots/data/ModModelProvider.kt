@@ -14,5 +14,6 @@ class ModModelProvider(output: PackOutput) : ModelProvider(output, AsmRobots.ID)
         itemModels.generateFlatItem(ModItems.CHEST_MODULE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.STORAGE_CONTROLLER_MODULE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.HARD_DRIVE_MODULE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.CRAFTING_TABLE_MODULE, ModelTemplates.FLAT_ITEM)
     }
 }

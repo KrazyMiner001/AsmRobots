@@ -30,4 +30,10 @@ object ModItems {
             .component(ModComponents.STORAGE_COMPONENT, StorageModuleComponent(size = 8))
             .stacksTo(1)
     }
+
+    val CRAFTING_TABLE_MODULE by REGISTRY.registerItem("crafting_table_module", ::CraftingTableModule) { properties ->
+        properties
+            .component(ModComponents.STORAGE_COMPONENT, StorageModuleComponent(size = 10))
+            .stacksTo(1)
+    }
 }

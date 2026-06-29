@@ -56,6 +56,7 @@ class StorageControllerModule(properties: Properties) : ModuleItem(properties) {
 
                 Transaction.openRoot().use {
                     val sourceResource = sourceHandler.getResource(sourceItemIndex)
+                    if (sourceResource.isEmpty) return@use
 
                     val sourceAmount = sourceHandler.getAmountAsInt(sourceItemIndex)
                     val inserted = destinationHandler.insert(destinationItemIndex, sourceResource, min(sourceAmount, value), it)
