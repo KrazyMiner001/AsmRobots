@@ -1,0 +1,6 @@
+---
+navigation:
+    title: Test
+---
+
+Test

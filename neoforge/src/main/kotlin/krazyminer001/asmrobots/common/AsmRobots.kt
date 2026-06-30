@@ -1,10 +1,12 @@
 package krazyminer001.asmrobots.common
 
+import guideme.Guide
 import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.item.container.StorageModuleContainer
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
+import net.minecraft.resources.Identifier
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.neoforged.bus.api.SubscribeEvent
@@ -38,6 +40,9 @@ object AsmRobots {
         ModMenuTypes.REGISTRY.register(MOD_BUS)
         ModItems.REGISTRY.register(MOD_BUS)
         ModComponents.REGISTRY.register(MOD_BUS)
+
+        val guide = Guide.builder(Identifier.fromNamespaceAndPath(ID, "guide"))
+            .build()
     }
 
     @SubscribeEvent
