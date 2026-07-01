@@ -188,7 +188,7 @@ Argument Types:
 
 ## JCond
 Syntax: `jcond address, condition, arg1, arg2`\
-Function: Jumps to `address` only if the condition is true. See [Conditions](./conditions.md)\
+Function: Jumps to `address` only if the condition is true. See [Conditions](./argument-types.md)\
 Argument Types:
 
 | Name      | Types                                   |
