@@ -4,6 +4,7 @@ navigation:
     parent: instructions.md
 ---
 
+# Argument Types
 # Register
 Reference to one of the system registers.\
 Typically used as either a source or destination argument, data gets written to the register or read from its value.\

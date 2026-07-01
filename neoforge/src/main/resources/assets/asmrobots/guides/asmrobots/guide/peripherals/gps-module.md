@@ -2,7 +2,7 @@
 navigation:
     title: GPS Module
     position: 4
-    parent: peripherals.md
+    parent: peripherals/peripherals.md
 ---
 
 # GPS Module

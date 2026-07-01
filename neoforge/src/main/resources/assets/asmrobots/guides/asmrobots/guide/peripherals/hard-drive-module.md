@@ -2,7 +2,7 @@
 navigation:
     title: Hard Drive Module
     position: 5
-    parent: peripherals.md
+    parent: peripherals/peripherals.md
 ---
 
 # Hard Drive Module

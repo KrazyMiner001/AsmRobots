@@ -2,7 +2,7 @@
 navigation:
     title: Crafting Table Module
     position: 3
-    parent: peripherals.md
+    parent: peripherals/peripherals.md
 ---
 
 # Crafting Table Module

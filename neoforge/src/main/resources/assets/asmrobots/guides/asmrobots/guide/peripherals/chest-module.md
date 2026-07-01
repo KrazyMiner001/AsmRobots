@@ -2,7 +2,7 @@
 navigation:
     title: Chest Module
     position: 2
-    parent: peripherals.md
+    parent: peripherals/peripherals.md
 ---
 
 # Chest Module

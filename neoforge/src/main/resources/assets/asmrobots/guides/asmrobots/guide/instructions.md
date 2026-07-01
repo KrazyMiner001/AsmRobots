@@ -4,6 +4,8 @@ navigation:
     position: 3
 ---
 
+# Instructions
+
 # Arithmetic
 Note: All argument values are treated as signed 32-bit integers unless otherwise specified
 ## Add

@@ -2,7 +2,7 @@
 navigation:
     title: Robot Entity
     position: 1
-    parent: peripherals.md
+    parent: peripherals/peripherals.md
 ---
 
 # Robot Entity

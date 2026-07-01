@@ -2,7 +2,7 @@
 navigation:
     title: Storage Controller Module
     position: 6
-    parent: peripherals.md
+    parent: peripherals/peripherals.md
 ---
 
 # Storage Controller Module

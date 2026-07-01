@@ -4,6 +4,7 @@ navigation:
     position: 2
 ---
 
+# Getting Started
 # Overview
 
 The robot is a 32-bit computer, inspired by RISC-V, with an 8-bit byte size.\
