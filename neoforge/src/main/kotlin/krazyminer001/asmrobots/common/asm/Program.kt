@@ -80,6 +80,10 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                 is InstructionRewrite.Srl -> target.wordValue = arg1.wordValue ushr arg2.wordValue
                 is InstructionRewrite.Sub -> target.wordValue = arg1.wordValue - arg2.wordValue
                 is InstructionRewrite.Jump -> reg[PC] = address.wordValue
+                is InstructionRewrite.Call -> {
+                    callStack.add(reg[PC])
+                    reg[PC] = address.wordValue
+                }
                 is InstructionRewrite.And -> target.wordValue = arg1.wordValue and arg2.wordValue
                 is InstructionRewrite.JCond -> {
                     if (when ((condition as InstructionArgument.Condition).condition) {

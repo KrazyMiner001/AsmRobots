@@ -188,6 +188,15 @@ Argument Types:
 |---------|------------------------------|
 | address | register, immediate32, label |
 
+## Call
+Syntax: `call address`\
+Function: Same as except it pushes the program counter after this instruction to the call stack, so that it can be returned to later\
+Argument Types:
+
+| Name    | Types                        |
+|---------|------------------------------|
+| address | register, immediate32, label |
+
 ## JCond
 Syntax: `jcond address, condition, arg1, arg2`\
 Function: Jumps to `address` only if the condition is true. See [Conditions](./argument-types.md)\

@@ -103,6 +103,9 @@ sealed interface InstructionRewrite {
     data class Jump(
         val address: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument
     ) : InstructionRewrite
+    data class Call(
+        val address: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument
+    ) : InstructionRewrite
     data class And(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
