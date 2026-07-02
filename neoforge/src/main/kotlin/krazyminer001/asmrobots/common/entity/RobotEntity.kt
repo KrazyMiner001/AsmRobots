@@ -207,7 +207,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                         onServerClick = clickHandler@{
                             val (code, labels) = Assembler.assemble(
                                 Assembler.lex(code).map { Assembler.parse(it).getOrElse { return@clickHandler } }
-                            ).getOrElse { return@clickHandler }
+                            )
                             program = Program(this@RobotEntity)
                             program?.initMemoryAndLabels(code, labels)
                         }

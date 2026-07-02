@@ -24,7 +24,7 @@ object Assembler {
                 null != float -> Lexeme.FloatNum(string)
                 null != condition -> Lexeme.Condition(condition)
                 null != register -> Lexeme.Register(register)
-                null != byte -> Lexeme.Byte(string)
+                null != byte -> Lexeme.Byte(string.drop(2))
                 else -> Lexeme.Identifier(string)
             }
         }
@@ -108,7 +108,8 @@ object Assembler {
     }
 
     fun parse(line: List<Lexeme>): AsmResult<LexedLine, AsmError.ParseError> {
-        if (line.any { it is Lexeme.Error }) TODO()
+        if (line.any { it is Lexeme.Error })
+            return AsmResult.Failure(AsmError.ParseError.UnparsableLine(line.joinToString("")))
         val parts = line.filter { it !is Lexeme.Whitespace }
 
         if (parts.isEmpty()) return LexedLine(null, null).asSuccess()
@@ -154,6 +155,15 @@ object Assembler {
             }
             if (invalidArguments.isNotEmpty())
                 return AsmResult.Failure(AsmError.ParseError.InvalidInstructionArguments(invalidArguments))
+
+            if (!firstPart.mnemonic.isValid(*arguments.toTypedArray())) {
+                return AsmResult.Failure(
+                    AsmError
+                        .ParseError
+                        .InvalidInstructionArgumentsFor(firstPart.mnemonic, arguments)
+                )
+            }
+
             return LexedLine(LexedLine.Content.Instruction(firstPart.mnemonic, arguments), comment).asSuccess()
         }
 
@@ -183,7 +193,7 @@ object Assembler {
         return AsmResult.Failure(AsmError.ParseError.UnparsableLine(line.joinToString("")))
     }
 
-    fun assemble(lines: List<LexedLine>): AsmResult<Pair<ByteArray, Map<String, Int>>, AsmError.ParseError.ParseErrors> {
+    fun assemble(lines: List<LexedLine>): Pair<ByteArray, Map<String, Int>> {
         val labels = mutableMapOf<String, Int>()
         val pendingLabels = mutableListOf<LexedLine.Content.Label>()
         val content = mutableListOf<Pair<LexedLine.Content, Int>>()
@@ -199,8 +209,6 @@ object Assembler {
                 else -> {}
             }
         }
-
-        val parseErrors = mutableListOf<Pair<AsmError.ParseError, Int>>()
 
         val instructionIndexToRam = mutableMapOf<Int, Int>()
 
@@ -246,17 +254,6 @@ object Assembler {
                 }
                 is LexedLine.Content.Instruction -> {
                     val (instructionEnum, arguments) = content
-                    if (!instructionEnum.isValid(*arguments.toTypedArray())) {
-                        parseErrors.add(
-                            Pair(
-                                AsmError.ParseError.InvalidInstructionArgumentsFor(
-                                    instructionEnum,
-                                    arguments
-                                ), lineNum
-                            )
-                        )
-                        return@forEach
-                    }
                     val instructionInstance = instructionEnum.create(*arguments.toTypedArray())
                     memory.addAll(instructionInstance.toBytes().toList())
                 }
@@ -264,8 +261,7 @@ object Assembler {
             }
         }
 
-        if (parseErrors.isNotEmpty()) return AsmResult.Failure(AsmError.ParseError.ParseErrors(parseErrors))
-        return AsmResult.Success(Pair(memory.toByteArray(), labelsToRam.toMap()))
+        return Pair(memory.toByteArray(), labelsToRam.toMap())
     }
 }
 

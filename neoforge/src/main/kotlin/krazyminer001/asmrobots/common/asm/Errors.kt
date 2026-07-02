@@ -8,24 +8,16 @@ import kotlin.contracts.contract
 
 sealed interface AsmError {
     sealed interface ParseError : AsmError {
-        data class InstructionNotFound(val instructionName: String) : ParseError {
-            override val text = "Invalid instruction $instructionName"
-        }
-
         data class InvalidInstructionArgumentsFor(val instruction: InstructionRewriteEnum, val providedArguments: List<InstructionArgument>) : ParseError {
-            override val text = "Invalid arguments ($providedArguments) for instruction $instruction"
+            override val text = "Invalid arguments for instruction $instruction"
         }
 
         data class InvalidInstructionArguments(val arguments: List<String>) : ParseError {
             override val text = "Could not parse instruction arguments: ${arguments.joinToString()}"
         }
 
-        data class ParseErrors(val errors: List<Pair<ParseError, Int>>) : ParseError {
-            override val text = errors.joinToString("\n") { "Encountered error on line ${it.second}: ${it.first.text}" }
-        }
-
         data class UnparsableLine(val line: String) : ParseError {
-            override val text = "Invalid line $line"
+            override val text = "Invalid line"
         }
 
         data class InvalidDelimiter(val delimiter: String) : ParseError {

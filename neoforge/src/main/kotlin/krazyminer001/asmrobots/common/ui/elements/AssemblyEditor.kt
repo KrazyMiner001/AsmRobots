@@ -6,6 +6,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister
+import krazyminer001.asmrobots.common.asm.AsmError
 import krazyminer001.asmrobots.common.asm.Assembler
 import krazyminer001.asmrobots.common.asm.Lexeme
 import net.minecraft.client.gui.Font
@@ -21,7 +22,7 @@ import kotlin.math.max
 )
 class AssemblyEditor : TextArea() {
     private var needsReparsing: Boolean = true
-    private val styledLines: MutableList<Component> = mutableListOf()
+    private val styledLines: MutableList<Pair<Component, AsmError.ParseError?>> = mutableListOf()
 
     var indentSize: Int = 2
 
@@ -30,12 +31,12 @@ class AssemblyEditor : TextArea() {
         val lexedText = Assembler.lex(lines.joinToString("\n"))
         lexedText.mapTo(styledLines) { line ->
             val component = Component.empty()
-            line.forEach { line ->
+            line.forEach { lexeme ->
                 component.append(
                     Component.literal(
-                        line.toString()
+                        lexeme.toString()
                     ).withStyle {
-                        when (line) {
+                        when (lexeme) {
                             Lexeme.Colon -> it
                             Lexeme.Comma -> it
                             is Lexeme.Comment -> it.withColor(Color.gray.rgb)
@@ -55,7 +56,8 @@ class AssemblyEditor : TextArea() {
                     }
                 )
             }
-            component
+            val parsed = Assembler.parse(line)
+            Pair(component, parsed.errorValue)
         }
         needsReparsing = false
     }
@@ -154,13 +156,22 @@ class AssemblyEditor : TextArea() {
             .withIndex()
             .filter { it.index in (firstVisibleLine..lastVisibleLine) }
             .forEach { (index, line) ->
+                val (text, error) = line
                 val lineY = y + index * lineHeight() - scrollY
                 val drawX = x - scrollX
                 context.pose.pushPose()
                 context.pose.translate(drawX, lineY)
                 context.graphics.text(
                     font,
-                    line.copy().withStyle { it.withFont(FontDescription.Resource(textAreaStyle.font())) },
+                    text.copy().withStyle { style ->
+                        style.withFont(FontDescription.Resource(textAreaStyle.font()))
+                    }.let { component ->
+                        if (error != null) {
+                            component.append(Component.literal("  Error: ${error.text}").withStyle {it.withColor(Color.red.rgb)})
+                        } else {
+                            component
+                        }
+                    },
                     0,
                     0,
                     -1,

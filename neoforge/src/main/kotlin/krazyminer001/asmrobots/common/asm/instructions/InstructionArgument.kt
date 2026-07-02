@@ -5,7 +5,6 @@ import krazyminer001.asmrobots.annotations.Enumerated
 import krazyminer001.asmrobots.common.asm.fromBytes
 import krazyminer001.asmrobots.common.asm.toBytes
 import kotlin.reflect.KClass
-import kotlin.text.get
 import krazyminer001.asmrobots.common.asm.instructions.Condition as ConditionEnum
 import krazyminer001.asmrobots.common.asm.instructions.Register as RegisterEnum
 
