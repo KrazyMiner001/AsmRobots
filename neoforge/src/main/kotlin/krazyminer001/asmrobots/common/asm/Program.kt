@@ -36,7 +36,7 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
             interruptsEnabled = false
         }
 
-        val (instruction, argumentTypes) = InstructionRewrite.identifyInstruction(
+        val (instruction, argumentTypes) = Instruction.identifyInstruction(
             memory[reg[PC]].toUByte(),
             memory[reg[PC] + 1].toUByte()
         )
@@ -54,38 +54,38 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
         val it = instruction.create(*arguments)
         with(it) {
             when (this) {
-                is InstructionRewrite.Add -> target.wordValue = arg1.wordValue + arg2.wordValue
-                is InstructionRewrite.Div -> target.wordValue = arg1.wordValue / arg2.wordValue
-                InstructionRewrite.Halt -> callback.halt()
-                is InstructionRewrite.In -> target.wordValue = callback[ioPortAddress.wordValue]
-                is InstructionRewrite.Mov -> target.wordValue = arg1.wordValue
-                is InstructionRewrite.Movb -> target.byteValue = arg1.byteValue
-                is InstructionRewrite.Movh -> target.halfValue = arg1.halfValue
-                is InstructionRewrite.Mul -> target.wordValue = arg1.wordValue * arg2.wordValue
-                is InstructionRewrite.Mulh -> target.wordValue =
+                is Instruction.Add -> target.wordValue = arg1.wordValue + arg2.wordValue
+                is Instruction.Div -> target.wordValue = arg1.wordValue / arg2.wordValue
+                Instruction.Halt -> callback.halt()
+                is Instruction.In -> target.wordValue = callback[ioPortAddress.wordValue]
+                is Instruction.Mov -> target.wordValue = arg1.wordValue
+                is Instruction.Movb -> target.byteValue = arg1.byteValue
+                is Instruction.Movh -> target.halfValue = arg1.halfValue
+                is Instruction.Mul -> target.wordValue = arg1.wordValue * arg2.wordValue
+                is Instruction.Mulh -> target.wordValue =
                     (arg1.wordValue.toLong() * arg2.wordValue.toLong()).ushr(32).toInt()
 
-                InstructionRewrite.Nop -> {}
-                is InstructionRewrite.Out -> callback[ioPortAddress.wordValue] = value.wordValue
-                is InstructionRewrite.Pop -> target.wordValue = pop()
-                is InstructionRewrite.Push -> push(value.wordValue)
-                is InstructionRewrite.Poph -> target.wordValue = popHalf().toUShort().toInt()
-                is InstructionRewrite.Pushh -> pushHalf(value.wordValue.toShort())
-                is InstructionRewrite.Popb -> target.wordValue = popByte().toUByte().toInt()
-                is InstructionRewrite.Pushb -> pushByte(value.wordValue.toByte())
-                is InstructionRewrite.Rem -> target.wordValue = arg1.wordValue % arg2.wordValue
-                InstructionRewrite.Ret -> reg[PC] = callStack.removeLast()
-                is InstructionRewrite.Sll -> target.wordValue = arg1.wordValue shl arg2.wordValue
-                is InstructionRewrite.Sra -> target.wordValue = arg1.wordValue shr arg2.wordValue
-                is InstructionRewrite.Srl -> target.wordValue = arg1.wordValue ushr arg2.wordValue
-                is InstructionRewrite.Sub -> target.wordValue = arg1.wordValue - arg2.wordValue
-                is InstructionRewrite.Jump -> reg[PC] = address.wordValue
-                is InstructionRewrite.Call -> {
+                Instruction.Nop -> {}
+                is Instruction.Out -> callback[ioPortAddress.wordValue] = value.wordValue
+                is Instruction.Pop -> target.wordValue = pop()
+                is Instruction.Push -> push(value.wordValue)
+                is Instruction.Poph -> target.wordValue = popHalf().toUShort().toInt()
+                is Instruction.Pushh -> pushHalf(value.wordValue.toShort())
+                is Instruction.Popb -> target.wordValue = popByte().toUByte().toInt()
+                is Instruction.Pushb -> pushByte(value.wordValue.toByte())
+                is Instruction.Rem -> target.wordValue = arg1.wordValue % arg2.wordValue
+                Instruction.Ret -> reg[PC] = callStack.removeLast()
+                is Instruction.Sll -> target.wordValue = arg1.wordValue shl arg2.wordValue
+                is Instruction.Sra -> target.wordValue = arg1.wordValue shr arg2.wordValue
+                is Instruction.Srl -> target.wordValue = arg1.wordValue ushr arg2.wordValue
+                is Instruction.Sub -> target.wordValue = arg1.wordValue - arg2.wordValue
+                is Instruction.Jump -> reg[PC] = address.wordValue
+                is Instruction.Call -> {
                     callStack.add(reg[PC])
                     reg[PC] = address.wordValue
                 }
-                is InstructionRewrite.And -> target.wordValue = arg1.wordValue and arg2.wordValue
-                is InstructionRewrite.JCond -> {
+                is Instruction.And -> target.wordValue = arg1.wordValue and arg2.wordValue
+                is Instruction.JCond -> {
                     if (when ((condition as InstructionArgument.Condition).condition) {
                             Condition.EQ -> arg1.wordValue == arg2.wordValue
                             Condition.LT -> arg1.wordValue < arg2.wordValue
@@ -97,12 +97,12 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                         reg[PC] = address.wordValue
                     }
                 }
-                is InstructionRewrite.Not -> target.wordValue = arg1.wordValue.inv()
-                is InstructionRewrite.Or -> target.wordValue = arg1.wordValue or arg2.wordValue
-                is InstructionRewrite.Xor -> target.wordValue = arg1.wordValue xor arg2.wordValue
-                InstructionRewrite.DI -> interruptsEnabled = false
-                InstructionRewrite.EI -> interruptsEnabled  = true
-                InstructionRewrite.CI -> pendingInterrupts.clear()
+                is Instruction.Not -> target.wordValue = arg1.wordValue.inv()
+                is Instruction.Or -> target.wordValue = arg1.wordValue or arg2.wordValue
+                is Instruction.Xor -> target.wordValue = arg1.wordValue xor arg2.wordValue
+                Instruction.DI -> interruptsEnabled = false
+                Instruction.EI -> interruptsEnabled  = true
+                Instruction.CI -> pendingInterrupts.clear()
             }
         }
     }

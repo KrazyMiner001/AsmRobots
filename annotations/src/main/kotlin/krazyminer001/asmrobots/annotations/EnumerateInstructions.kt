@@ -3,7 +3,7 @@ package krazyminer001.asmrobots.annotations
 import kotlin.reflect.KClass
 
 @Target(AnnotationTarget.CLASS)
-annotation class InstructionEnum(
+annotation class EnumerateInstructions(
     val argumentAnnotationClass: KClass<out Annotation>,
 )
 

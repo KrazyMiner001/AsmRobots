@@ -1,14 +1,14 @@
 package krazyminer001.asmrobots.common.asm
 
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
-import krazyminer001.asmrobots.common.asm.instructions.InstructionRewriteEnum
+import krazyminer001.asmrobots.common.asm.instructions.InstructionEnum
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.ExperimentalExtendedContracts
 import kotlin.contracts.contract
 
 sealed interface AsmError {
     sealed interface ParseError : AsmError {
-        data class InvalidInstructionArgumentsFor(val instruction: InstructionRewriteEnum, val providedArguments: List<InstructionArgument>) : ParseError {
+        data class InvalidInstructionArgumentsFor(val instruction: InstructionEnum, val providedArguments: List<InstructionArgument>) : ParseError {
             override val text = "Invalid arguments for instruction $instruction"
         }
 

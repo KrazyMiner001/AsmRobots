@@ -9,7 +9,7 @@ import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import krazyminer001.asmrobots.annotations.ArgumentAnnotation
-import krazyminer001.asmrobots.annotations.InstructionEnum
+import krazyminer001.asmrobots.annotations.EnumerateInstructions
 import krazyminer001.asmrobots.annotations.Parsable
 import krazyminer001.asmrobots.annotations.ParsableEnumerated
 
@@ -22,7 +22,7 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
             .filterIsInstance<KSClassDeclaration>()
             .forEach { it.accept(ParsableEnumeratedVisitor(parsable, resolver), Unit) }
 
-        resolver.getSymbolsWithAnnotation(InstructionEnum::class.qualifiedName!!)
+        resolver.getSymbolsWithAnnotation(EnumerateInstructions::class.qualifiedName!!)
             .filter(KSAnnotated::validate)
             .filterIsInstance<KSClassDeclaration>()
             .forEach { it.accept(InstructionEnumVisitor(), Unit) }
@@ -95,7 +95,7 @@ class InstructionAnnotationsProcessor(val codeGenerator: CodeGenerator, val logg
 
     inner class InstructionEnumVisitor : KSVisitorVoid() {
         override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
-            val annotation = classDeclaration.annotations.first { it.shortName.asString() == InstructionEnum::class.simpleName }
+            val annotation = classDeclaration.annotations.first { it.shortName.asString() == EnumerateInstructions::class.simpleName }
             val otherAnnotationType = annotation.arguments[0].value as KSType
             val argumentTypeAnnotation = otherAnnotationType.declaration.annotations.first { it.shortName.asString() == ArgumentAnnotation::class.simpleName }
             val argumentType = argumentTypeAnnotation.arguments[0].value as KSType

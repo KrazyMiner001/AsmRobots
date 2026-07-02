@@ -1,139 +1,139 @@
 package krazyminer001.asmrobots.common.asm.instructions
 
-import krazyminer001.asmrobots.annotations.InstructionEnum
+import krazyminer001.asmrobots.annotations.EnumerateInstructions
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.*
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Condition
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Label
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument.Register
 
-@InstructionEnum(ArgumentType::class)
-sealed interface InstructionRewrite {
+@EnumerateInstructions(ArgumentType::class)
+sealed interface Instruction {
     data class Add(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Sub(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Mul(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Mulh(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Div(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Rem(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Sll(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Srl(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Sra(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Mov(
         val target: @ArgumentType(Register::class, Pointer::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class,
             Label::class
         ) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Movh(
         val target: @ArgumentType(Register::class, Pointer::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class,
             Label::class
         ) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Movb(
         val target: @ArgumentType(Register::class, Pointer::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class, Pointer::class,
             Label::class
         ) InstructionArgument,
-    ) : InstructionRewrite
-    data object Ret : InstructionRewrite
-    data object Nop : InstructionRewrite
+    ) : Instruction
+    data object Ret : Instruction
+    data object Nop : Instruction
     data class Push(
         val value: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument
-    ) : InstructionRewrite
+    ) : Instruction
     data class Pop(
         val target: @ArgumentType(Register::class) InstructionArgument
-    ) : InstructionRewrite
+    ) : Instruction
     data class Pushh(
         val value: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument
-    ) : InstructionRewrite
+    ) : Instruction
     data class Poph(
         val target: @ArgumentType(Register::class) InstructionArgument
-    ) : InstructionRewrite
+    ) : Instruction
     data class Pushb(
         val value: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument
-    ) : InstructionRewrite
+    ) : Instruction
     data class Popb(
         val target: @ArgumentType(Register::class) InstructionArgument
-    ) : InstructionRewrite
-    data object Halt : InstructionRewrite
+    ) : Instruction
+    data object Halt : Instruction
     data class In(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val ioPortAddress: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument
-    ) : InstructionRewrite
+    ) : Instruction
     data class Out(
         val ioPortAddress: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val value: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument
-    ) : InstructionRewrite
+    ) : Instruction
     data class Jump(
         val address: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument
-    ) : InstructionRewrite
+    ) : Instruction
     data class Call(
         val address: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument
-    ) : InstructionRewrite
+    ) : Instruction
     data class And(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Or(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Xor(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class Not(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
-    ) : InstructionRewrite
+    ) : Instruction
     data class JCond(
         val address: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument,
         val condition: @ArgumentType(Condition::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
         val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
-    ) : InstructionRewrite
-    data object EI : InstructionRewrite
-    data object DI : InstructionRewrite
-    data object CI : InstructionRewrite
+    ) : Instruction
+    data object EI : Instruction
+    data object DI : Instruction
+    data object CI : Instruction
 
     fun toBytes(): ByteArray {
         return this.asEnum().toBytes(this)
@@ -144,10 +144,10 @@ sealed interface InstructionRewrite {
     }
 }
 
-fun InstructionRewrite.asEnum(): InstructionRewriteEnum = InstructionRewriteEnum.entries.find { it.name == this::class.simpleName }!!
+fun Instruction.asEnum(): InstructionEnum = InstructionEnum.entries.find { it.name == this::class.simpleName }!!
 
-fun InstructionRewrite.Companion.identifyInstruction(opcode: UByte, typeInformation: UByte): Pair<InstructionRewriteEnum, Array<InstructionArgumentEnum>> {
-    val instructionEnum = InstructionRewriteEnum.entries.find { it.ordinal == opcode.toInt() }
+fun Instruction.Companion.identifyInstruction(opcode: UByte, typeInformation: UByte): Pair<InstructionEnum, Array<InstructionArgumentEnum>> {
+    val instructionEnum = InstructionEnum.entries.find { it.ordinal == opcode.toInt() }
     if (instructionEnum == null) throw IllegalArgumentException("Opcode $opcode does not correspond to an instruction")
 
     val types = instructionEnum.types

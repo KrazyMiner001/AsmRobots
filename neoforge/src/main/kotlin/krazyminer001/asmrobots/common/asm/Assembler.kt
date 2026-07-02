@@ -1,8 +1,8 @@
 package krazyminer001.asmrobots.common.asm
 
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
-import krazyminer001.asmrobots.common.asm.instructions.InstructionRewrite.Companion.byteLength
-import krazyminer001.asmrobots.common.asm.instructions.InstructionRewriteEnum
+import krazyminer001.asmrobots.common.asm.instructions.Instruction.Companion.byteLength
+import krazyminer001.asmrobots.common.asm.instructions.InstructionEnum
 import krazyminer001.asmrobots.common.asm.instructions.asEnum
 import krazyminer001.asmrobots.common.asm.instructions.Condition as ConditionEnum
 import krazyminer001.asmrobots.common.asm.instructions.Register as RegisterEnum
@@ -71,7 +71,7 @@ object Assembler {
                     partialString.endsWith(" ") -> {
                         val mainPart = partialString.dropLast(1)
                         if (mainPart.isNotEmpty()) {
-                            val mnemonic = InstructionRewriteEnum.entries.find { it.name.lowercase() == mainPart }
+                            val mnemonic = InstructionEnum.entries.find { it.name.lowercase() == mainPart }
                             lexemes +=
                                 if (mainPart == "emb")
                                     Lexeme.EmbedDirective
@@ -100,7 +100,7 @@ object Assembler {
                 }
             }
             if (partialString.isNotEmpty() && lexemes.lastOrNull() !is Lexeme.Comment) {
-                val mnemonic = InstructionRewriteEnum.entries.find { it.name.lowercase() == partialString }
+                val mnemonic = InstructionEnum.entries.find { it.name.lowercase() == partialString }
                 lexemes += mnemonic?.let { Lexeme.Mnemonic(it) } ?: parseArgument(partialString)
             }
             lexemes.toList()
@@ -267,7 +267,7 @@ object Assembler {
 
 data class LexedLine(val content: Content?, val comment: String?) {
     sealed interface Content {
-        data class Instruction(val instruction: InstructionRewriteEnum, val arguments: List<InstructionArgument>) :
+        data class Instruction(val instruction: InstructionEnum, val arguments: List<InstructionArgument>) :
             Content
 
         data class Label(val name: String) : Content
@@ -308,7 +308,7 @@ sealed interface Lexeme {
         override fun toString() = condition.name.lowercase()
     }
 
-    data class Mnemonic(val mnemonic: InstructionRewriteEnum) : Lexeme {
+    data class Mnemonic(val mnemonic: InstructionEnum) : Lexeme {
         override fun toString() = mnemonic.name.lowercase()
     }
 

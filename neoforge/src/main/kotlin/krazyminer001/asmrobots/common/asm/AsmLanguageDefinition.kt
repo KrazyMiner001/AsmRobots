@@ -4,7 +4,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.LanguageDef
 import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.StyleManager
 import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.TokenType
 import com.lowdragmc.lowdraglib2.gui.ui.elements.codeeditor.language.TokenTypes
-import krazyminer001.asmrobots.common.asm.instructions.InstructionRewriteEnum
+import krazyminer001.asmrobots.common.asm.instructions.InstructionEnum
 import krazyminer001.asmrobots.common.asm.instructions.Register
 import net.minecraft.network.chat.Style
 import java.awt.Color
@@ -15,7 +15,7 @@ object AsmLanguageDefinition
         listOf(
             TokenType("Label").setPattern(".*:"),
             TokenType("Instruction").setPattern("\\b(?:" +
-                InstructionRewriteEnum.entries.joinToString("|") {
+                InstructionEnum.entries.joinToString("|") {
                     it.name.lowercase()
                 } + ")\\b"
             ),
