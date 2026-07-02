@@ -20,11 +20,11 @@ object Assembler {
             val register = RegisterEnum.entries.find { it.name.lowercase() == string }
             val byte = if (string.length == 4 && string[0] == '0' && string[1] == 'x') string.drop(2).toUByteOrNull(16) else null
             return when {
-                null != int -> Lexeme.Integer(int)
-                null != float -> Lexeme.FloatNum(float, string)
+                null != int -> Lexeme.Integer(string)
+                null != float -> Lexeme.FloatNum(string)
                 null != condition -> Lexeme.Condition(condition)
                 null != register -> Lexeme.Register(register)
-                null != byte -> Lexeme.Byte(byte, string)
+                null != byte -> Lexeme.Byte(string)
                 else -> Lexeme.Identifier(string)
             }
         }
@@ -85,7 +85,7 @@ object Assembler {
                     partialString.endsWith("(") -> {
                         val mainPart = partialString.dropLast(1)
                         val int = mainPart.toIntOrNull()
-                        lexemes += if (int == null) Lexeme.Error(mainPart) else Lexeme.Integer(int)
+                        lexemes += if (int == null) Lexeme.Error(mainPart) else Lexeme.Integer(mainPart)
                         lexemes += Lexeme.LeftBracket
                         partialString = ""
                     }
@@ -134,8 +134,8 @@ object Assembler {
                         is Lexeme.Register -> arguments += InstructionArgument.Register(lexeme.register)
                         is Lexeme.Identifier -> arguments += InstructionArgument.Label(-1, lexeme.text)
                         is Lexeme.Condition -> arguments += InstructionArgument.Condition(lexeme.condition)
-                        is Lexeme.Integer -> arguments += InstructionArgument.Immediate32(lexeme.value)
-                        is Lexeme.FloatNum -> arguments += InstructionArgument.ImmediateFloat32(lexeme.value)
+                        is Lexeme.Integer -> arguments += InstructionArgument.Immediate32(lexeme.num)
+                        is Lexeme.FloatNum -> arguments += InstructionArgument.ImmediateFloat32(lexeme.num)
                         else -> invalidArguments += lexeme.toString()
                     }
                 } else if (argument.size == 4) {
@@ -143,7 +143,7 @@ object Assembler {
                     if (offset is Lexeme.Integer && openBracket is Lexeme.LeftBracket && register is Lexeme.Register && closeBracket is Lexeme.RightBracket) {
                         arguments += InstructionArgument.Pointer(
                             register.register,
-                            InstructionArgument.Immediate32(offset.value)
+                            InstructionArgument.Immediate32(offset.num)
                         )
                     } else {
                         invalidArguments += argument.joinToString("")
@@ -293,16 +293,19 @@ sealed interface Lexeme {
         override fun toString() = register.name.lowercase()
     }
 
-    data class Integer(val value: Int) : Lexeme {
-        override fun toString() = value.toString()
+    data class Integer(val text: String) : Lexeme {
+        override fun toString() = text
+        val num = text.toInt()
     }
 
-    data class FloatNum(val value: Float, val originalText: String? = null) : Lexeme {
-        override fun toString() = originalText ?: value.toString()
+    data class FloatNum(val text: String) : Lexeme {
+        override fun toString() = text
+        val num = text.toFloat()
     }
 
-    data class Byte(val value: UByte, val originalText: String? = null) : Lexeme {
-        override fun toString() = originalText ?: "0x${value.toString(16)}"
+    data class Byte(val text: String) : Lexeme {
+        override fun toString() = text
+        val value = text.toUByte(16)
     }
 
     data class Condition(val condition: ConditionEnum) : Lexeme {
