@@ -362,6 +362,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                 level.server.playerList
                     .broadcastSystemMessage(messagePrefix.append("Error: ${it.text}"), false)
             }
+            halt()
         }
 
         if (onGround()) {
