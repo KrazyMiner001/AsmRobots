@@ -2,6 +2,7 @@ package krazyminer001.asmrobots.common
 
 import guideme.Guide
 import krazyminer001.asmrobots.common.entity.ModEntities
+import krazyminer001.asmrobots.common.item.ModCreativeTabs
 import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.item.container.StorageModuleContainer
@@ -42,6 +43,7 @@ object AsmRobots {
         ModMenuTypes.REGISTRY.register(MOD_BUS)
         ModItems.REGISTRY.register(MOD_BUS)
         ModComponents.REGISTRY.register(MOD_BUS)
+        ModCreativeTabs.REGISTRY.register(MOD_BUS)
 
         GUIDE = Guide.builder(Identifier.fromNamespaceAndPath(ID, "guide")).build()
     }

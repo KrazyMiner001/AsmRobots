@@ -2,8 +2,10 @@ package krazyminer001.asmrobots.data
 
 import krazyminer001.asmrobots.common.AsmRobots
 import krazyminer001.asmrobots.common.entity.ModEntities
+import krazyminer001.asmrobots.common.item.ModCreativeTabs
 import krazyminer001.asmrobots.common.item.ModItems
 import net.minecraft.data.PackOutput
+import net.minecraft.network.chat.contents.TranslatableContents
 import net.neoforged.neoforge.common.data.LanguageProvider
 
 class EnUsLanguageProvider(output: PackOutput) : LanguageProvider(output, AsmRobots.ID, "en_us") {
@@ -18,5 +20,7 @@ class EnUsLanguageProvider(output: PackOutput) : LanguageProvider(output, AsmRob
         this.add(ModItems.CRAFTING_TABLE_MODULE, "Crafting Table Module")
 
         this.add(ModItems.ROBOT, "Robot")
+
+        this.add((ModCreativeTabs.MAIN_TAB.displayName.contents as TranslatableContents).key, "ASM Robots")
     }
 }
