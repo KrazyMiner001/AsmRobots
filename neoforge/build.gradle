@@ -102,7 +102,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 
 dependencies {
-    implementation 'thedarkcolour:kotlinforforge-neoforge:6.2.0'
+    implementation "thedarkcolour:kotlinforforge-neoforge:${kff_version}"
 
     implementation "com.lowdragmc.ldlib2:ldlib2-neoforge-26.1:${ldlib2_version}"
 
@@ -126,7 +126,9 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
                              mod_license            : mod_license,
                              mod_version            : mod_version,
                              mod_authors            : mod_authors,
-                             mod_description        : mod_description]
+                             mod_description        : mod_description,
+                             ldlib2_version         : ldlib2_version,
+                             guideme_version        : guideme_version]
     inputs.properties replaceProperties
     expand replaceProperties
     from "src/main/templates"
