@@ -56,7 +56,7 @@ import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper
 import org.lwjgl.glfw.GLFW
 import kotlin.math.ceil
 
-class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level
+open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level
                   ) : Mob(type, level),
     IContainerUIHolder, ProgramCallback, InventoryCarrier {
 
@@ -75,6 +75,8 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
         }
         this.setCanPickUpLoot(true)
     }
+
+    protected val numModules = 4
 
     var code: String
         get() = entityData.get(CODE_DATA)
@@ -95,7 +97,7 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
     var blockBreakProgress: Pair<BlockPos, Int>? = null
 
     @get:JvmName("getInventoryContainer")
-    val inventory: SimpleContainer = object : SimpleContainer(4) {
+    val inventory: SimpleContainer = object : SimpleContainer(numModules) {
         override fun canPlaceItem(slot: Int, itemStack: ItemStack): Boolean {
             return super.canPlaceItem(slot, itemStack) && itemStack.item is ModuleItem
         }
@@ -419,21 +421,12 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun get(ioAddress: Int): Int {
         return when (ioAddress) {
-            in 1000..1999 -> {
-                val stack = inventory.getItem(0)
-                (stack.item as? ModuleItem)?.getIOPort(ioAddress - 1000, stack, this) ?: 0
-            }
-            in 2000..2999 -> {
-                val stack = inventory.getItem(1)
-                (stack.item as? ModuleItem)?.getIOPort(ioAddress - 2000, stack, this) ?: 0
-            }
-            in 3000..3999 -> {
-                val stack = inventory.getItem(2)
-                (stack.item as? ModuleItem)?.getIOPort(ioAddress - 3000, stack, this) ?: 0
-            }
-            in 4000..4999 -> {
-                val stack = inventory.getItem(3)
-                (stack.item as? ModuleItem)?.getIOPort(ioAddress - 4000, stack, this) ?: 0
+            in 1000..(numModules*1000+999) -> {
+                val moduleIndex = ioAddress.floorDiv(1000)
+                val address = ioAddress % 1000
+
+                val stack = inventory.getItem(moduleIndex - 1)
+                (stack.item as? ModuleItem)?.getIOPort(address, stack, this) ?: -1
             }
             IOPorts.VELOCITY -> velocity.toBits()
             IOPorts.FEET_BLOCK -> BuiltInRegistries.BLOCK
@@ -448,21 +441,12 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun set(ioAddress: Int, value: Int) {
         when (ioAddress) {
-            in 1000..1999 -> {
-                val stack = inventory.getItem(0)
-                (stack.item as? ModuleItem)?.setIOPort(ioAddress - 1000, stack, this, value)
-            }
-            in 2000..2999 -> {
-                val stack = inventory.getItem(1)
-                (stack.item as? ModuleItem)?.setIOPort(ioAddress - 2000, stack, this, value)
-            }
-            in 3000..3999 -> {
-                val stack = inventory.getItem(2)
-                (stack.item as? ModuleItem)?.setIOPort(ioAddress - 3000, stack, this, value)
-            }
-            in 4000..4999 -> {
-                val stack = inventory.getItem(3)
-                (stack.item as? ModuleItem)?.setIOPort(ioAddress - 4000, stack, this, value) ?: 0
+            in 1000..(numModules*1000+999) -> {
+                val moduleIndex = ioAddress.floorDiv(1000)
+                val address = ioAddress % 1000
+
+                val stack = inventory.getItem(moduleIndex - 1)
+                (stack.item as? ModuleItem)?.setIOPort(address, stack, this, value)
             }
             IOPorts.VELOCITY -> velocity = Float.fromBits(value).coerceIn(-1f..1f) / 20
             IOPorts.PRINT_INT -> {
