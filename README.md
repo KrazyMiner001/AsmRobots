@@ -5,6 +5,7 @@
 * [Documentation](#documentation)
 * [Download](#download)
 * [Building](#building)
+* [Demo](#demo)
 
 ## About
 A Minecraft mod around coding robots in assembly.\
@@ -31,3 +32,6 @@ If you do not know how to install NeoForge, see [their user guide](https://docs.
 
 ## Building
 To build the mod, clone this repo and run `gradle neoforge:build`
+
+## Demo
+![img.png](img.png)
