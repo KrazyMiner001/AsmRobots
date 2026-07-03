@@ -1,8 +1,10 @@
 package krazyminer001.asmrobots.common.item
 
 import krazyminer001.asmrobots.common.AsmRobots
+import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.item.component.StorageModuleComponent
+import net.minecraft.world.item.SpawnEggItem
 import net.neoforged.neoforge.registries.DeferredRegister
 import thedarkcolour.kotlinforforge.neoforge.forge.getValue
 
@@ -34,6 +36,12 @@ object ModItems {
     val CRAFTING_TABLE_MODULE by REGISTRY.registerItem("crafting_table_module", ::CraftingTableModule) { properties ->
         properties
             .component(ModComponents.STORAGE_COMPONENT, StorageModuleComponent(size = 10))
+            .stacksTo(1)
+    }
+
+    val ROBOT by REGISTRY.registerItem("robot", ::SpawnEggItem) { properties ->
+        properties
+            .spawnEgg(ModEntities.ROBOT_ENTITY)
             .stacksTo(1)
     }
 }

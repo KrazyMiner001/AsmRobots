@@ -19,6 +19,7 @@ import dev.vfyjxf.taffy.style.TaffyDisplay
 import guideme.GuidesCommon
 import krazyminer001.asmrobots.common.AsmRobots
 import krazyminer001.asmrobots.common.asm.*
+import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.item.ModuleItem
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.common.ui.elements.assemblyEditor
@@ -34,6 +35,7 @@ import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.resources.Identifier
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.*
+import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.HumanoidArm
@@ -74,6 +76,9 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
             }
         }
         this.setCanPickUpLoot(true)
+
+        setGuaranteedDrop(EquipmentSlot.MAINHAND)
+        setGuaranteedDrop(EquipmentSlot.OFFHAND)
     }
 
     protected val numModules = 4
@@ -471,6 +476,14 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     }
 
     override fun getInventory() = inventory
+
+    override fun dropCustomDeathLoot(level: ServerLevel, source: DamageSource, killedByPlayer: Boolean) {
+        super.dropCustomDeathLoot(level, source, killedByPlayer)
+
+        inventory.removeAllItems().forEach { drop(it, true, false) }
+
+        drop(ItemStack(ModItems.ROBOT, 1), false, false)
+    }
 
     companion object {
         val CODE_DATA: EntityDataAccessor<String> =

@@ -16,5 +16,7 @@ class EnUsLanguageProvider(output: PackOutput) : LanguageProvider(output, AsmRob
         this.add(ModItems.HARD_DRIVE_MODULE, "Hard Drive Module")
         this.add(ModItems.STORAGE_CONTROLLER_MODULE, "Storage Controller Module")
         this.add(ModItems.CRAFTING_TABLE_MODULE, "Crafting Table Module")
+
+        this.add(ModItems.ROBOT, "Robot")
     }
 }

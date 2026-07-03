@@ -4,5 +4,6 @@
   "item.asmrobots.crafting_table_module": "Crafting Table Module",
   "item.asmrobots.gps_module": "GPS Module",
   "item.asmrobots.hard_drive_module": "Hard Drive Module",
+  "item.asmrobots.robot": "Robot",
   "item.asmrobots.storage_controller_module": "Storage Controller Module"
 }
