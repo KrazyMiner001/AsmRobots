@@ -1,5 +1,6 @@
 package krazyminer001.asmrobots.common.asm
 
+import krazyminer001.asmrobots.common.asm.instructions.Instruction
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
 import krazyminer001.asmrobots.common.asm.instructions.InstructionEnum
 import kotlin.contracts.ExperimentalContracts
@@ -30,7 +31,13 @@ sealed interface AsmError {
     }
 
     sealed interface RuntimeError : AsmError {
+        data class CouldNotParseInstruction(val pc: Int): RuntimeError {
+            override val text = "Could not parse instruction at PC=$pc"
+        }
 
+        data class ErrorExecutingInstruction(val pc: Int, val instruction: Instruction): RuntimeError {
+            override val text = ""
+        }
     }
 
     val text: String

@@ -348,11 +348,15 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
 
     override fun tick() {
         super.tick()
-        try {
-            program?.step()
-        } catch (_: Throwable) {
-            program = null
+        val level = level()
+
+        program?.step()?.let {
+            if (level is ServerLevel) {
+                level.server.playerList
+                    .broadcastSystemMessage(messagePrefix.append("Error: ${it.text}"), false)
+            }
         }
+
         if (onGround()) {
             deltaMovement = deltaMovement.add(getInputVector(Vec3(0.0, 0.0, 1.0), velocity, yHeadRot))
 
@@ -403,7 +407,6 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                     }
                 }
                 is EntityHitResult -> {
-                    val level = level()
                     if (level is ServerLevel) {
                         if (hitResult.entity.isAttackable) {
                             this.doHurtTarget(level, hitResult.entity)
