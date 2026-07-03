@@ -242,14 +242,14 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                             display(TaffyDisplay.GRID)
                             grid {
                                 templateColumns("repeat(2, min-content)")
-                                templateRows("repeat(2, min-content)")
+                                templateRows("min-content")
                             }
                             gap {
                                 all(0)
                             }
                         }
                     }) {
-                        repeat(4) {
+                        repeat(numModules) {
                             itemSlot({
                                 bind(VanillaContainerWrapper.of(inventory), it)
                             })
