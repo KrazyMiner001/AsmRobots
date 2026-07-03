@@ -24,7 +24,7 @@ Documentation can be accessed from the code editor in the robot's UI.\
 I will probably make it available out of the game at some point.
 
 ## Download
-The mod can be downloaded from Modrinth (not yet, but it will be there)
+The mod can be downloaded from [Modrinth](https://modrinth.com/mod/asm-robots)
 
 ## Installation
 Install the mod by putting the file into `minecraft/mods/` alongside a version of [LDLib2](https://modrinth.com/mod/ldlib), [Kotlin for Forge](https://modrinth.com/mod/kotlin-for-forge) and [GuideME](https://modrinth.com/mod/guideme) on a neoforge install for 26.1.2.\
