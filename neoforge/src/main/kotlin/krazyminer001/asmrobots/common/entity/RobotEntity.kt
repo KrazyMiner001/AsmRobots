@@ -198,35 +198,37 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                         }
                     }
                 }) {
-                    button({
-                        onClick = {
-                            GuidesCommon.openGuide(player, AsmRobots.GUIDE.id)
-                        }
-                        text("Open Guide")
-                    })
+                    element {
+                        button({
+                            onClick = {
+                                GuidesCommon.openGuide(player, AsmRobots.GUIDE.id)
+                            }
+                            text("Open Guide")
+                        })
 
-                    button({
-                        onClick = {
-                            saveCodeEvent.send(clientCode.joinToString("\n"))
-                        }
-                        text("Save")
-                    })
-                    button({
-                        text("Execute")
-                        onServerClick = clickHandler@{
-                            val (code, labels) = Assembler.assemble(
-                                Assembler.lex(code).map { Assembler.parse(it).getOrElse { return@clickHandler } }
-                            )
-                            program = Program(this@RobotEntity)
-                            program?.initMemoryAndLabels(code, labels)
-                        }
-                    })
-                    button({
-                        text("Stop")
-                        onServerClick = {
-                            program = null
-                        }
-                    })
+                        button({
+                            onClick = {
+                                saveCodeEvent.send(clientCode.joinToString("\n"))
+                            }
+                            text("Save")
+                        })
+                        button({
+                            text("Execute")
+                            onServerClick = clickHandler@{
+                                val (code, labels) = Assembler.assemble(
+                                    Assembler.lex(code).map { Assembler.parse(it).getOrElse { return@clickHandler } }
+                                )
+                                program = Program(this@RobotEntity)
+                                program?.initMemoryAndLabels(code, labels)
+                            }
+                        })
+                        button({
+                            text("Stop")
+                            onServerClick = {
+                                program = null
+                            }
+                        })
+                    }
 
                     element({
                         layout = {
