@@ -16,6 +16,8 @@ import dev.vfyjxf.taffy.style.AlignContent
 import dev.vfyjxf.taffy.style.AlignItems
 import dev.vfyjxf.taffy.style.FlexDirection
 import dev.vfyjxf.taffy.style.TaffyDisplay
+import guideme.GuidesCommon
+import krazyminer001.asmrobots.common.AsmRobots
 import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.item.ModuleItem
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
@@ -196,6 +198,13 @@ class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, leve
                         }
                     }
                 }) {
+                    button({
+                        onClick = {
+                            GuidesCommon.openGuide(player, AsmRobots.GUIDE.id)
+                        }
+                        text("Open Guide")
+                    })
+
                     button({
                         onClick = {
                             saveCodeEvent.send(clientCode.joinToString("\n"))

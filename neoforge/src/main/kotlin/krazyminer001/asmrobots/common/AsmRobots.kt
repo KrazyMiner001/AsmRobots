@@ -33,6 +33,8 @@ object AsmRobots {
 
     val LOGGER: Logger = LogManager.getLogger(ID)
 
+    val GUIDE: Guide
+
     init {
         LOGGER.log(Level.INFO, "Hello world!")
 
@@ -41,8 +43,7 @@ object AsmRobots {
         ModItems.REGISTRY.register(MOD_BUS)
         ModComponents.REGISTRY.register(MOD_BUS)
 
-        val guide = Guide.builder(Identifier.fromNamespaceAndPath(ID, "guide"))
-            .build()
+        GUIDE = Guide.builder(Identifier.fromNamespaceAndPath(ID, "guide")).build()
     }
 
     @SubscribeEvent
