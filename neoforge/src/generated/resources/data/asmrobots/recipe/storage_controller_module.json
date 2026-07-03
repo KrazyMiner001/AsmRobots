@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "storage_controller_module",
+  "key": {
+    "C": "#c:chests",
+    "d": "minecraft:diamond",
+    "r": "minecraft:redstone"
+  },
+  "pattern": [
+    "CdC",
+    "drd",
+    "CdC"
+  ],
+  "result": {
+    "id": "asmrobots:storage_controller_module"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "c": "minecraft:compass",
+    "i": "minecraft:iron_ingot",
+    "r": "minecraft:redstone"
+  },
+  "pattern": [
+    "rir",
+    "ici",
+    "rir"
+  ],
+  "result": {
+    "id": "asmrobots:gps_module"
+  }
+}

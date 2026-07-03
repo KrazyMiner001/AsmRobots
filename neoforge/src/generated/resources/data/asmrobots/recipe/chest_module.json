@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "chest_module",
+  "key": {
+    "C": "#c:chests",
+    "i": "minecraft:iron_ingot",
+    "p": "#minecraft:planks"
+  },
+  "pattern": [
+    "pip",
+    "iCi",
+    "pip"
+  ],
+  "result": {
+    "id": "asmrobots:chest_module"
+  }
+}

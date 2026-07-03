@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "b": "minecraft:black_wool",
+    "g": "minecraft:green_wool",
+    "i": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    " g ",
+    "iii",
+    "b b"
+  ],
+  "result": {
+    "id": "asmrobots:robot"
+  }
+}

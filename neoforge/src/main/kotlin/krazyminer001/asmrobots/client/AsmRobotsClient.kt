@@ -8,6 +8,7 @@ import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.data.EnUsLanguageProvider
 import krazyminer001.asmrobots.data.ModModelProvider
+import krazyminer001.asmrobots.data.ModRecipeProvider
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
@@ -38,5 +39,6 @@ object AsmRobotsClient {
     fun gatherData(event: GatherDataEvent.Client) {
         event.createProvider(::ModModelProvider)
         event.createProvider(::EnUsLanguageProvider)
+        event.createProvider(ModRecipeProvider::Runner)
     }
 }

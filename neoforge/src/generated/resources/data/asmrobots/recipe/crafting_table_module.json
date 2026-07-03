@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "crafting_table_module",
+  "key": {
+    "c": "#c:player_workstations/crafting_tables",
+    "i": "minecraft:iron_ingot",
+    "r": "minecraft:redstone"
+  },
+  "pattern": [
+    "rir",
+    "ici",
+    "rir"
+  ],
+  "result": {
+    "id": "asmrobots:crafting_table_module"
+  }
+}

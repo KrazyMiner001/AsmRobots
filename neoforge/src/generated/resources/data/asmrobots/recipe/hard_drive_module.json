@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "hard_drive_module",
+  "key": {
+    "C": "#c:chests",
+    "g": "minecraft:gold_ingot",
+    "i": "minecraft:iron_ingot"
+  },
+  "pattern": [
+    "CiC",
+    "igi",
+    "CiC"
+  ],
+  "result": {
+    "id": "asmrobots:hard_drive_module"
+  }
+}
