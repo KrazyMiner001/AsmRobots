@@ -1,6 +1,7 @@
 package krazyminer001.asmrobots.common.item
 
 import krazyminer001.asmrobots.common.AsmRobots
+import krazyminer001.asmrobots.common.block.ModBlocks
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.CreativeModeTab
@@ -23,6 +24,9 @@ object ModCreativeTabs {
                 output.accept(ModItems.HARD_DRIVE_MODULE)
                 output.accept(ModItems.STORAGE_CONTROLLER_MODULE)
                 output.accept(ModItems.CRAFTING_TABLE_MODULE)
+                output.accept(ModItems.NETWORKING_MODULE)
+                output.accept(ModItems.STORAGE_BLOCK_INTERFACE_MODUE)
+                output.accept(ModBlocks.RELAY_BLOCK)
             }
             .build()
     }

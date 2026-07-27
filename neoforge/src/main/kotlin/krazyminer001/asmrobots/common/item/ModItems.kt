@@ -1,6 +1,7 @@
 package krazyminer001.asmrobots.common.item
 
 import krazyminer001.asmrobots.common.AsmRobots
+import krazyminer001.asmrobots.common.block.ModBlocks
 import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.item.component.StorageModuleComponent
@@ -44,4 +45,15 @@ object ModItems {
             .spawnEgg(ModEntities.ROBOT_ENTITY)
             .stacksTo(1)
     }
+
+    val NETWORKING_MODULE by REGISTRY.registerItem("networking_module", ::NetworkingModule) { properties ->
+        properties.stacksTo(1)
+    }
+
+    val STORAGE_BLOCK_INTERFACE_MODUE by REGISTRY.registerItem("storage_block_interface_module", ::StorageBlockInterfaceModule) {properties ->
+        properties.stacksTo(1)
+            .component(ModComponents.STORAGE_COMPONENT, StorageModuleComponent(size = 1))
+    }
+
+    val RELAY_BLOCK by REGISTRY.registerSimpleBlockItem("relay_block") { ModBlocks.RELAY_BLOCK }
 }

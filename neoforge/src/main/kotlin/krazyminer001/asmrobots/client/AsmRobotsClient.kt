@@ -7,8 +7,11 @@ import krazyminer001.asmrobots.common.AsmRobots
 import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.data.EnUsLanguageProvider
+import krazyminer001.asmrobots.data.ModBlockLootTableSubProvider
 import krazyminer001.asmrobots.data.ModModelProvider
 import krazyminer001.asmrobots.data.ModRecipeProvider
+import net.minecraft.data.loot.LootTableProvider
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets
 import net.neoforged.api.distmarker.Dist
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.EventBusSubscriber
@@ -40,5 +43,15 @@ object AsmRobotsClient {
         event.createProvider(::ModModelProvider)
         event.createProvider(::EnUsLanguageProvider)
         event.createProvider(ModRecipeProvider::Runner)
+        event.createProvider { output, lookupProvider ->
+            LootTableProvider(
+                output, setOf(), listOf(
+                    LootTableProvider.SubProviderEntry(
+                        ::ModBlockLootTableSubProvider,
+                        LootContextParamSets.BLOCK
+                    )
+                ), lookupProvider
+            )
+        }
     }
 }

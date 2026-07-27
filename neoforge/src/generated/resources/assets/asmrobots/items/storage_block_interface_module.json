@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "asmrobots:item/storage_block_interface_module"
+  }
+}

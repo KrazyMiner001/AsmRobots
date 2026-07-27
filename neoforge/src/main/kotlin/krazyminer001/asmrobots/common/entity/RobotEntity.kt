@@ -18,7 +18,10 @@ import dev.vfyjxf.taffy.style.FlexDirection
 import dev.vfyjxf.taffy.style.TaffyDisplay
 import guideme.GuidesCommon
 import krazyminer001.asmrobots.common.AsmRobots
-import krazyminer001.asmrobots.common.asm.*
+import krazyminer001.asmrobots.common.asm.Assembler
+import krazyminer001.asmrobots.common.asm.Program
+import krazyminer001.asmrobots.common.asm.ProgramCallback
+import krazyminer001.asmrobots.common.asm.getOrElse
 import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.item.ModuleItem
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
@@ -421,6 +424,15 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                         }
                     }
                 }
+            }
+        }
+
+        val immutableProgramCopy = program
+
+        if (immutableProgramCopy != null && level is ServerLevel) {
+            inventory.forEachIndexed { index, stack ->
+                val module = stack.item as? ModuleItem ?: return@forEachIndexed
+                module.tick(immutableProgramCopy, 1000 * (index + 1), level)
             }
         }
     }

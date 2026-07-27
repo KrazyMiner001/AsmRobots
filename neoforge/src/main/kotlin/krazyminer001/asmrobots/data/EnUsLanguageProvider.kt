@@ -1,6 +1,7 @@
 package krazyminer001.asmrobots.data
 
 import krazyminer001.asmrobots.common.AsmRobots
+import krazyminer001.asmrobots.common.block.ModBlocks
 import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.item.ModCreativeTabs
 import krazyminer001.asmrobots.common.item.ModItems
@@ -18,9 +19,13 @@ class EnUsLanguageProvider(output: PackOutput) : LanguageProvider(output, AsmRob
         this.add(ModItems.HARD_DRIVE_MODULE, "Hard Drive Module")
         this.add(ModItems.STORAGE_CONTROLLER_MODULE, "Storage Controller Module")
         this.add(ModItems.CRAFTING_TABLE_MODULE, "Crafting Table Module")
+        this.add(ModItems.NETWORKING_MODULE, "Networking Module")
+        this.add(ModItems.STORAGE_BLOCK_INTERFACE_MODUE, "Storage Block Interface Module")
 
         this.add(ModItems.ROBOT, "Robot")
 
         this.add((ModCreativeTabs.MAIN_TAB.displayName.contents as TranslatableContents).key, "ASM Robots")
+
+        this.add(ModBlocks.RELAY_BLOCK, "Relay Block")
     }
 }

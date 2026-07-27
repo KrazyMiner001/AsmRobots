@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "asmrobots:block/relay_block"
+    }
+  }
+}

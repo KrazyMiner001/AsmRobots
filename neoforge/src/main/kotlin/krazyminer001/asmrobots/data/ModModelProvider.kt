@@ -1,6 +1,7 @@
 package krazyminer001.asmrobots.data
 
 import krazyminer001.asmrobots.common.AsmRobots
+import krazyminer001.asmrobots.common.block.ModBlocks
 import krazyminer001.asmrobots.common.item.ModItems
 import net.minecraft.client.data.models.BlockModelGenerators
 import net.minecraft.client.data.models.ItemModelGenerators
@@ -15,6 +16,11 @@ class ModModelProvider(output: PackOutput) : ModelProvider(output, AsmRobots.ID)
         itemModels.generateFlatItem(ModItems.STORAGE_CONTROLLER_MODULE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.HARD_DRIVE_MODULE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.CRAFTING_TABLE_MODULE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.NETWORKING_MODULE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.STORAGE_BLOCK_INTERFACE_MODUE, ModelTemplates.FLAT_ITEM)
+
         itemModels.generateFlatItem(ModItems.ROBOT, ModelTemplates.FLAT_ITEM)
+
+        blockModels.createTrivialCube(ModBlocks.RELAY_BLOCK)
     }
 }
