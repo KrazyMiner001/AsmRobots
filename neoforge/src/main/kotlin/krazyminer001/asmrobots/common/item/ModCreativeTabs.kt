@@ -25,7 +25,7 @@ object ModCreativeTabs {
                 output.accept(ModItems.STORAGE_CONTROLLER_MODULE)
                 output.accept(ModItems.CRAFTING_TABLE_MODULE)
                 output.accept(ModItems.NETWORKING_MODULE)
-                output.accept(ModItems.STORAGE_BLOCK_INTERFACE_MODUE)
+                output.accept(ModItems.STORAGE_BLOCK_INTERFACE_MODULE)
                 output.accept(ModBlocks.RELAY_BLOCK)
             }
             .build()

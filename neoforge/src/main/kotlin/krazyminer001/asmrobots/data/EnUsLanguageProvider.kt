@@ -20,7 +20,7 @@ class EnUsLanguageProvider(output: PackOutput) : LanguageProvider(output, AsmRob
         this.add(ModItems.STORAGE_CONTROLLER_MODULE, "Storage Controller Module")
         this.add(ModItems.CRAFTING_TABLE_MODULE, "Crafting Table Module")
         this.add(ModItems.NETWORKING_MODULE, "Networking Module")
-        this.add(ModItems.STORAGE_BLOCK_INTERFACE_MODUE, "Storage Block Interface Module")
+        this.add(ModItems.STORAGE_BLOCK_INTERFACE_MODULE, "Storage Block Interface Module")
 
         this.add(ModItems.ROBOT, "Robot")
 

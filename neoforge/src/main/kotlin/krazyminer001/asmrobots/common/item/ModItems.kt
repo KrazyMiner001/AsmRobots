@@ -50,7 +50,7 @@ object ModItems {
         properties.stacksTo(1)
     }
 
-    val STORAGE_BLOCK_INTERFACE_MODUE by REGISTRY.registerItem("storage_block_interface_module", ::StorageBlockInterfaceModule) {properties ->
+    val STORAGE_BLOCK_INTERFACE_MODULE by REGISTRY.registerItem("storage_block_interface_module", ::StorageBlockInterfaceModule) { properties ->
         properties.stacksTo(1)
             .component(ModComponents.STORAGE_COMPONENT, StorageModuleComponent(size = 1))
     }
