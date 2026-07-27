@@ -23,7 +23,7 @@ import krazyminer001.asmrobots.common.asm.Program
 import krazyminer001.asmrobots.common.asm.ProgramCallback
 import krazyminer001.asmrobots.common.asm.getOrElse
 import krazyminer001.asmrobots.common.item.ModItems
-import krazyminer001.asmrobots.common.item.ModuleItem
+import krazyminer001.asmrobots.common.item.modules.ModuleItem
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.common.ui.elements.assemblyEditor
 import net.minecraft.core.BlockPos

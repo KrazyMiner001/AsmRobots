@@ -1,4 +1,4 @@
-package krazyminer001.asmrobots.common.item
+package krazyminer001.asmrobots.common.item.modules
 
 import krazyminer001.asmrobots.common.entity.RobotEntity
 import krazyminer001.asmrobots.common.item.component.ModComponents

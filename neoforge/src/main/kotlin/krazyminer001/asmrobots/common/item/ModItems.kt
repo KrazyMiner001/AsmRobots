@@ -5,6 +5,7 @@ import krazyminer001.asmrobots.common.block.ModBlocks
 import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.item.component.StorageModuleComponent
+import krazyminer001.asmrobots.common.item.modules.*
 import net.minecraft.world.item.SpawnEggItem
 import net.neoforged.neoforge.registries.DeferredRegister
 import thedarkcolour.kotlinforforge.neoforge.forge.getValue
@@ -23,7 +24,9 @@ object ModItems {
             .stacksTo(1)
     }
 
-    val STORAGE_CONTROLLER_MODULE by REGISTRY.registerItem("storage_controller_module", ::StorageControllerModule) {properties ->
+    val STORAGE_CONTROLLER_MODULE by REGISTRY.registerItem("storage_controller_module",
+        ::StorageControllerModule
+    ) { properties ->
         properties
             .stacksTo(1)
     }
@@ -50,7 +53,9 @@ object ModItems {
         properties.stacksTo(1)
     }
 
-    val STORAGE_BLOCK_INTERFACE_MODULE by REGISTRY.registerItem("storage_block_interface_module", ::StorageBlockInterfaceModule) { properties ->
+    val STORAGE_BLOCK_INTERFACE_MODULE by REGISTRY.registerItem("storage_block_interface_module",
+        ::StorageBlockInterfaceModule
+    ) { properties ->
         properties.stacksTo(1)
             .component(ModComponents.STORAGE_COMPONENT, StorageModuleComponent(size = 1))
     }
