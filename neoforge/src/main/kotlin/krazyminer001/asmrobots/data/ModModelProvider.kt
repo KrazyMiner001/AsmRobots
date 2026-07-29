@@ -19,6 +19,9 @@ class ModModelProvider(output: PackOutput) : ModelProvider(output, AsmRobots.ID)
         itemModels.generateFlatItem(ModItems.NETWORKING_MODULE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.STORAGE_BLOCK_INTERFACE_MODULE, ModelTemplates.FLAT_ITEM)
 
+        itemModels.generateFlatItem(ModItems.SPEED_UPGRADE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.PROCESSING_SPEED_UPGRADE, ModelTemplates.FLAT_ITEM)
+
         itemModels.generateFlatItem(ModItems.ROBOT, ModelTemplates.FLAT_ITEM)
 
         blockModels.createTrivialCube(ModBlocks.RELAY_BLOCK)

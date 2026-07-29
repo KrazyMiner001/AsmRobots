@@ -1,5 +1,6 @@
 package krazyminer001.asmrobots.common.entity
 
+import com.google.common.collect.ImmutableListMultimap
 import com.lowdragmc.lowdraglib2.gui.factory.IContainerUIHolder
 import com.lowdragmc.lowdraglib2.gui.holder.ModularUIContainerMenu
 import com.lowdragmc.lowdraglib2.gui.sync.rpc.rpcEvent
@@ -23,10 +24,12 @@ import krazyminer001.asmrobots.common.asm.Program
 import krazyminer001.asmrobots.common.asm.ProgramCallback
 import krazyminer001.asmrobots.common.asm.getOrElse
 import krazyminer001.asmrobots.common.item.ModItems
-import krazyminer001.asmrobots.common.item.modules.ModuleItem
+import krazyminer001.asmrobots.common.item.module.ModuleItem
+import krazyminer001.asmrobots.common.item.upgrade.UpgradeItem
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.common.ui.elements.assemblyEditor
 import net.minecraft.core.BlockPos
+import net.minecraft.core.Holder
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.RegistryFriendlyByteBuf
@@ -43,6 +46,8 @@ import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.HumanoidArm
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.ai.attributes.Attribute
+import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.ai.control.LookControl
 import net.minecraft.world.entity.npc.InventoryCarrier
@@ -85,6 +90,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     }
 
     protected val numModules = 4
+    protected val numUpgrades = 4
 
     var code: String
         get() = entityData.get(CODE_DATA)
@@ -110,6 +116,36 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
             return super.canPlaceItem(slot, itemStack) && itemStack.item is ModuleItem
         }
     }
+
+    val upgradesInventory: SimpleContainer = object : SimpleContainer(numUpgrades) {
+        override fun canPlaceItem(slot: Int, itemStack: ItemStack): Boolean {
+            return super.canPlaceItem(slot, itemStack) && itemStack.item is UpgradeItem
+        }
+
+        override fun setChanged() {
+            super.setChanged()
+            attributes.removeAttributeModifiers(
+                upgradeAttributes.fold(
+                    ImmutableListMultimap.Builder<Holder<Attribute>, AttributeModifier>()
+                ) { left, right -> left.putAll(right.first, right.second) }.build()
+            )
+
+            upgradeAttributes.clear()
+
+            items
+                .map(ItemStack::getItem)
+                .filterIsInstance<UpgradeItem>()
+                .flatMapTo(upgradeAttributes) { it.attributeModifiers.asIterable() }
+
+            attributes.addTransientAttributeModifiers(
+                upgradeAttributes.fold(
+                    ImmutableListMultimap.Builder<Holder<Attribute>, AttributeModifier>()
+                ) { left, right -> left.putAll(right.first, right.second) }.build()
+            )
+        }
+    }
+
+    val upgradeAttributes: MutableList<Pair<Holder<Attribute>, AttributeModifier>> = mutableListOf()
 
     override fun canHoldItem(itemStack: ItemStack): Boolean {
         val isTool = itemStack.has(DataComponents.TOOL)
@@ -360,13 +396,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         super.tick()
         val level = level()
 
-        program?.step()?.let {
-            if (level is ServerLevel) {
-                level.server.playerList
-                    .broadcastSystemMessage(messagePrefix.append("Error: ${it.text}"), false)
-            }
-            halt()
-        }
+        stepProgram()
 
         if (onGround()) {
             deltaMovement = deltaMovement.add(getInputVector(Vec3(0.0, 0.0, 1.0), velocity, yHeadRot))
@@ -434,6 +464,17 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                 val module = stack.item as? ModuleItem ?: return@forEachIndexed
                 module.tick(immutableProgramCopy, 1000 * (index + 1), level)
             }
+        }
+    }
+
+    fun stepProgram() {
+        val level = level()
+        program?.step()?.let {
+            if (level is ServerLevel) {
+                level.server.playerList
+                    .broadcastSystemMessage(messagePrefix.append("Error: ${it.text}"), false)
+            }
+            halt()
         }
     }
 

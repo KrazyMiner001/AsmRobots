@@ -1,4 +1,4 @@
-package krazyminer001.asmrobots.common.item.modules
+package krazyminer001.asmrobots.common.item.module
 
 import com.lowdragmc.lowdraglib2.gui.factory.HeldItemUIMenuType
 import com.lowdragmc.lowdraglib2.gui.ui.ModularUI

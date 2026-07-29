@@ -22,6 +22,9 @@ class EnUsLanguageProvider(output: PackOutput) : LanguageProvider(output, AsmRob
         this.add(ModItems.NETWORKING_MODULE, "Networking Module")
         this.add(ModItems.STORAGE_BLOCK_INTERFACE_MODULE, "Storage Block Interface Module")
 
+        this.add(ModItems.SPEED_UPGRADE, "Speed Upgrade")
+        this.add(ModItems.PROCESSING_SPEED_UPGRADE, "Processing Speed Upgrade")
+
         this.add(ModItems.ROBOT, "Robot")
 
         this.add((ModCreativeTabs.MAIN_TAB.displayName.contents as TranslatableContents).key, "ASM Robots")

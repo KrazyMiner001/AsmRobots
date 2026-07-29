@@ -6,7 +6,9 @@
   "item.asmrobots.gps_module": "GPS Module",
   "item.asmrobots.hard_drive_module": "Hard Drive Module",
   "item.asmrobots.networking_module": "Networking Module",
+  "item.asmrobots.processing_speed_upgrade": "Processing Speed Upgrade",
   "item.asmrobots.robot": "Robot",
+  "item.asmrobots.speed_upgrade": "Speed Upgrade",
   "item.asmrobots.storage_block_interface_module": "Storage Block Interface Module",
   "item.asmrobots.storage_controller_module": "Storage Controller Module",
   "itemGroup.asmrobots.main": "ASM Robots"

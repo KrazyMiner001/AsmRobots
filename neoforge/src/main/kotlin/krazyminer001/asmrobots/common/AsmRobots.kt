@@ -59,4 +59,6 @@ object AsmRobots {
                 .build()
         )
     }
+
+    fun namespacedIdentifier(path: String) = Identifier.fromNamespaceAndPath(ID, path)
 }

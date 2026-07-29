@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "asmrobots:item/processing_speed_upgrade"
+  }
+}

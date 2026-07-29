@@ -1,11 +1,15 @@
 package krazyminer001.asmrobots.common.item
 
 import krazyminer001.asmrobots.common.AsmRobots
+import krazyminer001.asmrobots.common.attribute.ModAttributes
 import krazyminer001.asmrobots.common.block.ModBlocks
 import krazyminer001.asmrobots.common.entity.ModEntities
 import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.item.component.StorageModuleComponent
-import krazyminer001.asmrobots.common.item.modules.*
+import krazyminer001.asmrobots.common.item.module.*
+import krazyminer001.asmrobots.common.item.upgrade.AttributeUpgradeItem
+import krazyminer001.asmrobots.common.item.upgrade.ProcessingSpeedUpgrade
+import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.SpawnEggItem
 import net.neoforged.neoforge.registries.DeferredRegister
 import thedarkcolour.kotlinforforge.neoforge.forge.getValue
@@ -24,7 +28,8 @@ object ModItems {
             .stacksTo(1)
     }
 
-    val STORAGE_CONTROLLER_MODULE by REGISTRY.registerItem("storage_controller_module",
+    val STORAGE_CONTROLLER_MODULE by REGISTRY.registerItem(
+        "storage_controller_module",
         ::StorageControllerModule
     ) { properties ->
         properties
@@ -53,7 +58,8 @@ object ModItems {
         properties.stacksTo(1)
     }
 
-    val STORAGE_BLOCK_INTERFACE_MODULE by REGISTRY.registerItem("storage_block_interface_module",
+    val STORAGE_BLOCK_INTERFACE_MODULE by REGISTRY.registerItem(
+        "storage_block_interface_module",
         ::StorageBlockInterfaceModule
     ) { properties ->
         properties.stacksTo(1)
@@ -61,4 +67,21 @@ object ModItems {
     }
 
     val RELAY_BLOCK by REGISTRY.registerSimpleBlockItem("relay_block") { ModBlocks.RELAY_BLOCK }
+
+    val SPEED_UPGRADE by REGISTRY.registerItem(
+        "speed_upgrade",
+        { properties ->
+            AttributeUpgradeItem(
+                properties,
+                Pair(Attributes.MOVEMENT_SPEED, ModAttributes.SPEED_UPGRADE_ATTRIBUTE_MODIFIER)
+            )
+        }
+    ) { properties -> properties.stacksTo(1) }
+
+    val PROCESSING_SPEED_UPGRADE by REGISTRY.registerItem(
+        "processing_speed_upgrade",
+        ::ProcessingSpeedUpgrade,
+    ) { properties ->
+        properties.stacksTo(1)
+    }
 }
