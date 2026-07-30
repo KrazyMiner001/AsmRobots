@@ -9,4 +9,9 @@ class AttributeUpgradeItem(
     override vararg val attributeModifiers: Pair<Holder<Attribute>, AttributeModifier>
 ) : UpgradeItem(properties) {
 
+    companion object {
+        fun withModifiers(
+            vararg attributeModifiers: Pair<Holder<Attribute>, AttributeModifier>
+        ) = { properties: Properties -> AttributeUpgradeItem(properties, *attributeModifiers) }
+    }
 }

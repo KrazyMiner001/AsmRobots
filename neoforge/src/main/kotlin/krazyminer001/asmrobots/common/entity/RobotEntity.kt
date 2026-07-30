@@ -30,6 +30,7 @@ import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.common.ui.elements.assemblyEditor
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Holder
+import net.minecraft.core.NonNullList
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.RegistryFriendlyByteBuf
@@ -50,7 +51,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.entity.ai.control.LookControl
-import net.minecraft.world.entity.npc.InventoryCarrier
 import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
@@ -68,7 +68,7 @@ import kotlin.math.ceil
 
 open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level
                   ) : Mob(type, level),
-    IContainerUIHolder, ProgramCallback, InventoryCarrier {
+    IContainerUIHolder, ProgramCallback {
 
     init {
         this.lookControl = object : LookControl(this) {
@@ -90,7 +90,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     }
 
     protected val numModules = 4
-    protected val numUpgrades = 4
+    protected val numUpgrades = 2
 
     var code: String
         get() = entityData.get(CODE_DATA)
@@ -110,8 +110,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
 
     var blockBreakProgress: Pair<BlockPos, Int>? = null
 
-    @get:JvmName("getInventoryContainer")
-    val inventory: SimpleContainer = object : SimpleContainer(numModules) {
+    val modulesInventory: SimpleContainer = object : SimpleContainer(numModules) {
         override fun canPlaceItem(slot: Int, itemStack: ItemStack): Boolean {
             return super.canPlaceItem(slot, itemStack) && itemStack.item is ModuleItem
         }
@@ -144,7 +143,6 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
             )
         }
     }
-
     val upgradeAttributes: MutableList<Pair<Holder<Attribute>, AttributeModifier>> = mutableListOf()
 
     override fun canHoldItem(itemStack: ItemStack): Boolean {
@@ -198,6 +196,27 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     }
 
     override fun createUI(player: Player): ModularUI {
+        fun Element<UIElement>.itemSlots(container: Container) {
+            element({
+                layout = {
+                    display(TaffyDisplay.GRID)
+                    grid {
+                        templateColumns("repeat(2, min-content)")
+                        templateRows("min-content")
+                    }
+                    gap {
+                        all(0)
+                    }
+                }
+            }) {
+                repeat(container.containerSize) {
+                    itemSlot({
+                        bind(VanillaContainerWrapper.of(container), it)
+                    })
+                }
+            }
+        }
+
         val root = element({
             focusable = true
             layout = {
@@ -276,24 +295,10 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                         })
                     }
 
-                    element({
-                        layout = {
-                            display(TaffyDisplay.GRID)
-                            grid {
-                                templateColumns("repeat(2, min-content)")
-                                templateRows("min-content")
-                            }
-                            gap {
-                                all(0)
-                            }
-                        }
-                    }) {
-                        repeat(numModules) {
-                            itemSlot({
-                                bind(VanillaContainerWrapper.of(inventory), it)
-                            })
-                        }
-                    }
+                    itemSlots(modulesInventory)
+
+                    itemSlots(upgradesInventory)
+
                     element({
                         layout = {
                             flexDirection(FlexDirection.ROW)
@@ -374,13 +379,15 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     override fun readAdditionalSaveData(input: ValueInput) {
         super.readAdditionalSaveData(input)
         this.setCanPickUpLoot(input.getBooleanOr("CanPickUpLoot", true))
-        ContainerHelper.loadAllItems(input, inventory.items)
+        input.getItems("modules", modulesInventory.items)
+        input.getItems("upgrades", upgradesInventory.items)
         code = input.getStringOr("code", "")
     }
 
     override fun addAdditionalSaveData(output: ValueOutput) {
         super.addAdditionalSaveData(output)
-        ContainerHelper.saveAllItems(output, inventory.items)
+        output.putItems("modules", modulesInventory.items)
+        output.putItems("upgrades", upgradesInventory.items)
         output.putString("code", code)
     }
 
@@ -460,7 +467,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         val immutableProgramCopy = program
 
         if (immutableProgramCopy != null && level is ServerLevel) {
-            inventory.forEachIndexed { index, stack ->
+            modulesInventory.forEachIndexed { index, stack ->
                 val module = stack.item as? ModuleItem ?: return@forEachIndexed
                 module.tick(immutableProgramCopy, 1000 * (index + 1), level)
             }
@@ -484,7 +491,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                 val moduleIndex = ioAddress.floorDiv(1000)
                 val address = ioAddress % 1000
 
-                val stack = inventory.getItem(moduleIndex - 1)
+                val stack = modulesInventory.getItem(moduleIndex - 1)
                 (stack.item as? ModuleItem)?.getIOPort(address, stack, this) ?: -1
             }
             IOPorts.VELOCITY -> velocity.toBits()
@@ -504,7 +511,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                 val moduleIndex = ioAddress.floorDiv(1000)
                 val address = ioAddress % 1000
 
-                val stack = inventory.getItem(moduleIndex - 1)
+                val stack = modulesInventory.getItem(moduleIndex - 1)
                 (stack.item as? ModuleItem)?.setIOPort(address, stack, this, value)
             }
             IOPorts.VELOCITY -> velocity = Float.fromBits(value).coerceIn(-1f..1f) / 20
@@ -529,12 +536,11 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         }
     }
 
-    override fun getInventory() = inventory
-
     override fun dropCustomDeathLoot(level: ServerLevel, source: DamageSource, killedByPlayer: Boolean) {
         super.dropCustomDeathLoot(level, source, killedByPlayer)
 
-        inventory.removeAllItems().forEach { drop(it, true, false) }
+        modulesInventory.removeAllItems().forEach { drop(it, true, false) }
+        upgradesInventory.removeAllItems().forEach { drop(it, true, false) }
 
         drop(ItemStack(ModItems.ROBOT, 1), false, false)
     }
@@ -570,3 +576,18 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     }
 }
 
+fun ValueInput.getItems(name: String, items: NonNullList<ItemStack>) {
+    this.listOrEmpty(name, ItemStackWithSlot.CODEC)
+        .forEach {
+            if (it.isValidInContainer(items.size)) {
+                items[it.slot] = it.stack
+            }
+        }
+}
+
+fun ValueOutput.putItems(name: String, items: NonNullList<ItemStack>) {
+    val outputItems = this.list(name, ItemStackWithSlot.CODEC)
+    items
+        .mapIndexed { index, stack -> ItemStackWithSlot(index, stack) }
+        .forEach { outputItems.add(it) }
+}

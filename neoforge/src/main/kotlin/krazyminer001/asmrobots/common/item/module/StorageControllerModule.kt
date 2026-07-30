@@ -43,8 +43,8 @@ class StorageControllerModule(properties: Properties) : ModuleItem(properties) {
             IOPorts.DESTINATION_ITEM -> destinationItemIndex = value
             IOPorts.MOVE -> {
                 if (value < 0) return
-                val source = robotEntity.inventory.getItem(sourceContainerIndex)
-                val destination = robotEntity.inventory.getItem(destinationContainerIndex)
+                val source = robotEntity.modulesInventory.getItem(sourceContainerIndex)
+                val destination = robotEntity.modulesInventory.getItem(destinationContainerIndex)
 
                 if (
                     !source.has(ModComponents.STORAGE_COMPONENT)

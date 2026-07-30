@@ -70,12 +70,9 @@ object ModItems {
 
     val SPEED_UPGRADE by REGISTRY.registerItem(
         "speed_upgrade",
-        { properties ->
-            AttributeUpgradeItem(
-                properties,
-                Pair(Attributes.MOVEMENT_SPEED, ModAttributes.SPEED_UPGRADE_ATTRIBUTE_MODIFIER)
-            )
-        }
+        AttributeUpgradeItem.withModifiers(
+            Pair(Attributes.MOVEMENT_SPEED, ModAttributes.SPEED_UPGRADE_ATTRIBUTE_MODIFIER)
+        )
     ) { properties -> properties.stacksTo(1) }
 
     val PROCESSING_SPEED_UPGRADE by REGISTRY.registerItem(
@@ -84,4 +81,11 @@ object ModItems {
     ) { properties ->
         properties.stacksTo(1)
     }
+
+    val STEP_HEIGHT_UPGRADE by REGISTRY.registerItem(
+        "step_height_upgrade",
+        AttributeUpgradeItem.withModifiers(
+            Pair(Attributes.MOVEMENT_SPEED, ModAttributes.STEP_HEIGHT_UPGRADE_ATTRIBUTE_MODIFIER)
+        )
+    ) { properties -> properties.stacksTo(1) }
 }
