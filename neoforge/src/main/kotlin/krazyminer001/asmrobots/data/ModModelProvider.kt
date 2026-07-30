@@ -22,6 +22,7 @@ class ModModelProvider(output: PackOutput) : ModelProvider(output, AsmRobots.ID)
         itemModels.generateFlatItem(ModItems.SPEED_UPGRADE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.PROCESSING_SPEED_UPGRADE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.STEP_HEIGHT_UPGRADE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.FLOATING_POINT_UPGRADE, ModelTemplates.FLAT_ITEM)
 
         itemModels.generateFlatItem(ModItems.ROBOT, ModelTemplates.FLAT_ITEM)
 

@@ -1,9 +1,12 @@
 package krazyminer001.asmrobots.common.asm
 
 import krazyminer001.asmrobots.common.asm.instructions.*
+import krazyminer001.asmrobots.common.asm.instructions.Instruction.*
 import krazyminer001.asmrobots.common.asm.instructions.Register.PC
 import krazyminer001.asmrobots.common.asm.instructions.Register.SP
 import kotlin.experimental.or
+import kotlin.math.*
+import krazyminer001.asmrobots.common.asm.extension.InstructionExtension.FLOATING_POINT_ARITHMETIC as FP
 
 class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
     private val memory: ByteArray = ByteArray(memorySize) { 0 }
@@ -62,39 +65,39 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
         runCatching {
             with(instruction) {
                 when (this) {
-                    is Instruction.Add -> target.wordValue = arg1.wordValue + arg2.wordValue
-                    is Instruction.Div -> target.wordValue = arg1.wordValue / arg2.wordValue
-                    Instruction.Halt -> callback.halt()
-                    is Instruction.In -> target.wordValue = callback[ioPortAddress.wordValue]
-                    is Instruction.Mov -> target.wordValue = arg1.wordValue
-                    is Instruction.Movb -> target.byteValue = arg1.byteValue
-                    is Instruction.Movh -> target.halfValue = arg1.halfValue
-                    is Instruction.Mul -> target.wordValue = arg1.wordValue * arg2.wordValue
-                    is Instruction.Mulh -> target.wordValue =
+                    is Add -> target.wordValue = arg1.wordValue + arg2.wordValue
+                    is Div -> target.wordValue = arg1.wordValue / arg2.wordValue
+                    Halt -> callback.halt()
+                    is In -> target.wordValue = callback[ioPortAddress.wordValue]
+                    is Mov -> target.wordValue = arg1.wordValue
+                    is Movb -> target.byteValue = arg1.byteValue
+                    is Movh -> target.halfValue = arg1.halfValue
+                    is Mul -> target.wordValue = arg1.wordValue * arg2.wordValue
+                    is Mulh -> target.wordValue =
                         (arg1.wordValue.toLong() * arg2.wordValue.toLong()).ushr(32).toInt()
 
-                    Instruction.Nop -> {}
-                    is Instruction.Out -> callback[ioPortAddress.wordValue] = value.wordValue
-                    is Instruction.Pop -> target.wordValue = pop()
-                    is Instruction.Push -> push(value.wordValue)
-                    is Instruction.Poph -> target.wordValue = popHalf().toUShort().toInt()
-                    is Instruction.Pushh -> pushHalf(value.wordValue.toShort())
-                    is Instruction.Popb -> target.wordValue = popByte().toUByte().toInt()
-                    is Instruction.Pushb -> pushByte(value.wordValue.toByte())
-                    is Instruction.Rem -> target.wordValue = arg1.wordValue % arg2.wordValue
-                    Instruction.Ret -> reg[PC] = callStack.removeLast()
-                    is Instruction.Sll -> target.wordValue = arg1.wordValue shl arg2.wordValue
-                    is Instruction.Sra -> target.wordValue = arg1.wordValue shr arg2.wordValue
-                    is Instruction.Srl -> target.wordValue = arg1.wordValue ushr arg2.wordValue
-                    is Instruction.Sub -> target.wordValue = arg1.wordValue - arg2.wordValue
-                    is Instruction.Jump -> reg[PC] = address.wordValue
-                    is Instruction.Call -> {
+                    Nop -> {}
+                    is Out -> callback[ioPortAddress.wordValue] = value.wordValue
+                    is Pop -> target.wordValue = pop()
+                    is Push -> push(value.wordValue)
+                    is Poph -> target.wordValue = popHalf().toUShort().toInt()
+                    is Pushh -> pushHalf(value.wordValue.toShort())
+                    is Popb -> target.wordValue = popByte().toUByte().toInt()
+                    is Pushb -> pushByte(value.wordValue.toByte())
+                    is Rem -> target.wordValue = arg1.wordValue % arg2.wordValue
+                    Ret -> reg[PC] = callStack.removeLast()
+                    is Sll -> target.wordValue = arg1.wordValue shl arg2.wordValue
+                    is Sra -> target.wordValue = arg1.wordValue shr arg2.wordValue
+                    is Srl -> target.wordValue = arg1.wordValue ushr arg2.wordValue
+                    is Sub -> target.wordValue = arg1.wordValue - arg2.wordValue
+                    is Jump -> reg[PC] = address.wordValue
+                    is Call -> {
                         callStack.add(reg[PC])
                         reg[PC] = address.wordValue
                     }
 
-                    is Instruction.And -> target.wordValue = arg1.wordValue and arg2.wordValue
-                    is Instruction.JCond -> {
+                    is And -> target.wordValue = arg1.wordValue and arg2.wordValue
+                    is JCond -> {
                         if (when ((condition as InstructionArgument.Condition).condition) {
                                 Condition.EQ -> arg1.wordValue == arg2.wordValue
                                 Condition.LT -> arg1.wordValue < arg2.wordValue
@@ -107,12 +110,44 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                         }
                     }
 
-                    is Instruction.Not -> target.wordValue = arg1.wordValue.inv()
-                    is Instruction.Or -> target.wordValue = arg1.wordValue or arg2.wordValue
-                    is Instruction.Xor -> target.wordValue = arg1.wordValue xor arg2.wordValue
-                    Instruction.DI -> interruptsEnabled = false
-                    Instruction.EI -> interruptsEnabled = true
-                    Instruction.CI -> pendingInterrupts.clear()
+                    is Not -> target.wordValue = arg1.wordValue.inv()
+                    is Or -> target.wordValue = arg1.wordValue or arg2.wordValue
+                    is Xor -> target.wordValue = arg1.wordValue xor arg2.wordValue
+                    DI -> interruptsEnabled = false
+                    EI -> interruptsEnabled = true
+                    CI -> pendingInterrupts.clear()
+                    in FP if FP !in callback ->
+                        return AsmError
+                            .RuntimeError
+                            .ExtensionNotPresent(instruction, FP)
+                    is FAdd if FP in callback -> target.floatValue = arg1.floatValue + arg2.floatValue
+                    is FDiv if FP in callback -> target.floatValue = arg1.floatValue / arg2.floatValue
+                    is FFMA if FP in callback -> target.floatValue += arg1.floatValue * arg2.floatValue
+                    is FMax if FP in callback -> target.floatValue = max(arg1.floatValue, arg2.floatValue)
+                    is FMin if FP in callback -> target.floatValue = min(arg1.floatValue, arg2.floatValue)
+                    is FMul if FP in callback -> target.floatValue = arg1.floatValue * arg2.floatValue
+                    is FNext if FP in callback -> target.floatValue = arg.floatValue.nextUp()
+                    is FRem if FP in callback -> target.floatValue = arg1.floatValue.IEEErem(arg2.floatValue)
+                    is FSqrt if FP in callback -> target.floatValue = sqrt(arg.floatValue)
+                    is FSub if FP in callback -> target.floatValue = arg1.floatValue - arg2.floatValue
+                    is FAbs if FP in callback -> target.floatValue = arg.floatValue.absoluteValue
+                    is FLog if FP in callback -> target.floatValue = log2(arg.floatValue)
+                    is FExp if FP in callback -> target.floatValue = arg.floatValue.pow(2)
+                    is FJCond if FP in callback -> {
+                        if (when ((condition as InstructionArgument.Condition).condition) {
+                                Condition.EQ -> arg1.floatValue == arg2.floatValue
+                                Condition.LT -> arg1.floatValue < arg2.floatValue
+                                Condition.LE -> arg1.floatValue <= arg2.floatValue
+                                Condition.GT -> arg1.floatValue > arg2.floatValue
+                                Condition.GE -> arg1.floatValue >= arg2.floatValue
+                            }
+                        ) {
+                            reg[PC] = address.wordValue
+                        }
+                    }
+                    is FToI if FP in callback -> target.wordValue = arg.floatValue.toInt()
+                    is IToF if FP in callback -> target.floatValue = arg.wordValue.toFloat()
+                    else -> {}
                 }
             }
         }.onFailure {
@@ -196,6 +231,10 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
             is InstructionArgument.Label -> throw IllegalArgumentException()
             else -> throw IllegalArgumentException()
         }
+
+    var InstructionArgument.floatValue: Float
+        get() = Float.fromBits(this.wordValue)
+        set(value) { this.wordValue = value.toRawBits() }
 
     var InstructionArgument.halfValue: Short
         get() = when (this) {

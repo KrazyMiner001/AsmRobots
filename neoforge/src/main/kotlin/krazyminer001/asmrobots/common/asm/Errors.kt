@@ -1,5 +1,6 @@
 package krazyminer001.asmrobots.common.asm
 
+import krazyminer001.asmrobots.common.asm.extension.InstructionExtension
 import krazyminer001.asmrobots.common.asm.instructions.Instruction
 import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
 import krazyminer001.asmrobots.common.asm.instructions.InstructionEnum
@@ -37,6 +38,10 @@ sealed interface AsmError {
 
         data class ErrorExecutingInstruction(val pc: Int, val instruction: Instruction): RuntimeError {
             override val text = ""
+        }
+
+        data class ExtensionNotPresent(val instruction: Instruction, val requiredExtension: InstructionExtension): RuntimeError {
+            override val text = "Instruction $instruction required extension $requiredExtension, which is not present"
         }
     }
 

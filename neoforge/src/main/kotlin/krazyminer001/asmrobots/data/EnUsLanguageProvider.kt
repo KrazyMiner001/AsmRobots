@@ -25,6 +25,7 @@ class EnUsLanguageProvider(output: PackOutput) : LanguageProvider(output, AsmRob
         this.add(ModItems.SPEED_UPGRADE, "Speed Upgrade")
         this.add(ModItems.PROCESSING_SPEED_UPGRADE, "Processing Speed Upgrade")
         this.add(ModItems.STEP_HEIGHT_UPGRADE, "Step Height Upgrade")
+        this.add(ModItems.FLOATING_POINT_UPGRADE, "Floating Point Upgrade")
 
         this.add(ModItems.ROBOT, "Robot")
 

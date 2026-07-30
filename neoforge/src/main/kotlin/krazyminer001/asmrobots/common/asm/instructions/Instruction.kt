@@ -135,6 +135,86 @@ sealed interface Instruction {
     data object DI : Instruction
     data object CI : Instruction
 
+    //Floating Point Extensions
+    data class FAdd(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FSub(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FMul(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FDiv(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FSqrt(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FFMA(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FRem(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FMin(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FMax(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FNext(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FPrev(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FAbs(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FLog(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FExp(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FJCond(
+        val address: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument,
+        val condition: @ArgumentType(Condition::class) InstructionArgument,
+        val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+        val arg2: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class FToI(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+    data class IToF(
+        val target: @ArgumentType(Register::class) InstructionArgument,
+        val arg: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
+    ) : Instruction
+
     fun toBytes(): ByteArray {
         return this.asEnum().toBytes(this)
     }

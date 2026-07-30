@@ -1,6 +1,7 @@
 package krazyminer001.asmrobots.common.item
 
 import krazyminer001.asmrobots.common.AsmRobots
+import krazyminer001.asmrobots.common.asm.extension.InstructionExtension
 import krazyminer001.asmrobots.common.attribute.ModAttributes
 import krazyminer001.asmrobots.common.block.ModBlocks
 import krazyminer001.asmrobots.common.entity.ModEntities
@@ -8,6 +9,7 @@ import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.item.component.StorageModuleComponent
 import krazyminer001.asmrobots.common.item.module.*
 import krazyminer001.asmrobots.common.item.upgrade.AttributeUpgradeItem
+import krazyminer001.asmrobots.common.item.upgrade.ExtensionUpgradeItem
 import krazyminer001.asmrobots.common.item.upgrade.ProcessingSpeedUpgrade
 import net.minecraft.world.entity.ai.attributes.Attributes
 import net.minecraft.world.item.SpawnEggItem
@@ -86,6 +88,13 @@ object ModItems {
         "step_height_upgrade",
         AttributeUpgradeItem.withModifiers(
             Pair(Attributes.MOVEMENT_SPEED, ModAttributes.STEP_HEIGHT_UPGRADE_ATTRIBUTE_MODIFIER)
+        )
+    ) { properties -> properties.stacksTo(1) }
+
+    val FLOATING_POINT_UPGRADE by REGISTRY.registerItem(
+        "floating_point_upgrade",
+        ExtensionUpgradeItem.withExtensions(
+            InstructionExtension.FLOATING_POINT_ARITHMETIC
         )
     ) { properties -> properties.stacksTo(1) }
 }

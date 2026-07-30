@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "asmrobots:item/step_height_upgrade"
+  }
+}

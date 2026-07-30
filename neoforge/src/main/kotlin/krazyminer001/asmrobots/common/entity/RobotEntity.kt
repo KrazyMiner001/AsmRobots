@@ -22,6 +22,7 @@ import krazyminer001.asmrobots.common.AsmRobots
 import krazyminer001.asmrobots.common.asm.Assembler
 import krazyminer001.asmrobots.common.asm.Program
 import krazyminer001.asmrobots.common.asm.ProgramCallback
+import krazyminer001.asmrobots.common.asm.extension.Extension
 import krazyminer001.asmrobots.common.asm.getOrElse
 import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.item.module.ModuleItem
@@ -535,6 +536,13 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
             IOPorts.PITCH -> targetPitch = value.toFloat() % 360
         }
     }
+
+    override fun contains(extension: Extension) = upgradesInventory
+        .items
+        .map { it.item }
+        .filterIsInstance<UpgradeItem>()
+        .map { extension in it.extensions }
+        .reduce { acc, bool -> acc || bool }
 
     override fun dropCustomDeathLoot(level: ServerLevel, source: DamageSource, killedByPlayer: Boolean) {
         super.dropCustomDeathLoot(level, source, killedByPlayer)
