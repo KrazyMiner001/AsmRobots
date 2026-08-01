@@ -9,6 +9,9 @@ enum class InstructionExtension(vararg val instructions: InstructionEnum) : Exte
     FLOATING_POINT_ARITHMETIC(
         FAdd, FSub, FMul, FDiv, FSqrt, FFMA, FRem, FMin, FMax, FNext, FPrev, FAbs, FLog, FExp, FJCond, FToI, IToF
     ),
+    MEMORY_MAPPING(
+        MapIO, Unmap
+    ),
     ;
 
     operator fun contains(instruction: Instruction): Boolean {

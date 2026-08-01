@@ -135,7 +135,7 @@ sealed interface Instruction {
     data object DI : Instruction
     data object CI : Instruction
 
-    //Floating Point Extensions
+    //region Floating Point Extensions
     data class FAdd(
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg1: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
@@ -214,6 +214,19 @@ sealed interface Instruction {
         val target: @ArgumentType(Register::class) InstructionArgument,
         val arg: @ArgumentType(Register::class, Immediate32::class, ImmediateFloat32::class) InstructionArgument,
     ) : Instruction
+    //endregion
+
+    //region Memory Map Extensions
+    data class MapIO(
+        val outIdentifier: @ArgumentType(Register::class) InstructionArgument,
+        val startAddress: @ArgumentType(Register::class, Immediate32::class, Label::class) InstructionArgument,
+        val size: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
+        val parameter: @ArgumentType(Register::class, Immediate32::class) InstructionArgument,
+    ) : Instruction
+    data class Unmap(
+        val identifier: @ArgumentType(Register::class) InstructionArgument
+    ) : Instruction
+    //endregion
 
     fun toBytes(): ByteArray {
         return this.asEnum().toBytes(this)

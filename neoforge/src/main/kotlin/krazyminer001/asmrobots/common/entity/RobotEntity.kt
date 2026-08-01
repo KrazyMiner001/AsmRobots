@@ -25,6 +25,7 @@ import krazyminer001.asmrobots.common.asm.ProgramCallback
 import krazyminer001.asmrobots.common.asm.extension.Extension
 import krazyminer001.asmrobots.common.asm.getOrElse
 import krazyminer001.asmrobots.common.item.ModItems
+import krazyminer001.asmrobots.common.item.module.MemoryMappedModuleItem
 import krazyminer001.asmrobots.common.item.module.ModuleItem
 import krazyminer001.asmrobots.common.item.upgrade.UpgradeItem
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
@@ -489,10 +490,9 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     override fun get(ioAddress: Int): Int {
         return when (ioAddress) {
             in 1000..(numModules*1000+999) -> {
-                val moduleIndex = ioAddress.floorDiv(1000)
-                val address = ioAddress % 1000
+                val (moduleIndex, address) = resolveModuleAndAddress(ioAddress)
 
-                val stack = modulesInventory.getItem(moduleIndex - 1)
+                val stack = modulesInventory.getItem(moduleIndex)
                 (stack.item as? ModuleItem)?.getIOPort(address, stack, this) ?: -1
             }
             IOPorts.VELOCITY -> velocity.toBits()
@@ -551,6 +551,33 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         upgradesInventory.removeAllItems().forEach { drop(it, true, false) }
 
         drop(ItemStack(ModItems.ROBOT, 1), false, false)
+    }
+
+    fun getMemoryMap(identifier: Int): MemoryMappedModuleItem.MappedMemory? {
+        if (identifier in 1000..numModules*1000+999) {
+            val (moduleIndex, innerIdentifier) = resolveModuleAndAddress(identifier)
+
+            val moduleItem = modulesInventory.items[moduleIndex]
+            return moduleItem.item.let { it as? MemoryMappedModuleItem }
+                ?.getMap(innerIdentifier, moduleItem, this)
+        }
+        return null
+    }
+
+    override fun getMappedMemory(identifier: Int, address: Int): Byte {
+        val map = getMemoryMap(identifier)
+        return map?.let { it[address] } ?: 0
+    }
+
+    override fun setMappedMemory(identifier: Int, address: Int, value: Byte) {
+        val map = getMemoryMap(identifier)
+        map?.let { it[address] = value }
+    }
+
+    fun resolveModuleAndAddress(combined: Int): Pair<Int, Int> {
+        val moduleIndex = combined.floorDiv(1000)
+        val address = combined % 1000
+        return Pair(moduleIndex - 1, address)
     }
 
     companion object {

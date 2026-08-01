@@ -7,4 +7,7 @@ interface ProgramCallback {
     operator fun get(ioAddress: Int): Int
     operator fun set(ioAddress: Int, value: Int)
     operator fun contains(extension: Extension): Boolean
+
+    fun getMappedMemory(identifier: Int, address: Int): Byte
+    fun setMappedMemory(identifier: Int, address: Int, value: Byte)
 }

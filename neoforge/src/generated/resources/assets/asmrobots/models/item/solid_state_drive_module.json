@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "asmrobots:item/solid_state_drive_module"
+  }
+}

@@ -1,5 +1,6 @@
 package krazyminer001.asmrobots.common.asm
 
+import krazyminer001.asmrobots.common.asm.extension.InstructionExtension.MEMORY_MAPPING
 import krazyminer001.asmrobots.common.asm.instructions.*
 import krazyminer001.asmrobots.common.asm.instructions.Instruction.*
 import krazyminer001.asmrobots.common.asm.instructions.Register.PC
@@ -9,7 +10,7 @@ import kotlin.math.*
 import krazyminer001.asmrobots.common.asm.extension.InstructionExtension.FLOATING_POINT_ARITHMETIC as FP
 
 class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
-    private val memory: ByteArray = ByteArray(memorySize) { 0 }
+    private val memory: Memory = Memory(memorySize) { MEMORY_MAPPING in callback }
     private val callStack: MutableList<Int> = mutableListOf()
     private val reg: RegisterStorage = RegisterStorage()
     private val labels: MutableMap<String, Int> = mutableMapOf()
@@ -21,7 +22,7 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
     }
 
     fun initMemoryAndLabels(initialMemory: ByteArray = byteArrayOf(), labels: Map<String, Int> = mapOf()) {
-        initialMemory.copyInto(memory)
+        memory.initRealMemory(initialMemory)
         this.labels.putAll(labels)
         reg[PC] = this.labels.getOrElse("_start") { 0 }
     }
@@ -147,6 +148,23 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                     }
                     is FToI if FP in callback -> target.wordValue = arg.floatValue.toInt()
                     is IToF if FP in callback -> target.floatValue = arg.wordValue.toFloat()
+                    in MEMORY_MAPPING if MEMORY_MAPPING !in callback -> {
+                        return AsmError
+                            .RuntimeError
+                            .ExtensionNotPresent(instruction, MEMORY_MAPPING)
+                    }
+                    is MapIO if MEMORY_MAPPING in callback -> {
+                        val memoryMap = memory.createMemoryMap(
+                            startAddress.wordValue,
+                            size.wordValue,
+                            { address -> callback.getMappedMemory(parameter.wordValue, address) },
+                            { address, value -> callback.setMappedMemory(parameter.wordValue, address, value) }
+                        )
+                        outIdentifier.wordValue = memoryMap.id
+                    }
+                    is Unmap if MEMORY_MAPPING in callback -> {
+                        memory.removeMemoryMap(Memory.MemoryMapId(identifier.wordValue))
+                    }
                     else -> {}
                 }
             }
@@ -190,26 +208,26 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
         memory[reg[SP]] = num
     }
 
-    private fun ByteArray.getWord(address: Int): Int {
+    private fun Memory.getWord(address: Int): Int {
         return this[address].toUByte().toInt() or
                 (this[address + 1].toUByte().toInt() shl 8) or
                 (this[address + 2].toUByte().toInt() shl 16) or
                 (this[address + 3].toUByte().toInt() shl 24)
     }
 
-    private fun ByteArray.getHalf(address: Int): Short {
+    private fun Memory.getHalf(address: Int): Short {
         return this[address].toUByte().toShort() or
                 (this[address + 1].toUByte().toInt() shl 8).toShort()
     }
 
-    private fun ByteArray.setWord(address: Int, value: Int) {
+    private fun Memory.setWord(address: Int, value: Int) {
         this[address] = value.toByte()
         this[address + 1] = (value ushr 8).toByte()
         this[address + 2] = (value ushr 16).toByte()
         this[address + 3] = (value ushr 24).toByte()
     }
 
-    private fun ByteArray.setHalf(address: Int, value: Short) {
+    private fun Memory.setHalf(address: Int, value: Short) {
         this[address] = value.toByte()
         this[address + 1] = (value.toUInt() shr 8).toByte()
     }

@@ -30,6 +30,11 @@ object ModItems {
             .stacksTo(1)
     }
 
+    val SOLID_STATE_DRIVE_MODULE by REGISTRY.registerItem(
+        "solid_state_drive_module",
+        ::SolidStateDriveModule
+    ) { properties -> properties.component(ModComponents.SOLID_STATE_DRIVE, List(128) { 0 })}
+
     val STORAGE_CONTROLLER_MODULE by REGISTRY.registerItem(
         "storage_controller_module",
         ::StorageControllerModule
@@ -95,6 +100,13 @@ object ModItems {
         "floating_point_upgrade",
         ExtensionUpgradeItem.withExtensions(
             InstructionExtension.FLOATING_POINT_ARITHMETIC
+        )
+    ) { properties -> properties.stacksTo(1) }
+
+    val MEMORY_MAP_UPGRADE by REGISTRY.registerItem(
+        "memory_map_upgrade",
+        ExtensionUpgradeItem.withExtensions(
+            InstructionExtension.MEMORY_MAPPING
         )
     ) { properties -> properties.stacksTo(1) }
 }

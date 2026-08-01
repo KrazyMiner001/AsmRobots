@@ -18,11 +18,13 @@ class ModModelProvider(output: PackOutput) : ModelProvider(output, AsmRobots.ID)
         itemModels.generateFlatItem(ModItems.CRAFTING_TABLE_MODULE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.NETWORKING_MODULE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.STORAGE_BLOCK_INTERFACE_MODULE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.SOLID_STATE_DRIVE_MODULE, ModelTemplates.FLAT_ITEM)
 
         itemModels.generateFlatItem(ModItems.SPEED_UPGRADE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.PROCESSING_SPEED_UPGRADE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.STEP_HEIGHT_UPGRADE, ModelTemplates.FLAT_ITEM)
         itemModels.generateFlatItem(ModItems.FLOATING_POINT_UPGRADE, ModelTemplates.FLAT_ITEM)
+        itemModels.generateFlatItem(ModItems.MEMORY_MAP_UPGRADE, ModelTemplates.FLAT_ITEM)
 
         itemModels.generateFlatItem(ModItems.ROBOT, ModelTemplates.FLAT_ITEM)
 
