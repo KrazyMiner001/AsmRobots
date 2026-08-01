@@ -68,9 +68,8 @@ import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper
 import org.lwjgl.glfw.GLFW
 import kotlin.math.ceil
 
-open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level
-                  ) : Mob(type, level),
-    IContainerUIHolder, ProgramCallback {
+open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level)
+    : Mob(type, level), IContainerUIHolder {
 
     init {
         this.lookControl = object : LookControl(this) {
@@ -146,6 +145,79 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         }
     }
     val upgradeAttributes: MutableList<Pair<Holder<Attribute>, AttributeModifier>> = mutableListOf()
+
+    val programCallback = object : ProgramCallback {
+        override fun halt() {
+            this@RobotEntity.halt()
+        }
+
+        override fun get(ioAddress: Int): Int {
+            return when (ioAddress) {
+                in 1000..(numModules*1000+999) -> {
+                    val (moduleIndex, address) = resolveModuleAndAddress(ioAddress)
+
+                    val stack = modulesInventory.getItem(moduleIndex)
+                    (stack.item as? ModuleItem)?.getIOPort(address, stack, this@RobotEntity) ?: -1
+                }
+                IOPorts.VELOCITY -> velocity.toBits()
+                IOPorts.FEET_BLOCK -> BuiltInRegistries.BLOCK
+                    .getId(level().getBlockState(blockPosition().offset(0, -1, 0)).block)
+                IOPorts.ATTACK -> if (isBreaking) 1 else 0
+                IOPorts.NOTIFY_BUMP -> if (shouldNotifyBump) 1 else 0
+                IOPorts.YAW -> yHeadRot.toInt()
+                IOPorts.PITCH -> xRot.toInt()
+                else -> 0
+            }
+        }
+
+        override fun set(ioAddress: Int, value: Int) {
+            when (ioAddress) {
+                in 1000..(numModules*1000+999) -> {
+                    val moduleIndex = ioAddress.floorDiv(1000)
+                    val address = ioAddress % 1000
+
+                    val stack = modulesInventory.getItem(moduleIndex - 1)
+                    (stack.item as? ModuleItem)?.setIOPort(address, stack, this@RobotEntity, value)
+                }
+                IOPorts.VELOCITY -> velocity = Float.fromBits(value).coerceIn(-1f..1f) / 20
+                IOPorts.PRINT_INT -> {
+                    val level = level()
+                    if (level is ServerLevel) {
+                        level.server.playerList
+                            .broadcastSystemMessage(messagePrefix.append(value.toString()), false)
+                    }
+                }
+                IOPorts.PRINT_FLOAT -> {
+                    val level = level()
+                    if (level is ServerLevel) {
+                        level.server.playerList
+                            .broadcastSystemMessage(messagePrefix.append(Float.fromBits(value).toString()), false)
+                    }
+                }
+                IOPorts.ATTACK -> isBreaking = value != 0
+                IOPorts.NOTIFY_BUMP -> shouldNotifyBump = value != 0
+                IOPorts.YAW -> targetYaw = value.toFloat() % 360
+                IOPorts.PITCH -> targetPitch = value.toFloat() % 360
+            }
+        }
+
+        override fun contains(extension: Extension) = upgradesInventory
+            .items
+            .map { it.item }
+            .filterIsInstance<UpgradeItem>()
+            .map { extension in it.extensions }
+            .reduce { acc, bool -> acc || bool }
+
+        override fun getMappedMemory(identifier: Int, address: Int): Byte {
+            val map = getMemoryMap(identifier)
+            return map?.let { it[address] } ?: 0
+        }
+
+        override fun setMappedMemory(identifier: Int, address: Int, value: Byte) {
+            val map = getMemoryMap(identifier)
+            map?.let { it[address] = value }
+        }
+    }
 
     override fun canHoldItem(itemStack: ItemStack): Boolean {
         val isTool = itemStack.has(DataComponents.TOOL)
@@ -285,7 +357,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                                 val (code, labels) = Assembler.assemble(
                                     Assembler.lex(code).map { Assembler.parse(it).getOrElse { return@clickHandler } }
                                 )
-                                program = Program(this@RobotEntity)
+                                program = Program(programCallback)
                                 program?.initMemoryAndLabels(code, labels)
                             }
                         })
@@ -397,10 +469,6 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         return super.shouldShowName()
     }
 
-    override fun halt() {
-        program = null
-    }
-
     override fun tick() {
         super.tick()
         val level = level()
@@ -487,62 +555,9 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         }
     }
 
-    override fun get(ioAddress: Int): Int {
-        return when (ioAddress) {
-            in 1000..(numModules*1000+999) -> {
-                val (moduleIndex, address) = resolveModuleAndAddress(ioAddress)
-
-                val stack = modulesInventory.getItem(moduleIndex)
-                (stack.item as? ModuleItem)?.getIOPort(address, stack, this) ?: -1
-            }
-            IOPorts.VELOCITY -> velocity.toBits()
-            IOPorts.FEET_BLOCK -> BuiltInRegistries.BLOCK
-                .getId(level().getBlockState(blockPosition().offset(0, -1, 0)).block)
-            IOPorts.ATTACK -> if (isBreaking) 1 else 0
-            IOPorts.NOTIFY_BUMP -> if (shouldNotifyBump) 1 else 0
-            IOPorts.YAW -> yHeadRot.toInt()
-            IOPorts.PITCH -> xRot.toInt()
-            else -> 0
-        }
+    fun halt() {
+        this.program = null
     }
-
-    override fun set(ioAddress: Int, value: Int) {
-        when (ioAddress) {
-            in 1000..(numModules*1000+999) -> {
-                val moduleIndex = ioAddress.floorDiv(1000)
-                val address = ioAddress % 1000
-
-                val stack = modulesInventory.getItem(moduleIndex - 1)
-                (stack.item as? ModuleItem)?.setIOPort(address, stack, this, value)
-            }
-            IOPorts.VELOCITY -> velocity = Float.fromBits(value).coerceIn(-1f..1f) / 20
-            IOPorts.PRINT_INT -> {
-                val level = level()
-                if (level is ServerLevel) {
-                    level.server.playerList
-                        .broadcastSystemMessage(messagePrefix.append(value.toString()), false)
-                }
-            }
-            IOPorts.PRINT_FLOAT -> {
-                val level = level()
-                if (level is ServerLevel) {
-                    level.server.playerList
-                        .broadcastSystemMessage(messagePrefix.append(Float.fromBits(value).toString()), false)
-                }
-            }
-            IOPorts.ATTACK -> isBreaking = value != 0
-            IOPorts.NOTIFY_BUMP -> shouldNotifyBump = value != 0
-            IOPorts.YAW -> targetYaw = value.toFloat() % 360
-            IOPorts.PITCH -> targetPitch = value.toFloat() % 360
-        }
-    }
-
-    override fun contains(extension: Extension) = upgradesInventory
-        .items
-        .map { it.item }
-        .filterIsInstance<UpgradeItem>()
-        .map { extension in it.extensions }
-        .reduce { acc, bool -> acc || bool }
 
     override fun dropCustomDeathLoot(level: ServerLevel, source: DamageSource, killedByPlayer: Boolean) {
         super.dropCustomDeathLoot(level, source, killedByPlayer)
@@ -562,16 +577,6 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                 ?.getMap(innerIdentifier, moduleItem, this)
         }
         return null
-    }
-
-    override fun getMappedMemory(identifier: Int, address: Int): Byte {
-        val map = getMemoryMap(identifier)
-        return map?.let { it[address] } ?: 0
-    }
-
-    override fun setMappedMemory(identifier: Int, address: Int, value: Byte) {
-        val map = getMemoryMap(identifier)
-        map?.let { it[address] = value }
     }
 
     fun resolveModuleAndAddress(combined: Int): Pair<Int, Int> {
