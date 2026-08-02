@@ -27,6 +27,12 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
         reg[PC] = this.labels.getOrElse("_start") { 0 }
     }
 
+    fun reload() {
+        this.labels["_reload"]?.let {
+            reg[PC] = it
+        }
+    }
+
     fun interrupt(id: Int) {
         pendingInterrupts.add(id)
     }

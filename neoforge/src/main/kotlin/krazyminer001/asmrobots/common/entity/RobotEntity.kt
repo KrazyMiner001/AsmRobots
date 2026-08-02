@@ -45,10 +45,7 @@ import net.minecraft.resources.Identifier
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.*
 import net.minecraft.world.damagesource.DamageSource
-import net.minecraft.world.entity.EntityType
-import net.minecraft.world.entity.EquipmentSlot
-import net.minecraft.world.entity.HumanoidArm
-import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.*
 import net.minecraft.world.entity.ai.attributes.Attribute
 import net.minecraft.world.entity.ai.attributes.AttributeModifier
 import net.minecraft.world.entity.ai.attributes.Attributes
@@ -58,6 +55,7 @@ import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.ServerLevelAccessor
 import net.minecraft.world.level.storage.ValueInput
 import net.minecraft.world.level.storage.ValueOutput
 import net.minecraft.world.phys.BlockHitResult
@@ -67,6 +65,7 @@ import net.neoforged.neoforge.transfer.item.ItemStackResourceHandler
 import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper
 import org.lwjgl.glfw.GLFW
 import kotlin.math.ceil
+import kotlin.properties.Delegates
 
 open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level)
     : Mob(type, level), IContainerUIHolder {
@@ -97,7 +96,10 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         get() = entityData.get(CODE_DATA)
         set(value) = entityData.set(CODE_DATA, value)
 
-    var program: Program? = null
+    var program: Program? by Delegates.observable(null) { _, _, new ->
+        running = new == null
+    }
+    var running: Boolean = false
 
     var isBreaking = false
     var shouldNotifyBump = false
@@ -456,6 +458,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         input.getItems("modules", modulesInventory.items)
         input.getItems("upgrades", upgradesInventory.items)
         code = input.getStringOr("code", "")
+        running = input.getBooleanOr("running", false)
     }
 
     override fun addAdditionalSaveData(output: ValueOutput) {
@@ -463,6 +466,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         output.putItems("modules", modulesInventory.items)
         output.putItems("upgrades", upgradesInventory.items)
         output.putString("code", code)
+        output.putBoolean("running", running)
     }
 
     override fun shouldShowName(): Boolean {
@@ -557,6 +561,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
 
     fun halt() {
         this.program = null
+        this.running = false
     }
 
     override fun dropCustomDeathLoot(level: ServerLevel, source: DamageSource, killedByPlayer: Boolean) {
@@ -583,6 +588,34 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         val moduleIndex = combined.floorDiv(1000)
         val address = combined % 1000
         return Pair(moduleIndex - 1, address)
+    }
+
+    @Deprecated(
+        "Override only",
+        ReplaceWith(
+            "EventHooks.finalizeMobSpawn(mob, level, difficulty, spawnType, spawnData)",
+            "net.neoforged.neoforge.event.EventHooks"
+        )
+    )
+    @org.jetbrains.annotations.ApiStatus.OverrideOnly
+    override fun finalizeSpawn(
+        level: ServerLevelAccessor,
+        difficulty: DifficultyInstance,
+        spawnReason: EntitySpawnReason,
+        groupData: SpawnGroupData?
+    ): SpawnGroupData? {
+        if (spawnReason == EntitySpawnReason.LOAD && program == null) {
+            run test@{
+                val (code, labels) = Assembler.assemble(
+                    Assembler.lex(code).map { Assembler.parse(it).getOrElse { return@test } }
+                )
+
+                program = Program(programCallback)
+                program?.initMemoryAndLabels(code, labels)
+                program?.reload()
+            }
+        }
+        return super.finalizeSpawn(level, difficulty, spawnReason, groupData)
     }
 
     companion object {
