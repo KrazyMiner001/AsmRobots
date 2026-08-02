@@ -18,14 +18,23 @@ object ModCreativeTabs {
             .icon { ItemStack(ModItems.ROBOT) }
             .displayItems { parameters, output ->
                 output.accept(ModItems.ROBOT)
+
                 output.accept(ModItems.GPS_MODULE)
                 output.accept(ModItems.CHEST_MODULE)
-                output.accept(ModItems.GPS_MODULE)
                 output.accept(ModItems.HARD_DRIVE_MODULE)
                 output.accept(ModItems.STORAGE_CONTROLLER_MODULE)
                 output.accept(ModItems.CRAFTING_TABLE_MODULE)
                 output.accept(ModItems.NETWORKING_MODULE)
                 output.accept(ModItems.STORAGE_BLOCK_INTERFACE_MODULE)
+                output.accept(ModItems.SOLID_STATE_DRIVE_MODULE)
+
+                output.accept(ModItems.CHUNK_LOAD_UPGRADE)
+                output.accept(ModItems.MEMORY_MAP_UPGRADE)
+                output.accept(ModItems.FLOATING_POINT_UPGRADE)
+                output.accept(ModItems.STEP_HEIGHT_UPGRADE)
+                output.accept(ModItems.PROCESSING_SPEED_UPGRADE)
+                output.accept(ModItems.SPEED_UPGRADE)
+
                 output.accept(ModBlocks.RELAY_BLOCK)
             }
             .build()
