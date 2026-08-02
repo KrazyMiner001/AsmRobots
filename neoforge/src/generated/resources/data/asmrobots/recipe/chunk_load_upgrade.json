@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "chunk_load_upgrade",
+  "key": {
+    "E": "minecraft:ender_eye",
+    "d": "#c:gems/diamond",
+    "n": "#c:ingots/netherite"
+  },
+  "pattern": [
+    "dEd",
+    "EnE",
+    "dEd"
+  ],
+  "result": {
+    "id": "asmrobots:chunk_load_upgrade"
+  }
+}

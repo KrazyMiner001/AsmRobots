@@ -4,8 +4,8 @@
   "group": "hard_drive_module",
   "key": {
     "C": "#c:chests",
-    "g": "minecraft:gold_ingot",
-    "i": "minecraft:iron_ingot"
+    "g": "#c:ingots/gold",
+    "i": "#c:ingots/iron"
   },
   "pattern": [
     "CiC",

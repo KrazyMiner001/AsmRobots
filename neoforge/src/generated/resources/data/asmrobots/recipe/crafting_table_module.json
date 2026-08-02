@@ -4,8 +4,8 @@
   "group": "crafting_table_module",
   "key": {
     "c": "#c:player_workstations/crafting_tables",
-    "i": "minecraft:iron_ingot",
-    "r": "minecraft:redstone"
+    "i": "#c:ingots/iron",
+    "r": "#c:dusts/redstone"
   },
   "pattern": [
     "rir",

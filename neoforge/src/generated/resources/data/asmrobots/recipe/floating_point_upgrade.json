@@ -1,18 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "group": "storage_controller_module",
+  "group": "floating_point_upgrade",
   "key": {
-    "C": "#c:chests",
     "d": "#c:gems/diamond",
+    "g": "#c:ingots/gold",
     "r": "#c:dusts/redstone"
   },
   "pattern": [
-    "CdC",
-    "drd",
-    "CdC"
+    "grg",
+    "rdr",
+    "grg"
   ],
   "result": {
-    "id": "asmrobots:storage_controller_module"
+    "id": "asmrobots:floating_point_upgrade"
   }
 }

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "relay_block",
+  "key": {
+    "C": "minecraft:chorus_flower",
+    "S": "#c:end_stones",
+    "p": "#c:ender_pearls"
+  },
+  "pattern": [
+    "SpS",
+    "pCp",
+    "SpS"
+  ],
+  "result": {
+    "id": "asmrobots:relay_block"
+  }
+}

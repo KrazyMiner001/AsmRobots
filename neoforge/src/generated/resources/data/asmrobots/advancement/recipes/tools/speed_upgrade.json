@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_gold_ingot": {
+    "has_sugar": {
       "conditions": {
         "items": [
           {
-            "items": "#c:ingots/gold"
+            "items": "minecraft:sugar"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "asmrobots:hard_drive_module"
+        "recipe": "asmrobots:speed_upgrade"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_gold_ingot"
+      "has_sugar"
     ]
   ],
   "rewards": {
     "recipes": [
-      "asmrobots:hard_drive_module"
+      "asmrobots:speed_upgrade"
     ]
   }
 }

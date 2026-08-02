@@ -1,11 +1,11 @@
 {
   "parent": "minecraft:recipes/root",
   "criteria": {
-    "has_gold_ingot": {
+    "has_chorus_flower": {
       "conditions": {
         "items": [
           {
-            "items": "#c:ingots/gold"
+            "items": "minecraft:chorus_flower"
           }
         ]
       },
@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "asmrobots:hard_drive_module"
+        "recipe": "asmrobots:relay_block"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -21,12 +21,12 @@
   "requirements": [
     [
       "has_the_recipe",
-      "has_gold_ingot"
+      "has_chorus_flower"
     ]
   ],
   "rewards": {
     "recipes": [
-      "asmrobots:hard_drive_module"
+      "asmrobots:relay_block"
     ]
   }
 }

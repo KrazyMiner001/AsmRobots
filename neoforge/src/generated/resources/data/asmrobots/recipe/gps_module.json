@@ -3,8 +3,8 @@
   "category": "equipment",
   "key": {
     "c": "minecraft:compass",
-    "i": "minecraft:iron_ingot",
-    "r": "minecraft:redstone"
+    "i": "#c:ingots/iron",
+    "r": "#c:dusts/redstone"
   },
   "pattern": [
     "rir",

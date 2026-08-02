@@ -1,18 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "group": "storage_controller_module",
+  "group": "memory_map_upgrade",
   "key": {
     "C": "#c:chests",
-    "d": "#c:gems/diamond",
+    "n": "#c:ingots/netherite",
     "r": "#c:dusts/redstone"
   },
   "pattern": [
-    "CdC",
-    "drd",
-    "CdC"
+    "CrC",
+    "rnr",
+    "CrC"
   ],
   "result": {
-    "id": "asmrobots:storage_controller_module"
+    "id": "asmrobots:memory_map_upgrade"
   }
 }

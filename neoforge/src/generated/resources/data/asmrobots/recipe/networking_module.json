@@ -1,18 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "group": "storage_controller_module",
+  "group": "networking_module",
   "key": {
-    "C": "#c:chests",
+    "E": "#c:ender_pearls",
     "d": "#c:gems/diamond",
     "r": "#c:dusts/redstone"
   },
   "pattern": [
-    "CdC",
-    "drd",
-    "CdC"
+    "rdr",
+    "dEd",
+    "rdr"
   ],
   "result": {
-    "id": "asmrobots:storage_controller_module"
+    "id": "asmrobots:networking_module"
   }
 }

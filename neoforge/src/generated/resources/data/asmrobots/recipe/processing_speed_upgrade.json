@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "processing_speed_upgrade",
+  "key": {
+    "S": "asmrobots:speed_upgrade",
+    "d": "#c:gems/diamond",
+    "s": "minecraft:sugar"
+  },
+  "pattern": [
+    "sds",
+    "dSd",
+    "sds"
+  ],
+  "result": {
+    "id": "asmrobots:processing_speed_upgrade"
+  }
+}

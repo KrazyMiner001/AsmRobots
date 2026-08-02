@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "solid_state_drive_module",
+  "key": {
+    "H": "asmrobots:hard_drive_module",
+    "d": "#c:gems/diamond",
+    "s": "minecraft:sugar"
+  },
+  "pattern": [
+    "sds",
+    "dHd",
+    "sds"
+  ],
+  "result": {
+    "id": "asmrobots:solid_state_drive_module"
+  }
+}

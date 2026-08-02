@@ -1,18 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "group": "chest_module",
+  "group": "speed_upgrade",
   "key": {
-    "C": "#c:chests",
+    "g": "#c:ingots/gold",
     "i": "#c:ingots/iron",
-    "p": "#minecraft:planks"
+    "s": "minecraft:sugar"
   },
   "pattern": [
-    "pip",
-    "iCi",
-    "pip"
+    "sis",
+    "igi",
+    "sis"
   ],
   "result": {
-    "id": "asmrobots:chest_module"
+    "id": "asmrobots:speed_upgrade"
   }
 }

@@ -4,7 +4,7 @@
   "key": {
     "b": "minecraft:black_wool",
     "g": "minecraft:green_wool",
-    "i": "minecraft:iron_ingot"
+    "i": "#c:ingots/iron"
   },
   "pattern": [
     " g ",

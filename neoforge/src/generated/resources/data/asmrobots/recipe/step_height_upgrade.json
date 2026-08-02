@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "group": "step_height_upgrade",
+  "key": {
+    "G": "minecraft:golden_carrot",
+    "i": "#c:ingots/iron",
+    "s": "minecraft:oak_stairs"
+  },
+  "pattern": [
+    "sis",
+    "iGi",
+    "sis"
+  ],
+  "result": {
+    "id": "asmrobots:step_height_upgrade"
+  }
+}
