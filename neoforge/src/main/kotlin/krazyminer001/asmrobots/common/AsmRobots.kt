@@ -8,6 +8,7 @@ import krazyminer001.asmrobots.common.item.ModCreativeTabs
 import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
+import krazyminer001.asmrobots.common.world.ModTicketTypes
 import net.minecraft.resources.Identifier
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.Attributes
@@ -44,6 +45,7 @@ object AsmRobots {
         ModCreativeTabs.REGISTRY.register(MOD_BUS)
         ModBlocks.REGISTRY.register(MOD_BUS)
         ModBlockEntities.REGISTRY.register(MOD_BUS)
+        ModTicketTypes.REGISTRY.register(MOD_BUS)
 
         GUIDE = Guide.builder(Identifier.fromNamespaceAndPath(ID, "guide")).build()
     }

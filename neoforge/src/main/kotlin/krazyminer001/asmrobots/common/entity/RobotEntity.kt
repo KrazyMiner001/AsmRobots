@@ -545,6 +545,11 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                 val module = stack.item as? ModuleItem ?: return@forEachIndexed
                 module.tick(immutableProgramCopy, 1000 * (index + 1), level)
             }
+
+            upgradesInventory.forEach { stack ->
+                val upgrade = stack.item as? UpgradeItem ?: return@forEach
+                upgrade.tick(stack, this)
+            }
         }
     }
 

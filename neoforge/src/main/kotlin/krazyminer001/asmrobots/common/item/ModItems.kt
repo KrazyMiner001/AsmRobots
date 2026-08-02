@@ -9,6 +9,7 @@ import krazyminer001.asmrobots.common.item.component.ModComponents
 import krazyminer001.asmrobots.common.item.component.StorageModuleComponent
 import krazyminer001.asmrobots.common.item.module.*
 import krazyminer001.asmrobots.common.item.upgrade.AttributeUpgradeItem
+import krazyminer001.asmrobots.common.item.upgrade.ChunkLoadUpgradeItem
 import krazyminer001.asmrobots.common.item.upgrade.ExtensionUpgradeItem
 import krazyminer001.asmrobots.common.item.upgrade.ProcessingSpeedUpgrade
 import net.minecraft.world.entity.ai.attributes.Attributes
@@ -108,5 +109,10 @@ object ModItems {
         ExtensionUpgradeItem.withExtensions(
             InstructionExtension.MEMORY_MAPPING
         )
+    ) { properties -> properties.stacksTo(1) }
+
+    val CHUNK_LOAD_UPGRADE by REGISTRY.registerItem(
+        "chunk_load_upgrade",
+        ::ChunkLoadUpgradeItem
     ) { properties -> properties.stacksTo(1) }
 }

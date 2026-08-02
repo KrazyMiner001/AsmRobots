@@ -2,6 +2,7 @@
   "block.asmrobots.relay_block": "Relay Block",
   "entity.asmrobots.robot": "Robot",
   "item.asmrobots.chest_module": "Chest Module",
+  "item.asmrobots.chunk_load_upgrade": "Chunk Load Upgrade",
   "item.asmrobots.crafting_table_module": "Crafting Table Module",
   "item.asmrobots.floating_point_upgrade": "Floating Point Upgrade",
   "item.asmrobots.gps_module": "GPS Module",
