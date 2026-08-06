@@ -1,4 +1,4 @@
-// 26.1.2	2026-08-02T13:19:12.0969955	Model Definitions - asmrobots
+// 26.1.2	2026-08-06T16:58:15.0510508	Model Definitions - asmrobots
 86cfc2f1415b353a19f7e3ab7499104c68decf08 assets/asmrobots/blockstates/relay_block.json
 b4285fd0a3b3a3fc533421c681e9dd128a0d820a assets/asmrobots/items/chest_module.json
 69bc10f5387d7b8cbff64fc3203909e49e0ac6b4 assets/asmrobots/items/chunk_load_upgrade.json
@@ -11,6 +11,7 @@ c526a4158002d499b460774a8ffd6296f8878b3d assets/asmrobots/items/networking_modul
 89c90ab559cfdf5ea8b6b710400a554cd302071e assets/asmrobots/items/processing_speed_upgrade.json
 1cca803e904d6416df285017af02ec0af602ac39 assets/asmrobots/items/relay_block.json
 eec3b5c1cd688cc52a021475529445c285beaaa4 assets/asmrobots/items/robot.json
+2654afa0cae6b7c5fb4e95d2d7035c5c375ca968 assets/asmrobots/items/robot_craft_module.json
 9f3d3c3b12c3be6c2e8441984499eb5df7c85193 assets/asmrobots/items/solid_state_drive_module.json
 7079335705df315224e4360fed60db93e5a0bf04 assets/asmrobots/items/speed_upgrade.json
 7438bce7942edb0070832bce3bd12618577d2f8b assets/asmrobots/items/step_height_upgrade.json
@@ -27,6 +28,7 @@ c26213ec9fda605f35cbd9e3f5b697085567f9f3 assets/asmrobots/models/item/gps_module
 326431601603c993a5c9bc4dd7883a9d93619fd5 assets/asmrobots/models/item/networking_module.json
 2e7dd96128ce9eff1ed2fb4d492ee82ad99d6133 assets/asmrobots/models/item/processing_speed_upgrade.json
 b5e01f326db5e85b74ce82cb12eb5d4e49f0d816 assets/asmrobots/models/item/robot.json
+382c1c324d011de0a27b9b45f32c3cc5b3f1452a assets/asmrobots/models/item/robot_craft_module.json
 67a77cfe4bfbe79ae94c401425a8f30b72f3162a assets/asmrobots/models/item/solid_state_drive_module.json
 973dfe745af2941311c2bcd454f9a0011799787e assets/asmrobots/models/item/speed_upgrade.json
 78354a54896acdec238ea7c752bbe8ae643554fe assets/asmrobots/models/item/step_height_upgrade.json

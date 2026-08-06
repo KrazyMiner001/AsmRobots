@@ -115,4 +115,9 @@ object ModItems {
         "chunk_load_upgrade",
         ::ChunkLoadUpgradeItem
     ) { properties -> properties.stacksTo(1) }
+
+    val ROBOT_CRAFT_MODULE by REGISTRY.registerItem(
+        "robot_craft_module",
+        ::RobotCraftModule
+    ) { properties -> properties.stacksTo(1) }
 }
