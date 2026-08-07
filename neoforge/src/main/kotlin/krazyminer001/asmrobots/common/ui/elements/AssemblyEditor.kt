@@ -137,27 +137,28 @@ class AssemblyEditor : TextArea() {
                         onRawLinesUpdated()
                     }
                 }
-                GLFW.GLFW_KEY_H if event.isCtrlDown -> {
-                    val instruction = selectedInstruction
-                    val player = this.modularUI?.player
-                    if (instruction != null && player != null) {
-                        val page = AsmRobots.GUIDE.pages.find { page ->
-                            page.frontmatter.additionalProperties["documented_instructions"]
-                                .let { it as? List<*> }?.contains(instruction.name) ?: false
-                        }
-
-                        if (page != null) {
-                            GuidesCommon.openGuide(
-                                player,
-                                AsmRobots.GUIDE.id, PageAnchor(page.id, instruction.name)
-                            )
-                        }
-                    }
-                }
                 else -> super.onKeyDown(event)
             }
         } else {
             super.onKeyDown(event)
+        }
+    }
+
+    override fun onMouseDown(event: UIEvent) {
+        super.onMouseDown(event)
+
+        val pageId = AsmRobots.namespacedIdentifier("instructions.md")
+        val instruction = selectedInstruction
+        val player = this.modularUI?.player
+
+        if (event.isCtrlDown) {
+            if (instruction != null && player != null && AsmRobots.GUIDE.pageExists(pageId)) {
+                GuidesCommon.openGuide(
+                    player,
+                    AsmRobots.GUIDE.id,
+                    PageAnchor(pageId, instruction.name.lowercase())
+                )
+            }
         }
     }
 
