@@ -6,9 +6,14 @@ import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvent
 import com.lowdragmc.lowdraglib2.gui.ui.rendering.GUIContext
 import com.lowdragmc.lowdraglib2.gui.ui.style.PropertyRegistry
 import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister
+import guideme.GuidesCommon
+import guideme.PageAnchor
+import krazyminer001.asmrobots.common.AsmRobots
 import krazyminer001.asmrobots.common.asm.AsmError
 import krazyminer001.asmrobots.common.asm.Assembler
+import krazyminer001.asmrobots.common.asm.LexedLine
 import krazyminer001.asmrobots.common.asm.Lexeme
+import krazyminer001.asmrobots.common.asm.instructions.InstructionEnum
 import net.minecraft.client.gui.Font
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.FontDescription
@@ -25,6 +30,14 @@ class AssemblyEditor : TextArea() {
     private val styledLines: MutableList<Pair<Component, AsmError.ParseError?>> = mutableListOf()
 
     var indentSize: Int = 2
+
+    val selectedInstruction: InstructionEnum?
+        get() {
+            val lexedText = Assembler.lex(lines.joinToString("\n"))
+            val parsed = Assembler.parse(lexedText[cursorLine])
+
+            return parsed.successValue?.component1().let { it as? LexedLine.Content.Instruction }?.instruction
+        }
 
     private fun reparseAndStyle() {
         styledLines.clear()
@@ -122,6 +135,23 @@ class AssemblyEditor : TextArea() {
                             }
                         }
                         onRawLinesUpdated()
+                    }
+                }
+                GLFW.GLFW_KEY_H if event.isCtrlDown -> {
+                    val instruction = selectedInstruction
+                    val player = this.modularUI?.player
+                    if (instruction != null && player != null) {
+                        val page = AsmRobots.GUIDE.pages.find { page ->
+                            page.frontmatter.additionalProperties["documented_instructions"]
+                                .let { it as? List<*> }?.contains(instruction.name) ?: false
+                        }
+
+                        if (page != null) {
+                            GuidesCommon.openGuide(
+                                player,
+                                AsmRobots.GUIDE.id, PageAnchor(page.id, instruction.name)
+                            )
+                        }
                     }
                 }
                 else -> super.onKeyDown(event)
