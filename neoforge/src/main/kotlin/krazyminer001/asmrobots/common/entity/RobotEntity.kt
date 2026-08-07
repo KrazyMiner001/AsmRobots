@@ -667,5 +667,6 @@ fun ValueOutput.putItems(name: String, items: NonNullList<ItemStack>) {
     val outputItems = this.list(name, ItemStackWithSlot.CODEC)
     items
         .mapIndexed { index, stack -> ItemStackWithSlot(index, stack) }
+        .filter { !it.stack.isEmpty }
         .forEach { outputItems.add(it) }
 }
