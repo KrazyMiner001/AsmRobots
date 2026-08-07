@@ -11,8 +11,9 @@ object ModEntities {
     val ROBOT_ENTITY by REGISTRY.registerEntityType(
         "robot",
         ::RobotEntity,
-        MobCategory.MISC) {
+        MobCategory.MISC
+    ) {
         it
-            .sized(12f/16, 13f/16)
+            .sized(12f / 16, 13f / 16)
     }
 }

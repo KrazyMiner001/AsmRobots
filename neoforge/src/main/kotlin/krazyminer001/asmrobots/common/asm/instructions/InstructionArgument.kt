@@ -14,14 +14,17 @@ sealed interface InstructionArgument {
     data class Register(val register: RegisterEnum) : InstructionArgument {
         override fun toBytes(): ByteArray = byteArrayOf(register.ordinal.toUByte().toByte())
     }
+
     @ArgumentData(4)
     data class Immediate32(val value: Int) : InstructionArgument {
         override fun toBytes(): ByteArray = value.toBytes()
     }
+
     @ArgumentData(4)
     data class ImmediateFloat32(val value: Float) : InstructionArgument {
         override fun toBytes(): ByteArray = value.toBits().toBytes()
     }
+
     @ArgumentData(5)
     data class Pointer(val register: RegisterEnum, val offset: Immediate32) : InstructionArgument {
         override fun toBytes(): ByteArray = byteArrayOf(
@@ -29,10 +32,12 @@ sealed interface InstructionArgument {
             *offset.value.toBytes()
         )
     }
+
     @ArgumentData(1)
     data class Condition(val condition: ConditionEnum) : InstructionArgument {
         override fun toBytes(): ByteArray = byteArrayOf(this.condition.ordinal.toUByte().toByte())
     }
+
     @ArgumentData(4)
     data class Label(val value: Int, val name: String? = null) : InstructionArgument {
         override fun toBytes(): ByteArray = value.toBytes()
@@ -86,15 +91,18 @@ fun InstructionArgument.Companion.fromBytes(bytes: ByteArray, type: InstructionA
                 bytes[3]
             )
         )
+
         InstructionArgumentEnum.ImmediateFloat32 -> InstructionArgument.ImmediateFloat32(
             Float.fromBits(Int.fromBytes(bytes[0], bytes[1], bytes[2], bytes[3]))
         )
+
         InstructionArgumentEnum.Pointer -> InstructionArgument.Pointer(
             RegisterEnum.entries.find { it.ordinal == bytes[0].toInt() }!!,
             InstructionArgument.Immediate32(
                 Int.fromBytes(bytes[1], bytes[2], bytes[3], bytes[4])
             )
         )
+
         InstructionArgumentEnum.Label -> InstructionArgument.Label(
             Int.fromBytes(
                 bytes[0],
@@ -103,6 +111,7 @@ fun InstructionArgument.Companion.fromBytes(bytes: ByteArray, type: InstructionA
                 bytes[3]
             )
         )
+
         InstructionArgumentEnum.Condition -> InstructionArgument.Condition(
             ConditionEnum.entries.find { it.ordinal == bytes[0].toInt() }!!
         )

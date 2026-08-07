@@ -15,8 +15,8 @@ class Memory(size: Int, val shouldApplyMaps: () -> Boolean) {
         size: Int,
         getter: (Int) -> Byte,
         setter: (Int, Byte) -> Unit,
-    ) : MemoryMapId {
-        val range = (startAddress..<startAddress+size)
+    ): MemoryMapId {
+        val range = (startAddress..<startAddress + size)
 
         if (memoryMaps.values.any { it.range.intersect(range).isNotEmpty() }) {
             return MemoryMapId.ERROR
@@ -40,7 +40,9 @@ class Memory(size: Int, val shouldApplyMaps: () -> Boolean) {
     }
 
     operator fun get(index: Int): Byte {
-        if (!shouldApplyMaps()) { return realMemory[index] }
+        if (!shouldApplyMaps()) {
+            return realMemory[index]
+        }
 
         return memoryMaps
             .filter { index in it.value }
@@ -75,9 +77,9 @@ class Memory(size: Int, val shouldApplyMaps: () -> Boolean) {
         private val getter: (Int) -> Byte,
         private val setter: (Int, Byte) -> Unit
     ) {
-        val range = startAddress..<startAddress+size
+        val range = startAddress..<startAddress + size
 
-        operator fun get(index: Int) : Byte {
+        operator fun get(index: Int): Byte {
             require(index in this)
             return getter(index - startAddress)
         }

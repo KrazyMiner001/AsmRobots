@@ -42,6 +42,7 @@ class NetworkingModule(properties: Properties) : ModuleItem(properties) {
 
                 relay[port]
             }
+
             IOPorts.RELAY_ADDRESS_X -> relayPos.x
             IOPorts.RELAY_ADDRESS_Y -> relayPos.y
             IOPorts.RELAY_ADDRESS_Z -> relayPos.z
@@ -67,6 +68,7 @@ class NetworkingModule(properties: Properties) : ModuleItem(properties) {
 
                 relay[port] = value
             }
+
             IOPorts.RELAY_ADDRESS_X -> relayPos.x = value
             IOPorts.RELAY_ADDRESS_Y -> relayPos.y = value
             IOPorts.RELAY_ADDRESS_Z -> relayPos.z = value
@@ -78,6 +80,7 @@ class NetworkingModule(properties: Properties) : ModuleItem(properties) {
                     subscribedPorts.add(Pair(value, 0))
                 }
             }
+
             IOPorts.REMOVED_SUBSCRIBED_PORT -> {
                 if (subscribedPortIndex < subscribedPorts.size) {
                     subscribedPorts.removeAt(subscribedPortIndex)

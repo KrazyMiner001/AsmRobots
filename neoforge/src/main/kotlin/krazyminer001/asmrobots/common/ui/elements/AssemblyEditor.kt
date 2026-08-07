@@ -137,6 +137,7 @@ class AssemblyEditor : TextArea() {
                         onRawLinesUpdated()
                     }
                 }
+
                 else -> super.onKeyDown(event)
             }
         } else {
@@ -198,7 +199,8 @@ class AssemblyEditor : TextArea() {
                         style.withFont(FontDescription.Resource(textAreaStyle.font()))
                     }.let { component ->
                         if (error != null) {
-                            component.append(Component.literal("  Error: ${error.text}").withStyle {it.withColor(Color.red.rgb)})
+                            component.append(
+                                Component.literal("  Error: ${error.text}").withStyle { it.withColor(Color.red.rgb) })
                         } else {
                             component
                         }

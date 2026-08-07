@@ -6,8 +6,8 @@ import net.minecraft.data.loot.BlockLootSubProvider
 import net.minecraft.world.flag.FeatureFlags
 import net.minecraft.world.level.block.Block
 
-class ModBlockLootTableSubProvider(registries: HolderLookup.Provider)
-    : BlockLootSubProvider(setOf(), FeatureFlags.DEFAULT_FLAGS, registries) {
+class ModBlockLootTableSubProvider(registries: HolderLookup.Provider) :
+    BlockLootSubProvider(setOf(), FeatureFlags.DEFAULT_FLAGS, registries) {
     override fun generate() {
         this.dropSelf(ModBlocks.RELAY_BLOCK)
     }

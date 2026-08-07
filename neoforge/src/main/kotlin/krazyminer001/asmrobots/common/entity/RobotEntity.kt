@@ -67,8 +67,8 @@ import org.lwjgl.glfw.GLFW
 import kotlin.math.ceil
 import kotlin.properties.Delegates
 
-open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level)
-    : Mob(type, level), IContainerUIHolder {
+open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY, level: Level) : Mob(type, level),
+    IContainerUIHolder {
 
     init {
         this.lookControl = object : LookControl(this) {
@@ -155,15 +155,17 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
 
         override fun get(ioAddress: Int): Int {
             return when (ioAddress) {
-                in 1000..(numModules*1000+999) -> {
+                in 1000..(numModules * 1000 + 999) -> {
                     val (moduleIndex, address) = resolveModuleAndAddress(ioAddress)
 
                     val stack = modulesInventory.getItem(moduleIndex)
                     (stack.item as? ModuleItem)?.getIOPort(address, stack, this@RobotEntity) ?: -1
                 }
+
                 IOPorts.VELOCITY -> velocity.toBits()
                 IOPorts.FEET_BLOCK -> BuiltInRegistries.BLOCK
                     .getId(level().getBlockState(blockPosition().offset(0, -1, 0)).block)
+
                 IOPorts.ATTACK -> if (isBreaking) 1 else 0
                 IOPorts.NOTIFY_BUMP -> if (shouldNotifyBump) 1 else 0
                 IOPorts.YAW -> yHeadRot.toInt()
@@ -174,13 +176,14 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
 
         override fun set(ioAddress: Int, value: Int) {
             when (ioAddress) {
-                in 1000..(numModules*1000+999) -> {
+                in 1000..(numModules * 1000 + 999) -> {
                     val moduleIndex = ioAddress.floorDiv(1000)
                     val address = ioAddress % 1000
 
                     val stack = modulesInventory.getItem(moduleIndex - 1)
                     (stack.item as? ModuleItem)?.setIOPort(address, stack, this@RobotEntity, value)
                 }
+
                 IOPorts.VELOCITY -> velocity = Float.fromBits(value).coerceIn(-1f..1f) / 20
                 IOPorts.PRINT_INT -> {
                     val level = level()
@@ -189,6 +192,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                             .broadcastSystemMessage(messagePrefix.append(value.toString()), false)
                     }
                 }
+
                 IOPorts.PRINT_FLOAT -> {
                     val level = level()
                     if (level is ServerLevel) {
@@ -196,6 +200,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                             .broadcastSystemMessage(messagePrefix.append(Float.fromBits(value).toString()), false)
                     }
                 }
+
                 IOPorts.ATTACK -> isBreaking = value != 0
                 IOPorts.NOTIFY_BUMP -> shouldNotifyBump = value != 0
                 IOPorts.YAW -> targetYaw = value.toFloat() % 360
@@ -246,6 +251,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
             return ItemStack.EMPTY
         }
     }
+
     override fun getMainArm(): HumanoidArm {
         return HumanoidArm.LEFT
     }
@@ -512,7 +518,11 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
 
                     var toolSpeed = tool.getDestroySpeed(block).toDouble()
                     if (toolSpeed > 1)
-                        toolSpeed += tool.attributeModifiers.compute(Attributes.MINING_EFFICIENCY, 0.0, EquipmentSlot.MAINHAND)
+                        toolSpeed += tool.attributeModifiers.compute(
+                            Attributes.MINING_EFFICIENCY,
+                            0.0,
+                            EquipmentSlot.MAINHAND
+                        )
 
                     val harvestMultiplier =
                         if (block.requiresCorrectToolForDrops()
@@ -532,6 +542,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                         this.blockBreakProgress = blockBreakProgress
                     }
                 }
+
                 is EntityHitResult -> {
                     if (level is ServerLevel) {
                         if (hitResult.entity.isAttackable) {
@@ -583,7 +594,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     }
 
     fun getMemoryMap(identifier: Int): MemoryMappedModuleItem.MappedMemory? {
-        if (identifier in 1000..numModules*1000+999) {
+        if (identifier in 1000..numModules * 1000 + 999) {
             val (moduleIndex, innerIdentifier) = resolveModuleAndAddress(identifier)
 
             val moduleItem = modulesInventory.items[moduleIndex]

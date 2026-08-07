@@ -29,21 +29,25 @@ class RobotCraftModule(properties: Properties) : ModuleItem(properties) {
             IOPorts.RECIPES_INDEX -> recipeIndex
             IOPorts.SELECTED_RECIPE_OUTPUT_ITEM -> getRecipes(robotEntity)[recipeIndex]
                 .result.item().value().let { BuiltInRegistries.ITEM.getId(it) }
+
             IOPorts.SELECTED_RECIPE_OUTPUT_COUNT -> getRecipes(robotEntity)[recipeIndex]
                 .result.count
+
             IOPorts.RECIPE_INPUT_INDEX -> recipeInputIndex
             IOPorts.RECIPE_INPUT_INGREDIENT_INDEX -> recipeIngredientIndex
             IOPorts.RECIPE_INPUT_ITEM -> getRecipes(robotEntity)[recipeIndex]
                 .items
                 .keys
                 .toList()[recipeInputIndex]
-                    .values[recipeIngredientIndex]
-                    .value()
+                .values[recipeIngredientIndex]
+                .value()
                 .let { BuiltInRegistries.ITEM.getId(it) }
+
             IOPorts.RECIPE_INPUT_COUNT -> getRecipes(robotEntity)[recipeIndex]
                 .items
                 .values
                 .toList()[recipeInputIndex]
+
             IOPorts.CRAFT -> lastCraftedItemsCount
             else -> 0
         }
@@ -64,6 +68,7 @@ class RobotCraftModule(properties: Properties) : ModuleItem(properties) {
                     lastCraftedItemsCount = craftResult.count
                 }
             }
+
             else -> {}
         }
     }

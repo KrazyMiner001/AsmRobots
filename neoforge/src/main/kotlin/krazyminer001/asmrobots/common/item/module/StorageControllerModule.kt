@@ -49,7 +49,7 @@ class StorageControllerModule(properties: Properties) : ModuleItem(properties) {
                 if (
                     !source.has(ModComponents.STORAGE_COMPONENT)
                     || !destination.has(ModComponents.STORAGE_COMPONENT)
-                    ) return
+                ) return
 
                 val sourceHandler = VanillaContainerWrapper.of(StorageModuleContainer(source))
                 val destinationHandler = VanillaContainerWrapper.of(StorageModuleContainer(destination))
@@ -59,7 +59,8 @@ class StorageControllerModule(properties: Properties) : ModuleItem(properties) {
                     if (sourceResource.isEmpty) return@use
 
                     val sourceAmount = sourceHandler.getAmountAsInt(sourceItemIndex)
-                    val inserted = destinationHandler.insert(destinationItemIndex, sourceResource, min(sourceAmount, value), it)
+                    val inserted =
+                        destinationHandler.insert(destinationItemIndex, sourceResource, min(sourceAmount, value), it)
 
                     val extracted = sourceHandler.extract(sourceItemIndex, sourceResource, inserted, it)
 

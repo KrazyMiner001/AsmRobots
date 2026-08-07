@@ -38,6 +38,7 @@ class StorageBlockInterfaceModule(properties: Properties) : ModuleItem(propertie
                     -1
                 }
             }
+
             IOPorts.CONTAINER_STACK_SIZE -> {
                 val level = robotEntity.level()
                 val hitResult = raycastBlock(robotEntity, itemStack)
@@ -49,6 +50,7 @@ class StorageBlockInterfaceModule(properties: Properties) : ModuleItem(propertie
                     -1
                 }
             }
+
             else -> 0
         }
     }

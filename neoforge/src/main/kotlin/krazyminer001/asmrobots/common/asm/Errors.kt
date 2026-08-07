@@ -10,7 +10,10 @@ import kotlin.contracts.contract
 
 sealed interface AsmError {
     sealed interface ParseError : AsmError {
-        data class InvalidInstructionArgumentsFor(val instruction: InstructionEnum, val providedArguments: List<InstructionArgument>) : ParseError {
+        data class InvalidInstructionArgumentsFor(
+            val instruction: InstructionEnum,
+            val providedArguments: List<InstructionArgument>
+        ) : ParseError {
             override val text = "Invalid arguments for instruction $instruction"
         }
 
@@ -32,15 +35,16 @@ sealed interface AsmError {
     }
 
     sealed interface RuntimeError : AsmError {
-        data class CouldNotParseInstruction(val pc: Int): RuntimeError {
+        data class CouldNotParseInstruction(val pc: Int) : RuntimeError {
             override val text = "Could not parse instruction at PC=$pc"
         }
 
-        data class ErrorExecutingInstruction(val pc: Int, val instruction: Instruction): RuntimeError {
+        data class ErrorExecutingInstruction(val pc: Int, val instruction: Instruction) : RuntimeError {
             override val text = ""
         }
 
-        data class ExtensionNotPresent(val instruction: Instruction, val requiredExtension: InstructionExtension): RuntimeError {
+        data class ExtensionNotPresent(val instruction: Instruction, val requiredExtension: InstructionExtension) :
+            RuntimeError {
             override val text = "Instruction $instruction required extension $requiredExtension, which is not present"
         }
     }
@@ -49,7 +53,7 @@ sealed interface AsmError {
 }
 
 sealed class AsmResult<out T : Any, out E : AsmError> {
-    data class Success<T : Any>(val value: T): AsmResult<T, Nothing>()
+    data class Success<T : Any>(val value: T) : AsmResult<T, Nothing>()
     data class Failure<E : AsmError>(val error: E) : AsmResult<Nothing, E>()
 
     @OptIn(ExperimentalContracts::class, ExperimentalExtendedContracts::class)
@@ -60,7 +64,7 @@ sealed class AsmResult<out T : Any, out E : AsmError> {
                 returns(null) implies (this@AsmResult is Failure<E>)
                 (this@AsmResult is Success<T>) implies returnsNotNull()
             }
-            return when(this) {
+            return when (this) {
                 is Failure<E> -> null
                 is Success<T> -> this.value
             }
@@ -74,7 +78,7 @@ sealed class AsmResult<out T : Any, out E : AsmError> {
                 returns(null) implies (this@AsmResult is Success<T>)
                 (this@AsmResult is Failure<E>) implies returnsNotNull()
             }
-            return when(this) {
+            return when (this) {
                 is Failure<E> -> this.error
                 is Success<T> -> null
             }
@@ -87,7 +91,7 @@ sealed class AsmResult<out T : Any, out E : AsmError> {
                 returns(false) implies (this@AsmResult is Failure<E>)
                 returns(true) implies (this@AsmResult is Success<T>)
             }
-            return when(this) {
+            return when (this) {
                 is Failure<*> -> false
                 is Success<*> -> true
             }
@@ -100,7 +104,7 @@ sealed class AsmResult<out T : Any, out E : AsmError> {
                 returns(true) implies (this@AsmResult is Failure<E>)
                 returns(false) implies (this@AsmResult is Success<T>)
             }
-            return when(this) {
+            return when (this) {
                 is Failure<*> -> true
                 is Success<*> -> false
             }

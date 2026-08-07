@@ -7,12 +7,18 @@ import net.minecraft.network.codec.StreamCodec
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.component.ItemContainerContents
 
-data class StorageModuleComponent(val itemContainerComponent: ItemContainerContents = ItemContainerContents.EMPTY, val size: Int) {
+data class StorageModuleComponent(
+    val itemContainerComponent: ItemContainerContents = ItemContainerContents.EMPTY,
+    val size: Int
+) {
     companion object {
-        val CODEC: Codec<StorageModuleComponent> = RecordCodecBuilder.create { it.group(
-            ItemContainerContents.CODEC.fieldOf("itemContainerComponent").forGetter(StorageModuleComponent::itemContainerComponent),
-            Codec.INT.fieldOf("size").forGetter(StorageModuleComponent::size)
-        ).apply(it, ::StorageModuleComponent) }
+        val CODEC: Codec<StorageModuleComponent> = RecordCodecBuilder.create {
+            it.group(
+                ItemContainerContents.CODEC.fieldOf("itemContainerComponent")
+                    .forGetter(StorageModuleComponent::itemContainerComponent),
+                Codec.INT.fieldOf("size").forGetter(StorageModuleComponent::size)
+            ).apply(it, ::StorageModuleComponent)
+        }
 
         val STREAM_CODEC = StreamCodec.composite(
             ItemContainerContents.STREAM_CODEC, StorageModuleComponent::itemContainerComponent,

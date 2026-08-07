@@ -9,7 +9,7 @@ import thedarkcolour.kotlinforforge.neoforge.forge.getValue
 object ModBlockEntities {
     val REGISTRY = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, AsmRobots.ID)
 
-    val RELAY_BLOCK_ENTITY_TYPE by REGISTRY.register("relay_block_entity") {->
+    val RELAY_BLOCK_ENTITY_TYPE by REGISTRY.register("relay_block_entity") { ->
         BlockEntityType(
             ::RelayBlockEntity,
             false,

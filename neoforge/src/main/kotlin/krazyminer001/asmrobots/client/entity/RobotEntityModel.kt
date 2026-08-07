@@ -28,7 +28,7 @@ class RobotEntityModel(root: ModelPart) : EntityModel<ArmedEntityRenderState>(ro
 
         fun createBodyLayer(): LayerDefinition {
             val meshdefinition = MeshDefinition()
-            val partdefinition = meshdefinition.getRoot()
+            val partdefinition = meshdefinition.root
 
             val treads = partdefinition.addOrReplaceChild(
                 "treads",

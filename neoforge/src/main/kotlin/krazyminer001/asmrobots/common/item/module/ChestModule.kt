@@ -55,6 +55,7 @@ class ChestModule(properties: Properties) : ModuleItem(properties), HeldItemUIMe
                 ?.itemContainerComponent
                 ?.getStackInSlot(index)?.item
                 ?.let { BuiltInRegistries.ITEM.getId(it) } ?: -1
+
             else -> 0
         }
     }

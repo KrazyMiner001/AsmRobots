@@ -5,7 +5,8 @@ import krazyminer001.asmrobots.common.item.component.StorageModuleComponent
 import net.minecraft.world.SimpleContainer
 import net.minecraft.world.item.ItemStack
 
-class StorageModuleContainer(private val stack: ItemStack) : SimpleContainer(stack.get(ModComponents.STORAGE_COMPONENT)?.size ?: 0) {
+class StorageModuleContainer(private val stack: ItemStack) :
+    SimpleContainer(stack.get(ModComponents.STORAGE_COMPONENT)?.size ?: 0) {
     init {
         val contents = stack.get(ModComponents.STORAGE_COMPONENT) ?: StorageModuleComponent(size = 0)
         contents.itemContainerComponent.copyInto(items)

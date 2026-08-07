@@ -1,7 +1,7 @@
 package krazyminer001.asmrobots.common.asm
 
-import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
 import krazyminer001.asmrobots.common.asm.instructions.Instruction.Companion.byteLength
+import krazyminer001.asmrobots.common.asm.instructions.InstructionArgument
 import krazyminer001.asmrobots.common.asm.instructions.InstructionEnum
 import krazyminer001.asmrobots.common.asm.instructions.asEnum
 import krazyminer001.asmrobots.common.asm.instructions.Condition as ConditionEnum
@@ -18,7 +18,8 @@ object Assembler {
             val float = string.toFloatOrNull()
             val condition = ConditionEnum.entries.find { it.name.lowercase() == string }
             val register = RegisterEnum.entries.find { it.name.lowercase() == string }
-            val byte = if (string.length == 4 && string[0] == '0' && string[1] == 'x') string.drop(2).toUByteOrNull(16) else null
+            val byte = if (string.length == 4 && string[0] == '0' && string[1] == 'x') string.drop(2)
+                .toUByteOrNull(16) else null
             return when {
                 null != int -> Lexeme.Integer(string)
                 null != float -> Lexeme.FloatNum(string)
@@ -219,9 +220,11 @@ object Assembler {
                 is LexedLine.Content.Instruction -> {
                     content.arguments.map { it.asEnum() }.byteLength() + 2
                 }
+
                 is LexedLine.Content.EmbedDirective -> {
                     content.values.size
                 }
+
                 else -> {
                     throw IllegalStateException("Content list has invalid object in it")
                 }
@@ -252,11 +255,13 @@ object Assembler {
                 is LexedLine.Content.EmbedDirective -> {
                     memory.addAll(content.values.map { it.toByte() })
                 }
+
                 is LexedLine.Content.Instruction -> {
                     val (instructionEnum, arguments) = content
                     val instructionInstance = instructionEnum.create(*arguments.toTypedArray())
                     memory.addAll(instructionInstance.toBytes().toList())
                 }
+
                 else -> throw IllegalStateException()
             }
         }

@@ -47,7 +47,9 @@ class RobotCraftRecipe(
                 }
             }
 
-            if (toRemove != 0) { return null }
+            if (toRemove != 0) {
+                return null
+            }
         }
 
         return inputItems
@@ -80,11 +82,13 @@ class RobotCraftRecipe(
         val CODEC: MapCodec<RobotCraftRecipe> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
                 ItemStackTemplate.MAP_CODEC.forGetter(RobotCraftRecipe::result),
-                Codec.unboundedMap(Ingredient.CODEC, PrimitiveCodec.INT).fieldOf("items").forGetter(RobotCraftRecipe::items),
+                Codec.unboundedMap(Ingredient.CODEC, PrimitiveCodec.INT).fieldOf("items")
+                    .forGetter(RobotCraftRecipe::items),
                 Recipe.CommonInfo.MAP_CODEC.forGetter(RobotCraftRecipe::commonInfo),
-                ModRecipeBookCategories.RobotBookCategory.CODEC.fieldOf("bookCategory").forGetter(RobotCraftRecipe::bookCategory),
+                ModRecipeBookCategories.RobotBookCategory.CODEC.fieldOf("bookCategory")
+                    .forGetter(RobotCraftRecipe::bookCategory),
                 Codec.STRING.fieldOf("groupName").forGetter(RobotCraftRecipe::groupName),
-                ).apply(instance, ::RobotCraftRecipe)
+            ).apply(instance, ::RobotCraftRecipe)
         }
 
         val STREAM_CODEC = StreamCodec.composite(

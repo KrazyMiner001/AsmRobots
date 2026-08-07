@@ -127,6 +127,7 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                         return AsmError
                             .RuntimeError
                             .ExtensionNotPresent(instruction, FP)
+
                     is FAdd if FP in callback -> target.floatValue = arg1.floatValue + arg2.floatValue
                     is FDiv if FP in callback -> target.floatValue = arg1.floatValue / arg2.floatValue
                     is FFMA if FP in callback -> target.floatValue += arg1.floatValue * arg2.floatValue
@@ -152,6 +153,7 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                             reg[PC] = address.wordValue
                         }
                     }
+
                     is FToI if FP in callback -> target.wordValue = arg.floatValue.toInt()
                     is IToF if FP in callback -> target.floatValue = arg.wordValue.toFloat()
                     in MEMORY_MAPPING if MEMORY_MAPPING !in callback -> {
@@ -159,6 +161,7 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                             .RuntimeError
                             .ExtensionNotPresent(instruction, MEMORY_MAPPING)
                     }
+
                     is MapIO if MEMORY_MAPPING in callback -> {
                         val memoryMap = memory.createMemoryMap(
                             startAddress.wordValue,
@@ -168,9 +171,11 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                         )
                         outIdentifier.wordValue = memoryMap.id
                     }
+
                     is Unmap if MEMORY_MAPPING in callback -> {
                         memory.removeMemoryMap(Memory.MemoryMapId(identifier.wordValue))
                     }
+
                     else -> {}
                 }
             }
@@ -258,7 +263,9 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
 
     var InstructionArgument.floatValue: Float
         get() = Float.fromBits(this.wordValue)
-        set(value) { this.wordValue = value.toRawBits() }
+        set(value) {
+            this.wordValue = value.toRawBits()
+        }
 
     var InstructionArgument.halfValue: Short
         get() = when (this) {

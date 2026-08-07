@@ -34,7 +34,7 @@ object ModItems {
     val SOLID_STATE_DRIVE_MODULE by REGISTRY.registerItem(
         "solid_state_drive_module",
         ::SolidStateDriveModule
-    ) { properties -> properties.component(ModComponents.SOLID_STATE_DRIVE, List(128) { 0 })}
+    ) { properties -> properties.component(ModComponents.SOLID_STATE_DRIVE, List(128) { 0 }) }
 
     val STORAGE_CONTROLLER_MODULE by REGISTRY.registerItem(
         "storage_controller_module",
