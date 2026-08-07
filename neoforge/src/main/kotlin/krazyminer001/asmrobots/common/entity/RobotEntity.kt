@@ -440,7 +440,11 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
             }
         }
 
-        return ModularUI(UI.of(root), player).shouldCloseOnEsc(false).shouldCloseOnKeyInventory(false)
+        return ModularUI(UI.of(root), player).apply {
+            shouldCloseOnEsc(false)
+            shouldCloseOnKeyInventory(false)
+            requestFocus(root)
+        }
     }
 
     override fun isStillValid(player: Player): Boolean {
