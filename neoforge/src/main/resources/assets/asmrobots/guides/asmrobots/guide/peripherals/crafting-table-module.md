@@ -3,6 +3,8 @@ navigation:
     title: Crafting Table Module
     position: 3
     parent: peripherals/peripherals.md
+item_ids:
+  - asmrobots:crafting_table_module
 ---
 
 # Crafting Table Module

@@ -2,6 +2,8 @@
 navigation:
     title: Introduction
     position: 1
+item_ids:
+      - asmrobots:robot
 ---
 
 # Introduction

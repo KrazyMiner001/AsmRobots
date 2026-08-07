@@ -3,6 +3,8 @@ navigation:
     title: Chest Module
     position: 2
     parent: peripherals/peripherals.md
+item_ids:
+  - asmrobots:chest_module
 ---
 
 # Chest Module

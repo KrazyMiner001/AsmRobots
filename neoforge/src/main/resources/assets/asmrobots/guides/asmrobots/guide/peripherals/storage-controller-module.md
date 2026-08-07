@@ -3,6 +3,8 @@ navigation:
     title: Storage Controller Module
     position: 6
     parent: peripherals/peripherals.md
+item_ids:
+  - asmrobots:storage_controller_module
 ---
 
 # Storage Controller Module

@@ -3,6 +3,8 @@ navigation:
     title: GPS Module
     position: 4
     parent: peripherals/peripherals.md
+item_ids:
+  - asmrobots:gps_module
 ---
 
 # GPS Module

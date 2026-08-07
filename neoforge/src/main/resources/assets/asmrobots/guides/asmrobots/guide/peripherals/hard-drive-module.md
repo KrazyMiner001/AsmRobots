@@ -3,6 +3,8 @@ navigation:
     title: Hard Drive Module
     position: 5
     parent: peripherals/peripherals.md
+item_ids:
+  - asmrobots:hard_drive_module
 ---
 
 # Hard Drive Module
