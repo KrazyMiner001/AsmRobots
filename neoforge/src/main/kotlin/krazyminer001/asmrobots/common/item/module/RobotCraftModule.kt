@@ -66,7 +66,7 @@ class RobotCraftModule(properties: Properties) : ModuleItem(properties) {
                 recipes.getOrNull(recipeIndex)?.let { recipe ->
                     val craftResult = RobotRecipeCrafter.craft(robotEntity, recipe)
                     lastCraftedItemsCount = craftResult.count
-                }
+                } ?: { lastCraftedItemsCount = -1 }
             }
 
             else -> {}

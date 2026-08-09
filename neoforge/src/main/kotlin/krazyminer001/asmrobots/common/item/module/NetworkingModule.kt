@@ -81,7 +81,7 @@ class NetworkingModule(properties: Properties) : ModuleItem(properties) {
                 }
             }
 
-            IOPorts.REMOVED_SUBSCRIBED_PORT -> {
+            IOPorts.REMOVE_SUBSCRIBED_PORT -> {
                 if (subscribedPortIndex < subscribedPorts.size) {
                     subscribedPorts.removeAt(subscribedPortIndex)
                     subscribedPortIndex--
@@ -101,6 +101,6 @@ class NetworkingModule(properties: Properties) : ModuleItem(properties) {
         const val RELAY_ADDRESS_Z = 4
         const val SUBSCRIBED_PORT_INDEX = 5
         const val SUBSCRIBED_PORT_VALUE = 6
-        const val REMOVED_SUBSCRIBED_PORT = 7
+        const val REMOVE_SUBSCRIBED_PORT = 7
     }
 }

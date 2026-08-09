@@ -20,6 +20,10 @@ The following terminology shall be used for units of memory:
 The system has 4 slots for peripherals called modules.\
 For more information see IO Interfacing
 
+# Upgrades
+The system has 2 slots for upgrades.\
+For more information see [upgrades](upgrades/upgrades.md)
+
 # Registers
 The system has 48 general purpose registers and 3 special registers.\
 \

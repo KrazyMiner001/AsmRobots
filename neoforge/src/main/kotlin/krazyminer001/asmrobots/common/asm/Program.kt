@@ -135,12 +135,13 @@ class Program(private val callback: ProgramCallback, memorySize: Int = 8192) {
                     is FMin if FP in callback -> target.floatValue = min(arg1.floatValue, arg2.floatValue)
                     is FMul if FP in callback -> target.floatValue = arg1.floatValue * arg2.floatValue
                     is FNext if FP in callback -> target.floatValue = arg.floatValue.nextUp()
+                    is FPrev if FP in callback -> target.floatValue = arg.floatValue.nextDown()
                     is FRem if FP in callback -> target.floatValue = arg1.floatValue.IEEErem(arg2.floatValue)
                     is FSqrt if FP in callback -> target.floatValue = sqrt(arg.floatValue)
                     is FSub if FP in callback -> target.floatValue = arg1.floatValue - arg2.floatValue
                     is FAbs if FP in callback -> target.floatValue = arg.floatValue.absoluteValue
                     is FLog if FP in callback -> target.floatValue = log2(arg.floatValue)
-                    is FExp if FP in callback -> target.floatValue = arg.floatValue.pow(2)
+                    is FExp if FP in callback -> target.floatValue = 2f.pow(arg.floatValue)
                     is FJCond if FP in callback -> {
                         if (when ((condition as InstructionArgument.Condition).condition) {
                                 Condition.EQ -> arg1.floatValue == arg2.floatValue
