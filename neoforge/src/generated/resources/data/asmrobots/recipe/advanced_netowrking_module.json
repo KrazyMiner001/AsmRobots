@@ -1,0 +1,14 @@
+{
+  "type": "asmrobots:robot_craft",
+  "bookCategory": "asmrobots:robot_misc",
+  "groupName": "advanced_networking_module",
+  "id": "asmrobots:advanced_netowrking_module",
+  "items": {
+    "#c:dusts/redstone": 4,
+    "#c:gems/diamond": 4,
+    "#c:ingots/gold": 4,
+    "asmrobots:networking_module": 1,
+    "minecraft:ender_eye": 4
+  },
+  "show_notification": false
+}

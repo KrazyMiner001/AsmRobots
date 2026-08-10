@@ -1,0 +1,12 @@
+{
+  "type": "asmrobots:robot_craft",
+  "bookCategory": "asmrobots:robot_misc",
+  "groupName": "solid_state_drive_module",
+  "id": "asmrobots:solid_state_drive_module",
+  "items": {
+    "#c:gems/diamond": 1,
+    "asmrobots:hard_drive_module": 1,
+    "minecraft:sugar": 2
+  },
+  "show_notification": false
+}

@@ -9,9 +9,9 @@ import net.minecraft.world.item.ItemStack
 import kotlin.jvm.optionals.getOrNull
 
 class NetworkingModule(properties: Properties) : ModuleItem(properties) {
-    var relayPos: BlockPos.MutableBlockPos = BlockPos.MutableBlockPos(0, 0, 0)
+    val relayPos: BlockPos.MutableBlockPos = BlockPos.MutableBlockPos(0, 0, 0)
     var port: Int = 0
-    val subscribedPorts = mutableListOf<Pair<Int, Int>>()
+    val subscribedPorts = mutableListOf<Pair<Int, Byte>>()
     var subscribedPortIndex = 0
 
     override fun tick(program: Program, portOffset: Int, level: ServerLevel) {
@@ -38,9 +38,9 @@ class NetworkingModule(properties: Properties) : ModuleItem(properties) {
                 val relay = robotEntity
                     .level()
                     .getBlockEntity(relayPos, ModBlockEntities.RELAY_BLOCK_ENTITY_TYPE)
-                    .getOrNull() ?: return -1
+                    .getOrNull() ?: return 0
 
-                relay[port]
+                relay[port].toUByte().toInt()
             }
 
             IOPorts.RELAY_ADDRESS_X -> relayPos.x
@@ -66,7 +66,7 @@ class NetworkingModule(properties: Properties) : ModuleItem(properties) {
                     .getBlockEntity(relayPos, ModBlockEntities.RELAY_BLOCK_ENTITY_TYPE)
                     .getOrNull() ?: return
 
-                relay[port] = value
+                relay[port] = value.toByte()
             }
 
             IOPorts.RELAY_ADDRESS_X -> relayPos.x = value

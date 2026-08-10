@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_networking_module": {
+      "conditions": {
+        "items": [
+          {
+            "items": "asmrobots:networking_module"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "asmrobots:advanced_netowrking_module"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_networking_module"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "asmrobots:advanced_netowrking_module"
+    ]
+  }
+}

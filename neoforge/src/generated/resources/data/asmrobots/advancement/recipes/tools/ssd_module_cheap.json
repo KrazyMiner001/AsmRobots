@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_hard_drive_module": {
+      "conditions": {
+        "items": [
+          {
+            "items": "asmrobots:hard_drive_module"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "asmrobots:ssd_module_cheap"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_hard_drive_module"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "asmrobots:ssd_module_cheap"
+    ]
+  }
+}

@@ -1,6 +1,7 @@
-// 26.1.2	2026-08-02T13:52:47.8747133	Asm Robots Recipe Provider
+// 26.1.2	2026-08-10T16:01:17.6718449	Asm Robots Recipe Provider
 fedc4a659e01dfb34f4baca9f7d054e7d487daec data/asmrobots/advancement/recipes/misc/relay_block.json
 6bb99e6bcd458bd3450765ab926330c8b98a7362 data/asmrobots/advancement/recipes/misc/robot.json
+2a91813769544eceb14df7a62ed925255e346534 data/asmrobots/advancement/recipes/tools/advanced_netowrking_module.json
 5ca7ce216f9f1e9da9eab05e8cc6425d80491bda data/asmrobots/advancement/recipes/tools/chest_module.json
 65405aef857c68ef163871899cf147ff4ed981de data/asmrobots/advancement/recipes/tools/chunk_load_upgrade.json
 f8eba98e8fb2084685582dfadb373d86ced33203 data/asmrobots/advancement/recipes/tools/crafting_table_module.json
@@ -12,9 +13,11 @@ fb5b1a9d945aa79796b6fa4a6cc2baef1f2c7b17 data/asmrobots/advancement/recipes/tool
 6fd77d40f2aa1fb9689b7554bcd9a72e65f080f9 data/asmrobots/advancement/recipes/tools/processing_speed_upgrade.json
 5bfefca870dcf53b3e15566117f79a06561e47fc data/asmrobots/advancement/recipes/tools/solid_state_drive_module.json
 bac342074333016112b02b9f162e5b0a33c6cbdb data/asmrobots/advancement/recipes/tools/speed_upgrade.json
+8ca02a977479b6d872dbae65d4005a4228bd1c26 data/asmrobots/advancement/recipes/tools/ssd_module_cheap.json
 d233dbc25e35bf268ae7ab1ff600a822cb369184 data/asmrobots/advancement/recipes/tools/step_height_upgrade.json
 3bc5d6c7061df55405509fca76613671009b75c8 data/asmrobots/advancement/recipes/tools/storage_block_interface_module.json
 8936ce6747a73f051d6456d67cd2c104f80e2133 data/asmrobots/advancement/recipes/tools/storage_controller_module.json
+3e78af1c25dbb9d59e5ce66fa049a27a0b090224 data/asmrobots/recipe/advanced_netowrking_module.json
 4e718126de43b35ea77ef4365244ac941b144814 data/asmrobots/recipe/chest_module.json
 0e8e9d33fa25b858268924fc11a488dfca96960b data/asmrobots/recipe/chunk_load_upgrade.json
 e0e6ae631972a619e35dd0ff5297b84c3a80d0f4 data/asmrobots/recipe/crafting_table_module.json
@@ -28,6 +31,7 @@ e1feae69a6072015919a4bb3b960c8accbe95d23 data/asmrobots/recipe/relay_block.json
 4bf1efe90d5283bdf98c29bb04edd829014131b0 data/asmrobots/recipe/robot.json
 f54ef280acd5424e9c71ce5185a5e81483ce85b5 data/asmrobots/recipe/solid_state_drive_module.json
 3451c37c76e029213232ec0472632615fbf34ffe data/asmrobots/recipe/speed_upgrade.json
+c7165292950dec18acd0a59a15f4b44d3fa6f44c data/asmrobots/recipe/ssd_module_cheap.json
 badcf4dd3c8d8ea6c39323dfa21f149e86edb7c5 data/asmrobots/recipe/step_height_upgrade.json
 9b34c9195485ce0fc3c02bdfc26ff99ce1efd729 data/asmrobots/recipe/storage_block_interface_module.json
 66e4da58671bf643bed14932a0c2d20645052249 data/asmrobots/recipe/storage_controller_module.json

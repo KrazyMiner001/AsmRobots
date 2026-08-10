@@ -1,13 +1,16 @@
 package krazyminer001.asmrobots.data
 
+import krazyminer001.asmrobots.common.AsmRobots
 import krazyminer001.asmrobots.common.block.ModBlocks
 import krazyminer001.asmrobots.common.item.ModItems
+import krazyminer001.asmrobots.common.recipe.RobotCraftRecipeBuilder
 import net.minecraft.core.HolderLookup
 import net.minecraft.data.PackOutput
 import net.minecraft.data.recipes.RecipeCategory
 import net.minecraft.data.recipes.RecipeOutput
 import net.minecraft.data.recipes.RecipeProvider
 import net.minecraft.tags.ItemTags
+import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.Items
 import net.minecraft.world.level.block.Blocks
 import net.neoforged.neoforge.common.Tags
@@ -89,6 +92,14 @@ class ModRecipeProvider(registries: HolderLookup.Provider, output: RecipeOutput)
             .group("solid_state_drive_module")
             .unlockedBy(getHasName(ModItems.HARD_DRIVE_MODULE), has(ModItems.HARD_DRIVE_MODULE))
             .save(output)
+
+        RobotCraftRecipeBuilder(ItemStackTemplate(ModItems.SOLID_STATE_DRIVE_MODULE, 1), RecipeCategory.TOOLS)
+            .item(Items.SUGAR, 2)
+            .item(tag(Tags.Items.GEMS_DIAMOND), 1)
+            .item(ModItems.HARD_DRIVE_MODULE)
+            .group("solid_state_drive_module")
+            .unlockedBy(getHasName(ModItems.HARD_DRIVE_MODULE), has(ModItems.HARD_DRIVE_MODULE))
+            .save(output, "${AsmRobots.ID}:ssd_module_cheap")
 
         shaped(RecipeCategory.TOOLS, ModItems.STORAGE_BLOCK_INTERFACE_MODULE)
             .pattern("CdC")
@@ -187,6 +198,16 @@ class ModRecipeProvider(registries: HolderLookup.Provider, output: RecipeOutput)
             .define('C', Blocks.CHORUS_FLOWER)
             .group("relay_block")
             .unlockedBy(getHasName(Blocks.CHORUS_FLOWER), has(Blocks.CHORUS_FLOWER))
+            .save(output)
+
+        RobotCraftRecipeBuilder(ItemStackTemplate(ModItems.ADVANCED_NETWORKING_MODULE, 1), RecipeCategory.TOOLS)
+            .item(ModItems.NETWORKING_MODULE)
+            .item(tag(Tags.Items.GEMS_DIAMOND), 4)
+            .item(tag(Tags.Items.DUSTS_REDSTONE), 4)
+            .item(tag(Tags.Items.INGOTS_GOLD), 4)
+            .item(Items.ENDER_EYE, 4)
+            .group("advanced_networking_module")
+            .unlockedBy(getHasName(ModItems.NETWORKING_MODULE), has(ModItems.NETWORKING_MODULE))
             .save(output)
     }
 

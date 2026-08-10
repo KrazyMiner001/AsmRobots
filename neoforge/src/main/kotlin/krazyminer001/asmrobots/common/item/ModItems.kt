@@ -120,4 +120,9 @@ object ModItems {
         "robot_craft_module",
         ::RobotCraftModule
     ) { properties -> properties.stacksTo(1) }
+
+    val ADVANCED_NETWORKING_MODULE by REGISTRY.registerItem(
+        "advanced_netowrking_module",
+        ::AdvancedNetworkingModule
+    ) { properties -> properties.stacksTo(1) }
 }

@@ -2,14 +2,17 @@ package krazyminer001.asmrobots.common.recipe
 
 import krazyminer001.asmrobots.common.recipe.ModRecipeBookCategories.RobotBookCategory
 import net.minecraft.advancements.Criterion
+import net.minecraft.core.HolderSet
 import net.minecraft.data.recipes.RecipeBuilder
 import net.minecraft.data.recipes.RecipeCategory
 import net.minecraft.data.recipes.RecipeOutput
 import net.minecraft.data.recipes.RecipeUnlockAdvancementBuilder
 import net.minecraft.resources.ResourceKey
+import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.crafting.Ingredient
 import net.minecraft.world.item.crafting.Recipe
+import net.minecraft.world.level.ItemLike
 
 class RobotCraftRecipeBuilder(val result: ItemStackTemplate, val category: RecipeCategory) : RecipeBuilder {
 
@@ -44,6 +47,12 @@ class RobotCraftRecipeBuilder(val result: ItemStackTemplate, val category: Recip
 
         return this
     }
+
+    fun item(item: HolderSet<Item>, count: Int = 1) = item(Ingredient.of(item), count)
+
+    fun item(item: Ingredient, count: Int = 1) = item(Pair(item, count))
+
+    fun item(item: ItemLike, count: Int = 1) = item(Ingredient.of(item), count)
 
     fun items(vararg items: Pair<Ingredient, Int>): RobotCraftRecipeBuilder {
         items.forEach { this.item(it) }

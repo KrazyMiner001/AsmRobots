@@ -11,10 +11,10 @@ import kotlin.jvm.optionals.getOrElse
 
 class RelayBlockEntity(worldPosition: BlockPos, blockState: BlockState) :
     BlockEntity(ModBlockEntities.RELAY_BLOCK_ENTITY_TYPE, worldPosition, blockState) {
-    private var data = mutableMapOf<Int, Int>()
+    private var data = mutableMapOf<Int, Byte>()
 
-    operator fun get(port: Int): Int = data[port] ?: 0
-    operator fun set(port: Int, value: Int) {
+    operator fun get(port: Int): Byte = data[port] ?: 0
+    operator fun set(port: Int, value: Byte) {
         data[port] = value
     }
 
@@ -25,11 +25,11 @@ class RelayBlockEntity(worldPosition: BlockPos, blockState: BlockState) :
 
     override fun saveAdditional(output: ValueOutput) {
         super.saveAdditional(output)
-        data = data.filterValues { it != 0 }.toMutableMap()
+        data = data.filterValues { it != 0.toByte() }.toMutableMap()
         output.storeNullable("data", DATA_CODEC, data)
     }
 
     companion object {
-        val DATA_CODEC: Codec<MutableMap<Int, Int>> = Codec.unboundedMap(PrimitiveCodec.INT, PrimitiveCodec.INT)
+        val DATA_CODEC: Codec<MutableMap<Int, Byte>> = Codec.unboundedMap(PrimitiveCodec.INT, PrimitiveCodec.BYTE)
     }
 }
