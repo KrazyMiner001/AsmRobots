@@ -1,13 +1,29 @@
 package krazyminer001.asmrobots.common.recipe
 
+import com.lowdragmc.lowdraglib2.gui.texture.Icons
+import com.lowdragmc.lowdraglib2.gui.ui.ModularUI
+import com.lowdragmc.lowdraglib2.gui.ui.UI
+import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollDisplay
+import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollerMode
+import com.lowdragmc.lowdraglib2.gui.ui.element
+import com.lowdragmc.lowdraglib2.gui.ui.elements.itemSlot
+import com.lowdragmc.lowdraglib2.gui.ui.elements.scrollerView
+import com.lowdragmc.lowdraglib2.gui.ui.elements.withItem
+import com.lowdragmc.lowdraglib2.integration.xei.IngredientIO
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
 import com.mojang.serialization.codecs.PrimitiveCodec
 import com.mojang.serialization.codecs.RecordCodecBuilder
+import dev.vfyjxf.taffy.style.AlignItems
+import dev.vfyjxf.taffy.style.FlexDirection
+import dev.vfyjxf.taffy.style.TaffyDisplay
+import krazyminer001.asmrobots.common.xei.XeiProvider
+import krazyminer001.asmrobots.common.xei.XeiSlotHelper.xeiSlotWidget
 import net.minecraft.core.Holder
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.crafting.Ingredient
 import net.minecraft.world.item.crafting.PlacementInfo
@@ -78,6 +94,140 @@ class RobotCraftRecipe(
 
     override fun recipeBookCategory() = bookCategory.bookCategory.value()
 
+    fun createJEIModularUI() = context(XeiProvider.JEI) { createModularUI() }
+
+    context(provider: XeiProvider)
+    fun createModularUI(): ModularUI {
+        val root = element({
+            layout = {
+                display(TaffyDisplay.FLEX)
+                flexDirection(FlexDirection.COLUMN)
+                gap { all(5) }
+            }
+        }) {
+            scrollerView({
+                scrollerViewStyle = {
+                    mode(ScrollerMode.VERTICAL)
+                    verticalScrollDisplay(ScrollDisplay.ALWAYS)
+                }
+
+                layout = {
+                    alignSelf(AlignItems.CENTER)
+                    height(18 * 3 + 10)
+                    width(18 * 3 + 15)
+                }
+            }) {
+                element({
+                    layout = {
+                        display(TaffyDisplay.GRID)
+                        grid {
+                            templateColumns("repeat(3, min-content)")
+                            templateRows("min-content")
+                        }
+                        gap {
+                            all(0)
+                        }
+                    }
+                }) {
+                    items.forEach { (ingredient, count) ->
+                        itemSlot {
+                            withItem(ItemStack(ingredient.values.first(), count))
+                            xeiSlotWidget(IngredientIO.INPUT, ingredient, count)
+                        }
+                    }
+                }
+            }
+
+            element({
+                layout = {
+                    alignSelf(AlignItems.CENTER)
+                    height(24)
+                    width(24)
+                }
+                style = {
+                    backgroundTexture(Icons.DOWN_ARROW_NO_BAR)
+                }
+            })
+
+            itemSlot({
+                layout = {
+                    alignSelf(AlignItems.CENTER)
+                }
+            }) {
+                this.withItem(result.create())
+                xeiSlotWidget(IngredientIO.OUTPUT)
+            }
+        }
+
+        return ModularUI.of(UI.of(root))
+    }
+
+    fun createREIModularUI(): ModularUI {
+        return context(XeiProvider.REI) { createModularUI() }
+//        val root = element({
+//            layout = {
+//                display(TaffyDisplay.FLEX)
+//                flexDirection(FlexDirection.COLUMN)
+//                gap { all(5) }
+//            }
+//        }) {
+//            scrollerView({
+//                scrollerViewStyle = {
+//                    mode(ScrollerMode.VERTICAL)
+//                    verticalScrollDisplay(ScrollDisplay.ALWAYS)
+//                }
+//
+//                layout = {
+//                    alignSelf(AlignItems.CENTER)
+//                    height(18 * 3 + 10)
+//                    width(18 * 3 + 15)
+//                }
+//            }) {
+//                element({
+//                    layout = {
+//                        display(TaffyDisplay.GRID)
+//                        grid {
+//                            templateColumns("repeat(3, min-content)")
+//                            templateRows("min-content")
+//                        }
+//                        gap {
+//                            all(0)
+//                        }
+//                    }
+//                }) {
+//                    items.forEach { (ingredient, count) ->
+//                        itemSlot {
+//                            withItem(ItemStack(ingredient.values.first(), count))
+//                            reiWidget(IngredientIO.INPUT, ingredient.values)
+//                        }
+//                    }
+//                }
+//            }
+//
+//            element({
+//                layout = {
+//                    alignSelf(AlignItems.CENTER)
+//                    height(24)
+//                    width(24)
+//                }
+//                style = {
+//                    backgroundTexture(Icons.DOWN_ARROW_NO_BAR)
+//                }
+//            })
+//
+//            itemSlot({
+//                layout = {
+//                    alignSelf(AlignItems.CENTER)
+//                }
+//            }) {
+//                this.withItem(result.create())
+//                reiWidget(IngredientIO.OUTPUT)
+//            }
+//        }
+//
+//        return ModularUI.of(UI.of(root))
+    }
+
     companion object {
         val CODEC: MapCodec<RobotCraftRecipe> = RecordCodecBuilder.mapCodec { instance ->
             instance.group(
@@ -102,5 +252,8 @@ class RobotCraftRecipe(
             ByteBufCodecs.STRING_UTF8, RobotCraftRecipe::groupName,
             ::RobotCraftRecipe
         )
+
+        const val WIDTH = 89
+        const val HEIGHT = 138
     }
 }

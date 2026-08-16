@@ -37,5 +37,7 @@ class EnUsLanguageProvider(output: PackOutput) : LanguageProvider(output, AsmRob
         this.add((ModCreativeTabs.MAIN_TAB.displayName.contents as TranslatableContents).key, "ASM Robots")
 
         this.add(ModBlocks.RELAY_BLOCK, "Relay Block")
+
+        this.add("category.asmrobots.robot_craft", "Robot Crafting Module")
     }
 }

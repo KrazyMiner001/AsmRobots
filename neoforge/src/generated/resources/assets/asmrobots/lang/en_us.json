@@ -1,5 +1,6 @@
 {
   "block.asmrobots.relay_block": "Relay Block",
+  "category.asmrobots.robot_craft": "Robot Crafting Module",
   "entity.asmrobots.robot": "Robot",
   "item.asmrobots.advanced_netowrking_module": "Advanced Networking Module",
   "item.asmrobots.chest_module": "Chest Module",

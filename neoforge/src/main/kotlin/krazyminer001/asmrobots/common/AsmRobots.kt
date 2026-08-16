@@ -15,9 +15,9 @@ import krazyminer001.asmrobots.common.world.ModTicketTypes
 import net.minecraft.resources.Identifier
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.ai.attributes.Attributes
-import net.neoforged.bus.api.SubscribeEvent
-import net.neoforged.fml.common.EventBusSubscriber
 import net.neoforged.fml.common.Mod
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.event.OnDatapackSyncEvent
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
@@ -30,7 +30,6 @@ import thedarkcolour.kotlinforforge.neoforge.forge.MOD_BUS
  * An example for blocks is in the `blocks` package of this mod.
  */
 @Mod(AsmRobots.ID)
-@EventBusSubscriber
 object AsmRobots {
     const val ID = "asmrobots"
 
@@ -54,9 +53,12 @@ object AsmRobots {
         ModRecipeBookCategories.REGISTRY.register(MOD_BUS)
 
         GUIDE = Guide.builder(Identifier.fromNamespaceAndPath(ID, "guide")).build()
+
+        NeoForge.EVENT_BUS.addListener(::onDatapackSyncEvent)
+
+        MOD_BUS.addListener(::createDefaultAttributes)
     }
 
-    @SubscribeEvent
     fun createDefaultAttributes(event: EntityAttributeCreationEvent) {
         event.put(
             ModEntities.ROBOT_ENTITY,
@@ -68,5 +70,10 @@ object AsmRobots {
         )
     }
 
-    fun namespacedIdentifier(path: String) = Identifier.fromNamespaceAndPath(ID, path)
+    fun onDatapackSyncEvent(event: OnDatapackSyncEvent) {
+        event.sendRecipes(ModRecipeTypes.ROBOT_CRAFT)
+    }
+
+    @Suppress("NOTHING_TO_INLINE")
+    inline fun namespacedIdentifier(path: String) = Identifier.fromNamespaceAndPath(ID, path)
 }

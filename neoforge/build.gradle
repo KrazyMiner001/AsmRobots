@@ -20,6 +20,18 @@ repositories {
     // LDLib2
     maven { url = "https://maven.firstdark.dev/snapshots" }
 
+    maven {
+        // location of the maven that hosts JEI files
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
+
+    maven { url "https://maven.shedaniel.me/" }
 }
 
 base {
@@ -108,6 +120,13 @@ dependencies {
 
     compileOnly "org.appliedenergistics:guideme:${guideme_version}:api"
     runtimeOnly "org.appliedenergistics:guideme:${guideme_version}"
+
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    //runtimeOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+
+    compileOnly "me.shedaniel:RoughlyEnoughItems-api-neoforge:$rei_version"
+    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:$rei_version"
+    //runtimeOnly "me.shedaniel:RoughlyEnoughItems-neoforge:$rei_version"
 
     implementation project(':annotations')
     ksp project (':processor')
