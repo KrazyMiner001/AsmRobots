@@ -6,11 +6,17 @@ import com.lowdragmc.lowdraglib2.integration.xei.IngredientIO
 import krazyminer001.asmrobots.common.xei.rei.ModularUIREIHelper.reiWidget
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.Ingredient
+import net.minecraft.world.level.ItemLike
 import java.util.stream.Stream
 
 object XeiSlotHelper {
     context(provider: XeiProvider)
-    fun ItemSlotElement<ItemSlot>.xeiSlotWidget(ingredientIO: IngredientIO = IngredientIO.NONE, ingredient: Ingredient? = null, count: Int? = null) {
+    fun ItemSlotElement<ItemSlot>.xeiSlotWidget(
+        ingredientIO: IngredientIO = IngredientIO.NONE,
+        ingredient: Ingredient? = null,
+        count: Int? = null,
+        itemListener: (ItemLike?) -> Unit = {},
+    ) {
         val count = count ?: this.element.slot.item.count
 
         when (provider) {
@@ -30,7 +36,7 @@ object XeiSlotHelper {
                 }
             }
             XeiProvider.REI -> {
-                reiWidget(ingredientIO, ingredient?.values)
+                reiWidget(ingredientIO, ingredient?.values, count, itemListener)
             }
         }
     }

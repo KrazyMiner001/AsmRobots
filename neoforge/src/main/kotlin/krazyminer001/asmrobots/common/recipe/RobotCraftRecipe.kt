@@ -8,7 +8,7 @@ import com.lowdragmc.lowdraglib2.gui.ui.data.ScrollerMode
 import com.lowdragmc.lowdraglib2.gui.ui.element
 import com.lowdragmc.lowdraglib2.gui.ui.elements.itemSlot
 import com.lowdragmc.lowdraglib2.gui.ui.elements.scrollerView
-import com.lowdragmc.lowdraglib2.gui.ui.elements.withItem
+import com.lowdragmc.lowdraglib2.gui.ui.event.UIEvents
 import com.lowdragmc.lowdraglib2.integration.xei.IngredientIO
 import com.mojang.serialization.Codec
 import com.mojang.serialization.MapCodec
@@ -17,13 +17,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder
 import dev.vfyjxf.taffy.style.AlignItems
 import dev.vfyjxf.taffy.style.FlexDirection
 import dev.vfyjxf.taffy.style.TaffyDisplay
+import krazyminer001.asmrobots.common.item.Slots
 import krazyminer001.asmrobots.common.xei.XeiProvider
 import krazyminer001.asmrobots.common.xei.XeiSlotHelper.xeiSlotWidget
 import net.minecraft.core.Holder
 import net.minecraft.network.codec.ByteBufCodecs
 import net.minecraft.network.codec.StreamCodec
 import net.minecraft.world.item.Item
-import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.ItemStackTemplate
 import net.minecraft.world.item.crafting.Ingredient
 import net.minecraft.world.item.crafting.PlacementInfo
@@ -105,6 +105,13 @@ class RobotCraftRecipe(
                 gap { all(5) }
             }
         }) {
+            val ticker = Slots.Ticker()
+            if (provider == XeiProvider.JEI) {
+                events(false) {
+                    UIEvents.TICK += {ticker.value++}
+                }
+            }
+
             scrollerView({
                 scrollerViewStyle = {
                     mode(ScrollerMode.VERTICAL)
@@ -130,9 +137,26 @@ class RobotCraftRecipe(
                     }
                 }) {
                     items.forEach { (ingredient, count) ->
-                        itemSlot {
-                            withItem(ItemStack(ingredient.values.first(), count))
-                            xeiSlotWidget(IngredientIO.INPUT, ingredient, count)
+                        val itemProvider = Slots.ItemProvider()
+
+                        if (provider == XeiProvider.JEI) {
+                            ticker += { tick ->
+                                itemProvider.value = ingredient.values[(tick / 20) % ingredient.values.size()].value()
+                            }
+                            itemProvider.value = ingredient.values[0].value()
+                        }
+
+                        itemSlot({
+                            slot = Slots.cyclingUncappedSlot(
+                                count,
+                                itemProvider
+                            )
+                        }) {
+                            xeiSlotWidget(IngredientIO.INPUT, ingredient, count) {
+                                if (provider == XeiProvider.REI) {
+                                    itemProvider.value = it
+                                }
+                            }
                         }
                     }
                 }
@@ -153,8 +177,8 @@ class RobotCraftRecipe(
                 layout = {
                     alignSelf(AlignItems.CENTER)
                 }
+                slot = Slots.uncappedSlot(result.create())
             }) {
-                this.withItem(result.create())
                 xeiSlotWidget(IngredientIO.OUTPUT)
             }
         }

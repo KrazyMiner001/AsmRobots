@@ -13,6 +13,9 @@ import org.joml.Matrix3x2f
 import org.joml.Vector2f
 
 class ModularREIWidget(val modularUI: ModularUI, val rectangle: Rectangle) : Widget() {
+
+    private var currentTick = 0f
+
     private val localToWorld = Matrix3x2f()
     private val modularWidget: ModularUIWidget
         get() = ModularUIClientAccess.getWidget(modularUI)
@@ -39,6 +42,10 @@ class ModularREIWidget(val modularUI: ModularUI, val rectangle: Rectangle) : Wid
 
     override fun render(graphics: GuiGraphics, mouseX: Int, mouseY: Int, delta: Float) {
         val partialTick = minecraft.deltaTracker.getGameTimeDeltaPartialTick(false)
+        if (currentTick.toInt() < (currentTick + partialTick).toInt()) {
+            modularUI.tick()
+        }
+        currentTick += partialTick
         graphics.renderDeferredElements()
 
         val matrixStack = graphics.pose()
