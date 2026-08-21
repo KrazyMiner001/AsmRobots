@@ -16,7 +16,6 @@ import net.minecraft.data.loot.LootTableProvider
 import net.minecraft.world.item.crafting.RecipeHolder
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets
 import net.neoforged.api.distmarker.Dist
-import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.Mod
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent
 import net.neoforged.neoforge.client.event.EntityRenderersEvent
@@ -42,23 +41,19 @@ object AsmRobotsClient {
         NeoForge.EVENT_BUS.addListener(::recipesReceived)
         NeoForge.EVENT_BUS.addListener(::clientLoggingOut)
     }
-
-    @SubscribeEvent
+    
     fun registerEntityRenderers(event: EntityRenderersEvent.RegisterRenderers) {
         event.registerEntityRenderer(ModEntities.ROBOT_ENTITY, ::RobotEntityRenderer)
     }
-
-    @SubscribeEvent
+    
     fun registerMenuScreens(event: RegisterMenuScreensEvent) {
         event.register(ModMenuTypes.ROBOT_UI, ::ModularUIContainerScreen)
     }
 
-    @SubscribeEvent
     fun registerLayerDefinitions(event: EntityRenderersEvent.RegisterLayerDefinitions) {
         event.registerLayerDefinition(RobotEntityModel.LAYER_LOCATION, RobotEntityModel::createBodyLayer)
     }
 
-    @SubscribeEvent
     fun gatherData(event: GatherDataEvent.Client) {
         event.createProvider(::ModModelProvider)
         event.createProvider(::EnUsLanguageProvider)
@@ -75,13 +70,11 @@ object AsmRobotsClient {
         }
     }
 
-    @SubscribeEvent
     fun recipesReceived(event: RecipesReceivedEvent) {
         _robotRecipes.clear()
         _robotRecipes.addAll(event.recipeMap.byType(ModRecipeTypes.ROBOT_CRAFT))
     }
 
-    @SubscribeEvent
     fun clientLoggingOut(event: ClientPlayerNetworkEvent.LoggingOut) {
         _robotRecipes.clear()
     }

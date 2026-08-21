@@ -28,6 +28,7 @@ import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.item.module.MemoryMappedModuleItem
 import krazyminer001.asmrobots.common.item.module.ModuleItem
 import krazyminer001.asmrobots.common.item.upgrade.UpgradeItem
+import krazyminer001.asmrobots.common.texture.FaceTexture
 import krazyminer001.asmrobots.common.ui.ModMenuTypes
 import krazyminer001.asmrobots.common.ui.elements.assemblyEditor
 import net.minecraft.core.BlockPos
@@ -170,6 +171,9 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                 IOPorts.NOTIFY_BUMP -> if (shouldNotifyBump) 1 else 0
                 IOPorts.YAW -> yHeadRot.toInt()
                 IOPorts.PITCH -> xRot.toInt()
+                IOPorts.FACE_X -> faceX
+                IOPorts.FACE_Y -> faceY
+                IOPorts.FACE_ARGB -> face[faceX, faceY]
                 else -> 0
             }
         }
@@ -205,6 +209,9 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
                 IOPorts.NOTIFY_BUMP -> shouldNotifyBump = value != 0
                 IOPorts.YAW -> targetYaw = value.toFloat() % 360
                 IOPorts.PITCH -> targetPitch = value.toFloat() % 360
+                IOPorts.FACE_X -> faceX = value.coerceIn(0..<20)
+                IOPorts.FACE_Y -> faceY = value.coerceIn(0..<8)
+                IOPorts.FACE_ARGB -> face = face.clone().set(faceX, faceY, value).build()
             }
         }
 
@@ -225,6 +232,13 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
             map?.let { it[address] = value }
         }
     }
+
+    var face: FaceTexture
+        get() = entityData.get(FACE_DATA)
+        set(value) = entityData.set(FACE_DATA, value)
+
+    var faceX = 0
+    var faceY = 0
 
     override fun canHoldItem(itemStack: ItemStack): Boolean {
         val isTool = itemStack.has(DataComponents.TOOL)
@@ -460,6 +474,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     override fun defineSynchedData(entityData: SynchedEntityData.Builder) {
         super.defineSynchedData(entityData)
         entityData.define(CODE_DATA, "")
+        entityData.define(FACE_DATA, FaceTexture())
     }
 
     override fun readAdditionalSaveData(input: ValueInput) {
@@ -641,6 +656,9 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
     companion object {
         val CODE_DATA: EntityDataAccessor<String> =
             SynchedEntityData.defineId(RobotEntity::class.java, EntityDataSerializers.STRING)
+
+        val FACE_DATA: EntityDataAccessor<FaceTexture> =
+            SynchedEntityData.defineId(RobotEntity::class.java, ModEntityDataSerializers.FACE_STATE)
     }
 
     object IOPorts {
@@ -652,6 +670,9 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
         const val NOTIFY_BUMP = 6
         const val YAW = 7
         const val PITCH = 8
+        const val FACE_X = 9
+        const val FACE_Y = 10
+        const val FACE_ARGB = 11
     }
 
     object Interrupts {

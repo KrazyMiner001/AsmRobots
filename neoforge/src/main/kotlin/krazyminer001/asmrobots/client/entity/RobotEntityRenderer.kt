@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState
 import net.minecraft.resources.Identifier
 
 class RobotEntityRenderer(context: EntityRendererProvider.Context) :
-    LivingEntityRenderer<RobotEntity, ArmedEntityRenderState, RobotEntityModel>(
+    LivingEntityRenderer<RobotEntity, RobotEntityRenderState, RobotEntityModel>(
         context,
         RobotEntityModel(context.bakeLayer(RobotEntityModel.LAYER_LOCATION)),
         0.5f
@@ -20,18 +20,20 @@ class RobotEntityRenderer(context: EntityRendererProvider.Context) :
 
     init {
         addLayer(RobotEntityLayer(this, context.modelSet))
+        addLayer(RobotEntityFaceRenderLayer(this))
     }
 
-    override fun extractRenderState(entity: RobotEntity, state: ArmedEntityRenderState, partialTicks: Float) {
+    override fun extractRenderState(entity: RobotEntity, state: RobotEntityRenderState, partialTicks: Float) {
         super.extractRenderState(entity, state, partialTicks)
         ArmedEntityRenderState.extractArmedEntityRenderState(entity, state, itemModelResolver, partialTicks)
+        state.face = entity.face
     }
 
-    override fun createRenderState(): ArmedEntityRenderState {
-        return ArmedEntityRenderState()
+    override fun createRenderState(): RobotEntityRenderState {
+        return RobotEntityRenderState()
     }
 
-    override fun getTextureLocation(state: ArmedEntityRenderState): Identifier {
+    override fun getTextureLocation(state: RobotEntityRenderState): Identifier {
         return Identifier.fromNamespaceAndPath(AsmRobots.ID, "textures/entity/robot_entity.png")
     }
 }

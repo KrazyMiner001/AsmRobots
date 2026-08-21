@@ -7,15 +7,14 @@ import net.minecraft.client.model.geom.EntityModelSet
 import net.minecraft.client.renderer.SubmitNodeCollector
 import net.minecraft.client.renderer.entity.RenderLayerParent
 import net.minecraft.client.renderer.entity.layers.RenderLayer
-import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState
 import net.minecraft.client.renderer.texture.OverlayTexture
 import net.minecraft.resources.Identifier
 
 class RobotEntityLayer(
-    renderer: RenderLayerParent<ArmedEntityRenderState, RobotEntityModel>,
+    renderer: RenderLayerParent<RobotEntityRenderState, RobotEntityModel>,
     entityModelSet: EntityModelSet
 ) :
-    RenderLayer<ArmedEntityRenderState, RobotEntityModel>(renderer) {
+    RenderLayer<RobotEntityRenderState, RobotEntityModel>(renderer) {
 
     val model = RobotEntityModel(entityModelSet.bakeLayer(RobotEntityModel.LAYER_LOCATION))
 
@@ -23,7 +22,7 @@ class RobotEntityLayer(
         poseStack: PoseStack,
         submitNodeCollector: SubmitNodeCollector,
         lightCoords: Int,
-        state: ArmedEntityRenderState,
+        state: RobotEntityRenderState,
         yRot: Float,
         xRot: Float
     ) {

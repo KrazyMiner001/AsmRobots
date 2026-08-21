@@ -4,6 +4,7 @@ import guideme.Guide
 import krazyminer001.asmrobots.common.block.ModBlockEntities
 import krazyminer001.asmrobots.common.block.ModBlocks
 import krazyminer001.asmrobots.common.entity.ModEntities
+import krazyminer001.asmrobots.common.entity.ModEntityDataSerializers
 import krazyminer001.asmrobots.common.item.ModCreativeTabs
 import krazyminer001.asmrobots.common.item.ModItems
 import krazyminer001.asmrobots.common.item.component.ModComponents
@@ -51,6 +52,7 @@ object AsmRobots {
         ModRecipeTypes.REGISTRY.register(MOD_BUS)
         ModRecipeSerializers.REGISTRY.register(MOD_BUS)
         ModRecipeBookCategories.REGISTRY.register(MOD_BUS)
+        ModEntityDataSerializers.REGISTRY.register(MOD_BUS)
 
         GUIDE = Guide.builder(Identifier.fromNamespaceAndPath(ID, "guide")).build()
 
