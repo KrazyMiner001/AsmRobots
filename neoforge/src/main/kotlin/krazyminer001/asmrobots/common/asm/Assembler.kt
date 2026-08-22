@@ -15,17 +15,16 @@ object Assembler {
             string: String,
         ): Lexeme {
             val int = string.toIntOrNull()
+            val hexInt = if (string.startsWith("0x")) string.drop(2).toUIntOrNull(16) else null
             val float = string.toFloatOrNull()
             val condition = ConditionEnum.entries.find { it.name.lowercase() == string }
             val register = RegisterEnum.entries.find { it.name.lowercase() == string }
-            val byte = if (string.length == 4 && string[0] == '0' && string[1] == 'x') string.drop(2)
-                .toUByteOrNull(16) else null
             return when {
                 null != int -> Lexeme.Integer(string)
+                null != hexInt -> Lexeme.HexInteger(string)
                 null != float -> Lexeme.FloatNum(string)
                 null != condition -> Lexeme.Condition(condition)
                 null != register -> Lexeme.Register(register)
-                null != byte -> Lexeme.Byte(string.drop(2))
                 else -> Lexeme.Identifier(string)
             }
         }
@@ -136,13 +135,13 @@ object Assembler {
                         is Lexeme.Register -> arguments += InstructionArgument.Register(lexeme.register)
                         is Lexeme.Identifier -> arguments += InstructionArgument.Label(-1, lexeme.text)
                         is Lexeme.Condition -> arguments += InstructionArgument.Condition(lexeme.condition)
-                        is Lexeme.Integer -> arguments += InstructionArgument.Immediate32(lexeme.num)
+                        is Integral -> arguments += InstructionArgument.Immediate32(lexeme.num)
                         is Lexeme.FloatNum -> arguments += InstructionArgument.ImmediateFloat32(lexeme.num)
                         else -> invalidArguments += lexeme.toString()
                     }
                 } else if (argument.size == 4) {
                     val (offset, openBracket, register, closeBracket) = argument
-                    if (offset is Lexeme.Integer && openBracket is Lexeme.LeftBracket && register is Lexeme.Register && closeBracket is Lexeme.RightBracket) {
+                    if (offset is Integral && openBracket is Lexeme.LeftBracket && register is Lexeme.Register && closeBracket is Lexeme.RightBracket) {
                         arguments += InstructionArgument.Pointer(
                             register.register,
                             InstructionArgument.Immediate32(offset.num)
@@ -179,11 +178,11 @@ object Assembler {
                     if (comma != null && comma !is Lexeme.Comma) {
                         return AsmResult.Failure(AsmError.ParseError.InvalidDelimiter(comma.toString()))
                     }
-                    if (byte !is Lexeme.Byte) {
+                    if (byte !is Lexeme.HexInteger || byte.text.length != 4) {
                         return AsmResult.Failure(AsmError.ParseError.InvalidByte(byte.toString()))
                     }
 
-                    byte.value
+                    byte.num.toUByte()
                 }
 
             return LexedLine(LexedLine.Content.EmbedDirective(bytes), comment).asSuccess()
@@ -281,6 +280,10 @@ data class LexedLine(val content: Content?, val comment: String?) {
     }
 }
 
+sealed interface Integral : Lexeme {
+    val num: Int
+}
+
 sealed interface Lexeme {
     data class Identifier(val text: String) : Lexeme {
         override fun toString() = text
@@ -294,19 +297,19 @@ sealed interface Lexeme {
         override fun toString() = register.name.lowercase()
     }
 
-    data class Integer(val text: String) : Lexeme {
+    data class Integer(val text: String) : Lexeme, Integral {
         override fun toString() = text
-        val num = text.toInt()
+        override val num = text.toInt()
+    }
+
+    data class HexInteger(val text: String) : Lexeme, Integral {
+        override fun toString() = text
+        override val num = text.drop(2).toUInt(16).toInt()
     }
 
     data class FloatNum(val text: String) : Lexeme {
         override fun toString() = text
         val num = text.toFloat()
-    }
-
-    data class Byte(val text: String) : Lexeme {
-        override fun toString() = text
-        val value = text.toUByte(16)
     }
 
     data class Condition(val condition: ConditionEnum) : Lexeme {

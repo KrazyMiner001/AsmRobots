@@ -9,10 +9,7 @@ import com.lowdragmc.lowdraglib2.registry.annotation.LDLRegister
 import guideme.GuidesCommon
 import guideme.PageAnchor
 import krazyminer001.asmrobots.common.AsmRobots
-import krazyminer001.asmrobots.common.asm.AsmError
-import krazyminer001.asmrobots.common.asm.Assembler
-import krazyminer001.asmrobots.common.asm.LexedLine
-import krazyminer001.asmrobots.common.asm.Lexeme
+import krazyminer001.asmrobots.common.asm.*
 import krazyminer001.asmrobots.common.asm.instructions.InstructionEnum
 import net.minecraft.client.gui.Font
 import net.minecraft.network.chat.Component
@@ -57,13 +54,12 @@ class AssemblyEditor : TextArea() {
                             is Lexeme.Error -> it.withColor(Color.red.rgb).withUnderlined(true)
                             is Lexeme.FloatNum -> it.withColor(Color.cyan.rgb)
                             is Lexeme.Identifier -> it.withColor(0xCB94F5)
-                            is Lexeme.Integer -> it.withColor(Color.cyan.rgb)
+                            is Integral -> it.withColor(Color.cyan.rgb)
                             Lexeme.LeftBracket -> it
                             is Lexeme.Mnemonic -> it.withColor(Color.green.rgb)
                             is Lexeme.Register -> it.withColor(Color.pink.rgb)
                             Lexeme.RightBracket -> it
                             Lexeme.Whitespace -> it
-                            is Lexeme.Byte -> it.withColor(Color.cyan.rgb)
                             Lexeme.EmbedDirective -> it.withColor(Color.yellow.rgb)
                         }
                     }
