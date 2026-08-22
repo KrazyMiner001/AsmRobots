@@ -219,8 +219,7 @@ open class RobotEntity(type: EntityType<RobotEntity> = ModEntities.ROBOT_ENTITY,
             .items
             .map { it.item }
             .filterIsInstance<UpgradeItem>()
-            .map { extension in it.extensions }
-            .reduce { acc, bool -> acc || bool }
+            .any { extension in it.extensions }
 
         override fun getMappedMemory(identifier: Int, address: Int): Byte {
             val map = getMemoryMap(identifier)
