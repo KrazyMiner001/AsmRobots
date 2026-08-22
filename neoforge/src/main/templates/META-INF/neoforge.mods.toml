@@ -77,9 +77,25 @@ modId = "ldlib2"
 type = "required"
 versionRange = "[${ldlib2_version},)"
 side = "BOTH"
+reason = "Used for the UI"
 
 [[dependencies."${mod_id}"]]
 modId = "guideme"
 type = "required"
 versionRange = "[${guideme_version},)"
+side = "BOTH"
+reason = "Used for the documentation"
+
+[[dependencies."${mod_id}"]]
+modId = "roughlyenoughitems"
+type = "optional"
+versionRange = "[${rei_version},)"
+reason = "Provides REI support when installed"
+side = "BOTH"
+
+[[dependencies."${mod_id}"]]
+modId = "jei"
+type = "optional"
+versionRange = "[${jei_version},)"
+reason = "Provides JEI support when installed"
 side = "BOTH"
