@@ -277,7 +277,7 @@ Argument Types:
 | ioAddress | register, immediate32, immediateFloat32 |
 
 ## Out
-Syntax: `in ioAddress, value`\
+Syntax: `out ioAddress, value`\
 Function: Write data from `value` to `ioAddress`\
 Argument Types:
 
