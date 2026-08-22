@@ -1,8 +1,8 @@
 ---
 navigation:
-title: Step Height Upgrade
-position: 3
-parent: upgrades/upgrades.md
+    title: Step Height Upgrade
+    position: 3
+    parent: upgrades/upgrades.md
 item_ids:
 - asmrobots:step_height_upgrade
 ---

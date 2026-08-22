@@ -1,10 +1,10 @@
 ---
 navigation:
-title: Floating Point Upgrade
-position: 4
-parent: upgrades/upgrades.md
+    title: Floating Point Upgrade
+    position: 4
+    parent: upgrades/upgrades.md
 item_ids:
-- asmrobots:floating-point-upgrade
+- asmrobots:floating_point_upgrade
 ---
 
 # Floating Point Upgrade

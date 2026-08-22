@@ -1,8 +1,8 @@
 ---
 navigation:
-title: Processing Speed Upgrade
-position: 2
-parent: upgrades/upgrades.md
+    title: Processing Speed Upgrade
+    position: 2
+    parent: upgrades/upgrades.md
 item_ids:
 - asmrobots:processing_speed_upgrade
 ---

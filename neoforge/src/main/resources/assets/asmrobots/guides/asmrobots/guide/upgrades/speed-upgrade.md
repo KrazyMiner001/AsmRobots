@@ -1,8 +1,8 @@
 ---
 navigation:
-title: Speed Upgrade
-position: 1
-parent: upgrades/upgrades.md
+    title: Speed Upgrade
+    position: 1
+    parent: upgrades/upgrades.md
 item_ids:
 - asmrobots:speed_upgrade
 ---

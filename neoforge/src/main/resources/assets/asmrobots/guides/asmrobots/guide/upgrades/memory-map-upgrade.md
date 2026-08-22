@@ -1,8 +1,8 @@
 ---
 navigation:
-title: Memory Map Upgrade
-position: 5
-parent: upgrades/upgrades.md
+    title: Memory Map Upgrade
+    position: 5
+    parent: upgrades/upgrades.md
 item_ids:
 - asmrobots:memory_map_upgrade
 ---

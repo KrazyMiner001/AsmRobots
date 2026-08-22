@@ -1,8 +1,8 @@
 ---
 navigation:
-title: Chunk Load Upgrade
-position: 6
-parent: upgrades/upgrades.md
+    title: Chunk Load Upgrade
+    position: 6
+    parent: upgrades/upgrades.md
 item_ids:
 - asmrobots:chunk_load_upgrade
 ---
