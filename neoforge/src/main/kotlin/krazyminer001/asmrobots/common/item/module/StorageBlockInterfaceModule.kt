@@ -9,6 +9,8 @@ import net.minecraft.world.phys.BlockHitResult
 import net.minecraft.world.phys.HitResult
 import net.minecraft.world.phys.Vec3
 import net.neoforged.neoforge.capabilities.Capabilities
+import net.neoforged.neoforge.transfer.ResourceHandler
+import net.neoforged.neoforge.transfer.item.ItemResource
 import net.neoforged.neoforge.transfer.item.VanillaContainerWrapper
 import net.neoforged.neoforge.transfer.transaction.Transaction
 import kotlin.math.max
@@ -24,7 +26,7 @@ class StorageBlockInterfaceModule(properties: Properties) : ModuleItem(propertie
     ): Int {
         return when (address) {
             IOPorts.TARGET_INDEX -> targetIndex
-            IOPorts.TRANSFER -> lastTransferredAmount
+            IOPorts.PULL -> lastTransferredAmount
             IOPorts.CONTAINER_ITEM -> {
                 val level = robotEntity.level()
                 val hitResult = raycastBlock(robotEntity, itemStack)
@@ -63,31 +65,41 @@ class StorageBlockInterfaceModule(properties: Properties) : ModuleItem(propertie
     ) {
         when (address) {
             IOPorts.TARGET_INDEX -> targetIndex = value
-            IOPorts.TRANSFER -> {
+            IOPorts.PULL -> {
                 val level = robotEntity.level()
                 val hitResult = raycastBlock(robotEntity, itemStack)
 
                 if (hitResult.type == HitResult.Type.BLOCK) {
                     val pos = hitResult.blockPos
-                    val sourceBlock = level.getCapability(Capabilities.Item.BLOCK, pos, null) ?: return
+                    val storageBlock = level.getCapability(Capabilities.Item.BLOCK, pos, null) ?: return
 
-                    val destinationHandler = VanillaContainerWrapper.of(StorageModuleContainer(itemStack))
+                    val robotStorageHandler = VanillaContainerWrapper.of(StorageModuleContainer(itemStack))
 
-                    Transaction.openRoot().use { tx ->
-                        val resource = sourceBlock.getResource(targetIndex)
-                        if (resource.isEmpty) return@use
+                    fun transferItems(sourceHandler: ResourceHandler<ItemResource>, destinationHandler: ResourceHandler<ItemResource>, amount: Int) {
+                        Transaction.openRoot().use { tx ->
+                            val resource = sourceHandler.getResource(targetIndex)
+                            if (resource.isEmpty) return@use
 
-                        val sourceAmount = sourceBlock.getAmountAsInt(targetIndex)
-                        val inserted = destinationHandler.insert(resource, sourceAmount.coerceAtMost(value), tx)
+                            val sourceAmount = sourceHandler.getAmountAsInt(targetIndex)
+                            val inserted = destinationHandler.insert(resource, sourceAmount.coerceAtMost(amount), tx)
 
-                        val extracted = sourceBlock.extract(targetIndex, resource, inserted, tx)
+                            val extracted = sourceHandler.extract(targetIndex, resource, inserted, tx)
 
-                        if (inserted == extracted) {
-                            tx.commit()
-                            lastTransferredAmount = inserted
-                        } else {
-                            lastTransferredAmount = -1
+                            if (inserted == extracted) {
+                                tx.commit()
+                                lastTransferredAmount = inserted
+                            } else {
+                                lastTransferredAmount = -1
+                            }
                         }
+                    }
+
+                    if (value > 0) {
+                        transferItems(storageBlock, robotStorageHandler, value)
+                    } else if (value < 0) {
+                        transferItems(robotStorageHandler, storageBlock, -value)
+                    } else {
+                        lastTransferredAmount = 0
                     }
                 }
             }
@@ -113,7 +125,7 @@ class StorageBlockInterfaceModule(properties: Properties) : ModuleItem(propertie
 
     object IOPorts {
         const val TARGET_INDEX = 0
-        const val TRANSFER = 1
+        const val PULL = 1
         const val CONTAINER_ITEM = 2
         const val CONTAINER_STACK_SIZE = 3
     }
