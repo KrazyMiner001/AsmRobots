@@ -122,7 +122,7 @@ object ModItems {
     ) { properties -> properties.stacksTo(1) }
 
     val ADVANCED_NETWORKING_MODULE by REGISTRY.registerItem(
-        "advanced_netowrking_module",
+        "advanced_networking_module",
         ::AdvancedNetworkingModule
     ) { properties -> properties.stacksTo(1) }
 }

@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "asmrobots:advanced_netowrking_module"
+        "recipe": "asmrobots:advanced_networking_module"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "asmrobots:advanced_netowrking_module"
+      "asmrobots:advanced_networking_module"
     ]
   }
 }

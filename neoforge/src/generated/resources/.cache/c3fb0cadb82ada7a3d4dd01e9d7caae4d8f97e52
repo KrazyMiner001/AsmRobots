@@ -1,7 +1,7 @@
-// 26.1.2	2026-08-18T16:03:58.8860296	Asm Robots Recipe Provider
+// 26.1.2	2026-08-22T11:39:41.9721889	Asm Robots Recipe Provider
 fedc4a659e01dfb34f4baca9f7d054e7d487daec data/asmrobots/advancement/recipes/misc/relay_block.json
 6bb99e6bcd458bd3450765ab926330c8b98a7362 data/asmrobots/advancement/recipes/misc/robot.json
-2a91813769544eceb14df7a62ed925255e346534 data/asmrobots/advancement/recipes/tools/advanced_netowrking_module.json
+0fb40b5a88367c024d44711a7db8f6d72c240edc data/asmrobots/advancement/recipes/tools/advanced_networking_module.json
 5ca7ce216f9f1e9da9eab05e8cc6425d80491bda data/asmrobots/advancement/recipes/tools/chest_module.json
 65405aef857c68ef163871899cf147ff4ed981de data/asmrobots/advancement/recipes/tools/chunk_load_upgrade.json
 f8eba98e8fb2084685582dfadb373d86ced33203 data/asmrobots/advancement/recipes/tools/crafting_table_module.json
@@ -17,7 +17,7 @@ bac342074333016112b02b9f162e5b0a33c6cbdb data/asmrobots/advancement/recipes/tool
 d233dbc25e35bf268ae7ab1ff600a822cb369184 data/asmrobots/advancement/recipes/tools/step_height_upgrade.json
 3bc5d6c7061df55405509fca76613671009b75c8 data/asmrobots/advancement/recipes/tools/storage_block_interface_module.json
 8936ce6747a73f051d6456d67cd2c104f80e2133 data/asmrobots/advancement/recipes/tools/storage_controller_module.json
-3e78af1c25dbb9d59e5ce66fa049a27a0b090224 data/asmrobots/recipe/advanced_netowrking_module.json
+bb3d3765c1c305c2f4a10aec402f67a2ae89f346 data/asmrobots/recipe/advanced_networking_module.json
 4e718126de43b35ea77ef4365244ac941b144814 data/asmrobots/recipe/chest_module.json
 0e8e9d33fa25b858268924fc11a488dfca96960b data/asmrobots/recipe/chunk_load_upgrade.json
 e0e6ae631972a619e35dd0ff5297b84c3a80d0f4 data/asmrobots/recipe/crafting_table_module.json

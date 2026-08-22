@@ -2,7 +2,7 @@
   "type": "asmrobots:robot_craft",
   "bookCategory": "asmrobots:robot_misc",
   "groupName": "advanced_networking_module",
-  "id": "asmrobots:advanced_netowrking_module",
+  "id": "asmrobots:advanced_networking_module",
   "items": {
     "#c:dusts/redstone": 4,
     "#c:gems/diamond": 4,
